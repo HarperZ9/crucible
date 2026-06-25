@@ -1,15 +1,22 @@
 """The ``crucible`` command: an argument surface over the judgment organ.
 
-``register`` and ``assess`` work offline on a thesis JSON; ``registry list|verify`` inspects a stored
-registry. Each subcommand binds a handler from ``crucible.commands`` via ``set_defaults(func=...)``;
-``main`` dispatches to it. Output is human text by default, JSON with ``--json``.
+``register``, ``assess``, and ``steelman`` work on a thesis (a JSON file, or an id with
+``--registry``); ``registry list|verify`` and ``verdicts [--verify]`` inspect a stored registry. Each
+subcommand binds a handler from ``crucible.commands`` via ``set_defaults(func=...)``; ``main``
+dispatches to it. Output is human text by default, JSON with ``--json``.
 """
 from __future__ import annotations
 
 import argparse
 
 from crucible import __version__
-from crucible.commands import cmd_assess, cmd_register, cmd_registry, cmd_verdicts
+from crucible.commands import (
+    cmd_assess,
+    cmd_register,
+    cmd_registry,
+    cmd_steelman,
+    cmd_verdicts,
+)
 
 
 def _add_common(p: argparse.ArgumentParser) -> None:
@@ -34,6 +41,14 @@ def build_parser() -> argparse.ArgumentParser:
                      help="path to a measurements JSON; a claim with no measurement is UNVERIFIABLE")
     _add_common(ass)
     ass.set_defaults(func=cmd_assess)
+
+    stl = sub.add_parser("steelman",
+                         help="propose the test that would settle each claim (the null default restates the "
+                              "claim's own falsification; a model edge proposes independent attacks later)")
+    stl.add_argument("thesis", help="path to a thesis JSON, or a thesis id when --registry is given")
+    stl.add_argument("--registry", default=None, metavar="DIR", help="resolve a thesis id from a registry at DIR")
+    stl.add_argument("--json", action="store_true", help="emit JSON instead of human text")
+    stl.set_defaults(func=cmd_steelman)
 
     rgy = sub.add_parser("registry", help="inspect a stored registry: list or verify")
     rgy.add_argument("action", choices=["list", "verify"], help="list theses or verify stored claims")

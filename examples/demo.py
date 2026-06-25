@@ -18,6 +18,7 @@ import dataclasses  # noqa: E402
 
 from crucible.assess import assess, verify_assessment  # noqa: E402
 from crucible.claim import make_claim  # noqa: E402
+from crucible.steelman import NullSteelman, steelman_thesis  # noqa: E402
 from crucible.thesis import make_thesis  # noqa: E402
 from crucible.verdict import Measurement  # noqa: E402
 
@@ -37,6 +38,11 @@ def main() -> int:
 
     thesis = make_thesis("Binary search comparison bounds", [holds, breaks, untestable], clock=CLOCK)
     print(f'thesis "{thesis.title}": {len(thesis.claims)} claims, seal {thesis.seal[:12]}...')
+
+    # Steelman first: the adversary proposes the test that would settle each claim (it does not decide).
+    print()
+    for r in steelman_thesis(NullSteelman(), thesis):
+        print(f"  steelman[{r.source}] {r.claim_id}: {r.measurable or '(unfalsifiable)'}")
 
     # The measurement decides. The worst case for n=1024 is floor(log2(1024)) + 1 = 11 probes.
     measurements = [

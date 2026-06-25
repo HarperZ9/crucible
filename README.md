@@ -11,10 +11,10 @@ than a record, and the loudest version wins. Crucible is the organ that holds an
 It is the cognition counterpart to Gather. Where Gather brings evidence in and records how it was
 obtained (the afferent organ), Crucible tests a thesis against that evidence and emits a verdict you
 can re-check (the efferent organ). You register a thesis as a set of claims, and for each claim the
-observation that would refute it. Crucible steelmans the claims, measures them against a substrate,
-and writes a verdict per claim: MATCH, DRIFT, or UNVERIFIABLE. The verdict is grounded in the
-measurement, not in a judge's opinion, and it recomputes from the record, so a confident assertion
-cannot fake it.
+observation that would refute it. Crucible steelmans the claims (proposing the test that would settle
+each) and, once a measurement is supplied, writes a verdict per claim: MATCH, DRIFT, or UNVERIFIABLE.
+The verdict is grounded in the measurement, not in a judge's opinion, and it recomputes from the
+record, so a confident assertion cannot fake it.
 
 ## The loop
 
@@ -31,9 +31,10 @@ cannot fake it.
 The continuous part is the loop: substrates, measurements, and theses all improve across rounds,
 and the witnessed verdicts track which moved.
 
-Shipped today (0.1.0): steps 1 and 5, the spine. You register a thesis and witness a re-derivable
-verdict per claim from supplied measurements. The steelman seam (step 2), the measurement harness
-(step 3), and the continuous refine (step 4) land in the releases that follow; see Status below.
+Shipped today (0.2.0): steps 1, 2, and 5. You register a thesis, steelman it (adversaries propose the
+test that would settle each claim), and witness a re-derivable verdict per claim from supplied
+measurements. The measurement harness (step 3) and the continuous refine (step 4) land in the releases
+that follow; see Status below.
 
 ## The differentiator (do not lose this)
 
@@ -90,7 +91,10 @@ Shipped:
   thesis and the measurements: a verdict cannot be asserted, it must follow from the record.
 - A content-addressed registry that re-verifies stored claims (MATCH / MISSING / CORRUPT), checks
   thesis seals (catching a swapped claim a body check would miss), and refuses to load a tampered thesis.
-- The `crucible` CLI: `register`, `assess`, `registry list|verify`, `verdicts [--verify]`.
+- The steelman seam: independent adversaries propose the strongest refutation of each claim and the
+  test that would settle it (they propose; the measurement decides). The Null default surfaces the
+  claim's own falsification and invents nothing; a model edge plugs in through the same shape later.
+- The `crucible` CLI: `register`, `assess`, `steelman`, `registry list|verify`, `verdicts [--verify]`.
 
 ## License
 

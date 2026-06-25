@@ -3,6 +3,20 @@
 All notable changes to Crucible. Versions follow semantic versioning; each minor release is built
 behind a feature branch and reviewed before merge.
 
+## 0.2.0
+
+The steelman seam: adversarial refutation as a pluggable shape, the conjecture-and-attack half of
+judgment.
+
+- `crucible.steelman`: a `Steelman` protocol and a `Refutation` (the proposed attack plus the
+  measurable test that would settle it). Adversaries propose what to test; they do not decide.
+- `NullSteelman`: the standing default. Deterministic and invents nothing: it surfaces the claim's own
+  stated falsification as the test, or flags a claim that states no falsification as unrefutable. A
+  model edge (a real independent refuter) plugs in through the same protocol later.
+- `steelman_thesis` runs a steelman over every claim in a thesis, returning the proposed tests in
+  claim order, ready to feed the measurement step.
+- CLI: `crucible steelman <thesis>` prints each claim's challenge and the test it proposes.
+
 ## 0.1.0
 
 The P1 foundation: the verdict spine and the witnessed, re-derivable record.

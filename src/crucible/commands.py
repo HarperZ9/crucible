@@ -12,6 +12,7 @@ import time
 from crucible.assess import Assessment, assess, recheck_assessment, verify_assessment
 from crucible.claim import make_claim
 from crucible.registry import MATCH, Registry
+from crucible.steelman import NullSteelman, Refutation, steelman_thesis
 from crucible.thesis import PUBLISHABLE, Thesis, make_thesis
 from crucible.verdict import Measurement, Verdict
 
@@ -140,6 +141,31 @@ def cmd_assess(args) -> int:
         if check is not None:
             print(f"re-derived from disk: {all(check.values())}  {check}")
         print(f"recorded to {args.registry}")
+    return 0
+
+
+def _refutation_dict(r: Refutation) -> dict:
+    return {"claim_id": r.claim_id, "claim_sha256": r.claim_sha256, "challenge": r.challenge,
+            "measurable": r.measurable, "source": r.source}
+
+
+def cmd_steelman(args) -> int:
+    try:
+        thesis = _resolve_thesis(args.thesis, args.registry)
+    except _INPUT_ERRORS as exc:
+        print(f"steelman failed: {exc}", file=sys.stderr)
+        return 1
+    refutations = steelman_thesis(NullSteelman(), thesis)
+    if args.json:
+        print(json.dumps({"thesis_id": thesis.id,
+                          "refutations": [_refutation_dict(r) for r in refutations]},
+                         indent=2, ensure_ascii=False))
+        return 0
+    print(f'steelmanned thesis {thesis.id} "{thesis.title}": {len(refutations)} refutation(s) from null')
+    for r in refutations:
+        test = r.measurable or "(no test: the claim is unfalsifiable)"
+        print(f"  {r.claim_id:<16} {r.challenge}")
+        print(f"  {'':<16} -> measure: {test}")
     return 0
 
 
