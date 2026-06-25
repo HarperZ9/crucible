@@ -1,7 +1,57 @@
 # Changelog
 
-All notable changes to Crucible. Versions follow semantic versioning; each minor release is built
+All notable changes to crucible. Versions follow semantic versioning; each minor release is built
 behind a feature branch and reviewed before merge.
+
+## 0.9.0
+
+1.0-readiness hardening.
+
+- Examples: the bundled demo and JSON examples are now regression-tested through the public CLI.
+- CLI surface: help output is covered for the shipped commands and registry actions.
+- Docs: adds a release-readiness checklist for the 1.0 review gate.
+
+## 0.8.0
+
+Optional subprocess-backed seam adapters.
+
+- `crucible.subprocess_edges`: adds `SubprocessSteelman` and `SubprocessMeasure`, stdlib-only adapters
+  for configured commands that exchange bounded JSON over stdin/stdout.
+- Safety posture: commands must be argv sequences rather than shell strings; request and response
+  sizes are bounded; timeouts are enforced; claim identity and producer labels are stamped locally.
+- Public API: exports `SubprocessSteelman` and `SubprocessMeasure`.
+
+## 0.7.0
+
+Registry operations for a growing corpus.
+
+- `crucible.registry_ops`: adds `registry_stats`, `search_theses`, and `prune_objects` for registry
+  health, recall, and object-store hygiene without changing the durable storage contract.
+- CLI: `crucible registry stats`, `crucible registry search`, and `crucible registry prune` summarize
+  the corpus, search by scope/status/latest verdict, and report orphaned claim bodies. Prune is
+  dry-run by default and deletes only with `--apply`.
+- Public API: exports `registry_stats`, `search_theses`, and `prune_objects`.
+
+## 0.6.0
+
+Publication-gated thesis export.
+
+- `crucible.gate`: adds `gate_check`, `export_guard`, and `export_thesis`. Fenced disposition and
+  explicit fenced/restricted markers fail closed at the public export edge.
+- CLI: `crucible export THESIS` emits the public thesis contract for publishable theses, resolves
+  thesis ids from a registry with `--registry`, and refuses fenced theses with a clean error.
+- Public API: exports `gate_check`, `export_guard`, and `export_thesis`.
+
+## 0.5.0
+
+Drift tracking across witnessed assessment rounds.
+
+- `crucible.drift`: compares two assessments of the same thesis and classifies each claim as held,
+  moved, improved, or regressed. Numeric margins decide direction; unrankable transitions such as
+  UNVERIFIABLE to MATCH are reported as moved.
+- CLI: `crucible drift REGISTRY` compares the latest two stored assessments, with human and JSON
+  output and clean errors for too-short or mixed-thesis histories.
+- Public API: exports `DriftRow`, `DriftReport`, and `drift_track`.
 
 ## 0.4.0
 

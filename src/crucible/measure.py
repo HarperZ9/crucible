@@ -38,7 +38,7 @@ class MetricSpec:
 class Measure(Protocol):
     """The measurement seam, the sound-oracle edge. ``measure`` returns a Measurement of a claim
     against a substrate; ``verdict_for`` decides from it. The default is the deterministic
-    ``NullMeasure``, so Crucible stands alone; an oracle plugs in through this shape."""
+    ``NullMeasure``, so crucible stands alone; an oracle plugs in through this shape."""
 
     name: str
 

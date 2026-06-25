@@ -1,4 +1,4 @@
-"""A self-contained tour of Crucible, offline, no install and nothing downloaded.
+"""A self-contained tour of crucible, offline, no install and nothing downloaded.
 
 Build a thesis of three claims about binary search, measure two of them against a known bound, and
 witness a verdict per claim: one holds (MATCH), one breaks (DRIFT), and one states no falsification

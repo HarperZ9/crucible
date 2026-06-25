@@ -1,0 +1,92 @@
+from __future__ import annotations
+
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+import pytest
+
+from crucible.cli import main
+
+ROOT = Path(__file__).resolve().parents[1]
+EXAMPLES = ROOT / "examples"
+
+
+def _example(name: str) -> str:
+    return str(EXAMPLES / name)
+
+
+def _json_out(capsys):
+    return json.loads(capsys.readouterr().out)
+
+
+def test_demo_example_runs_as_a_script():
+    run = subprocess.run([sys.executable, _example("demo.py")], cwd=ROOT, capture_output=True,
+                         text=True, timeout=10, check=False)
+
+    assert run.returncode == 0
+    assert "MATCH" in run.stdout
+    assert "DRIFT" in run.stdout
+    assert "UNVERIFIABLE" in run.stdout
+    assert "verified True" in run.stdout
+    assert "verified False" in run.stdout
+
+
+def test_example_json_files_roundtrip_through_public_cli(tmp_path, capsys):
+    thesis = _example("thesis-binary-search.json")
+    measurements = _example("measurements-binary-search.json")
+    substrate = _example("substrate-binary-search.json")
+    refine_config = _example("refine-discovery-loop.json")
+    reg = str(tmp_path / "reg")
+
+    assert main(["register", thesis, "--registry", reg, "--json"]) == 0
+    registered = _json_out(capsys)
+    assert registered["stored"]["registered"] is True
+
+    assert main(["assess", thesis, "--measurements", measurements, "--registry", reg, "--json"]) == 0
+    assessed = _json_out(capsys)
+    assert assessed["assessment"]["match"] == 1
+    assert assessed["assessment"]["drift"] == 1
+    assert assessed["assessment"]["unverifiable"] == 1
+
+    assert main(["measure", thesis, "--substrate", substrate, "--json"]) == 0
+    measured = _json_out(capsys)
+    assert measured["assessment"]["match"] == 1
+    assert measured["assessment"]["drift"] == 1
+
+    assert main(["refine", refine_config, "--json"]) == 0
+    refined = _json_out(capsys)
+    assert refined["status"] == "correct"
+    assert refined["iterations"] == 2
+
+    assert main(["registry", "stats", reg, "--json"]) == 0
+    stats = _json_out(capsys)
+    assert stats["theses"] == 1
+    assert stats["assessments"] == 1
+
+    assert main(["registry", "search", reg, "binary", "--verdict", "DRIFT", "--json"]) == 0
+    rows = _json_out(capsys)
+    assert len(rows) == 1
+    assert rows[0]["title"] == "Binary search comparison bounds"
+
+    assert main(["export", thesis]) == 0
+    exported = _json_out(capsys)
+    assert exported["disposition"] == "publishable"
+
+
+def test_cli_help_advertises_shipped_command_surface(capsys):
+    with pytest.raises(SystemExit) as root_help:
+        main(["--help"])
+    assert root_help.value.code == 0
+    root = capsys.readouterr().out
+    for command in ("register", "assess", "steelman", "measure", "registry",
+                    "verdicts", "drift", "export", "refine"):
+        assert command in root
+
+    with pytest.raises(SystemExit) as registry_help:
+        main(["registry", "--help"])
+    assert registry_help.value.code == 0
+    registry = capsys.readouterr().out
+    for action in ("list", "verify", "stats", "search", "prune"):
+        assert action in registry

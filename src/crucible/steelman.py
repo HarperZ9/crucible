@@ -41,7 +41,7 @@ class Refutation:
 class Steelman(Protocol):
     """The seam where a claim meets its adversary, the optional model edge. ``refute`` proposes zero
     or more refutations of a claim; it never decides the claim (the measurement does). The default is
-    the deterministic ``NullSteelman``, so Crucible stands alone; a model plugs in through this shape."""
+    the deterministic ``NullSteelman``, so crucible stands alone; a model plugs in through this shape."""
 
     name: str
 
