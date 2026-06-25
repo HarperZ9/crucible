@@ -31,12 +31,14 @@ from the record, so a confident assertion cannot fake it.
 The continuous part is the loop: substrates, measurements, and theses all improve across rounds,
 and the witnessed verdicts track which moved.
 
-Shipped today (0.7.0): the full first loop plus drift tracking, publication-gated export, and
-registry operations. You register a thesis, steelman it (adversaries propose the test), measure each
-claim against a substrate oracle, refine across substrate rounds toward a cohesively verified thesis,
-witness a re-derivable verdict per claim, compare assessment rounds to see what held, moved,
-improved, or regressed, and inspect a growing registry by status, scope, and latest verdict. A fenced
-thesis can be assessed locally, but the export edge refuses it by default.
+Shipped today (0.8.0): the full first loop plus drift tracking, publication-gated export, registry
+operations, and optional subprocess-backed seam adapters. You register a thesis, steelman it
+(adversaries propose the test), measure each claim against a substrate oracle, refine across
+substrate rounds toward a cohesively verified thesis, witness a re-derivable verdict per claim,
+compare assessment rounds to see what held, moved, improved, or regressed, inspect a growing
+registry by status, scope, and latest verdict, and plug configured model/oracle commands into the
+steelman and measure seams. A fenced thesis can be assessed locally, but the export edge refuses it
+by default.
 
 ## The differentiator (do not lose this)
 
@@ -112,6 +114,9 @@ Shipped:
 - Registry operations: `registry_stats`, `search_theses`, `prune_objects`, and
   `crucible registry stats|search|prune` summarize the corpus, recall theses by scope/status/latest
   verdict, and prune orphan claim bodies only when explicitly applied.
+- Optional subprocess edges: `SubprocessSteelman` and `SubprocessMeasure` run configured commands
+  through bounded JSON stdin/stdout, reject shell strings, enforce timeouts, and stamp claim identity
+  locally. The default seams remain Null and the verdict step still has no model in it.
 - The `crucible` CLI: `register`, `assess`, `steelman`, `measure`,
   `registry list|verify|stats|search|prune`, `refine`, `drift`, `export`, `verdicts [--verify]`.
 

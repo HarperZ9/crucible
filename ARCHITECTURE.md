@@ -79,6 +79,14 @@ default, exactly as Gather isolates its synthesizer.
 
 The core imports neither the Null nor any model, so the package keeps zero third-party dependencies.
 
+## Subprocess seam adapters
+
+`SubprocessSteelman` and `SubprocessMeasure` are optional stdlib adapters for configured commands.
+They exchange one bounded JSON request/response over stdin/stdout, enforce a timeout, and reject shell
+strings so arguments are not re-parsed by a shell. A child process may propose a challenge or report a
+deviation, but crucible stamps the claim identity, claim hash, and producer name locally. The verdict
+still follows from `verdict_for`; a subprocess cannot assert MATCH.
+
 ## Drift tracking
 
 The continuous loop needs an honest account of what changed between rounds. `drift_track(previous,

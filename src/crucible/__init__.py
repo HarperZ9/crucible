@@ -42,6 +42,7 @@ from crucible.refine import (
 from crucible.registry import Registry
 from crucible.registry_ops import prune_objects, registry_stats, search_theses
 from crucible.steelman import NullSteelman, Refutation, Steelman, steelman_thesis
+from crucible.subprocess_edges import SubprocessMeasure, SubprocessSteelman
 from crucible.thesis import (
     FENCED,
     PUBLISHABLE,
@@ -59,12 +60,13 @@ from crucible.verdict import (
     verdict_for,
 )
 
-__version__ = "0.7.0"
+__version__ = "0.8.0"
 
 __all__ = [
     "Assessment", "Claim", "DriftReport", "DriftRow", "GradedCriterion", "Measure", "Measurement",
     "MetricSpec", "NullMeasure", "NullSteelman", "RefineOutcome", "RefineReport", "Reflection",
-    "Refutation", "Registry", "Steelman", "TableMeasure", "Thesis", "Verdict",
+    "Refutation", "Registry", "Steelman", "SubprocessMeasure", "SubprocessSteelman", "TableMeasure",
+    "Thesis", "Verdict",
     "DRIFT", "FENCED", "MATCH", "PUBLISHABLE", "UNVERIFIABLE",
     "assess", "claim_body", "claim_hash", "cohesion", "content_hash", "make_claim", "make_thesis",
     "drift_track", "export_guard", "export_thesis", "gate_check", "measure_thesis",

@@ -3,6 +3,16 @@
 All notable changes to crucible. Versions follow semantic versioning; each minor release is built
 behind a feature branch and reviewed before merge.
 
+## 0.8.0
+
+Optional subprocess-backed seam adapters.
+
+- `crucible.subprocess_edges`: adds `SubprocessSteelman` and `SubprocessMeasure`, stdlib-only adapters
+  for configured commands that exchange bounded JSON over stdin/stdout.
+- Safety posture: commands must be argv sequences rather than shell strings; request and response
+  sizes are bounded; timeouts are enforced; claim identity and producer labels are stamped locally.
+- Public API: exports `SubprocessSteelman` and `SubprocessMeasure`.
+
 ## 0.7.0
 
 Registry operations for a growing corpus.
