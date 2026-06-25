@@ -1,0 +1,17 @@
+.env
+.env.*
+CLAUDE.local.md
+.superpowers/
+docs/superpowers/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+dist/
+build/
+*.egg-info/
+.venv/
+crucible-cache/
+.coverage
+htmlcov/
