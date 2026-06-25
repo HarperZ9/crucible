@@ -62,10 +62,10 @@ measured is never read as holding.
 When published:
 
 ```bash
-pip install crucible-engine
+pip install crucible-bench
 ```
 
-The distribution is `crucible-engine`; it installs the `crucible` command and the `crucible` package
+The distribution is `crucible-bench`; it installs the `crucible` command and the `crucible` package
 (`import crucible`). The core is pure standard library. From a clone:
 
 ```bash

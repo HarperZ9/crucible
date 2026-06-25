@@ -3,7 +3,7 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "crucible-engine"
+name = "crucible-bench"
 version = "0.4.0"
 description = "An accountable judgment organ: register a thesis and emit a re-checkable verdict per claim (MATCH / DRIFT / UNVERIFIABLE), grounded in a measurement rather than asserted"
 readme = "README.md"
