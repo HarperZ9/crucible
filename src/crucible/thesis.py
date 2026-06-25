@@ -1,9 +1,10 @@
 """A Thesis: a set of claims with a re-checkable seal over them.
 
-The seal is order independent (the claims are sorted) but covers each claim's id and content hash,
-so swapping, reordering, or relabelling a claim breaks it exactly as tampering with content does. A
-thesis carries a disposition (publishable or fenced) that the publication gate reads at the export
-edge.
+The seal folds in the title, the disposition, and each claim's id and content hash. The claims are
+sorted, so the seal is over the SET of claims: swapping a claim's content or relabelling its id
+breaks it; reordering does not, because a thesis is a set. The disposition is sealed, so a fenced
+thesis cannot be relabelled publishable without breaking the seal. The registration time is metadata
+and is not sealed.
 """
 from __future__ import annotations
 
@@ -18,15 +19,17 @@ PUBLISHABLE = "publishable"
 FENCED = "fenced"
 
 
-def thesis_seal(claims: tuple[Claim, ...]) -> str:
-    """A deterministic fingerprint over a thesis's claims, recomputable from the record.
+def thesis_seal(title: str, disposition: str, claims: tuple[Claim, ...]) -> str:
+    """A deterministic fingerprint over a thesis, recomputable from the record.
 
-    The claims are sorted by their canonical form, so the seal depends on the set, not the order in
-    which they were supplied. Each claim is folded in by its id and content hash.
+    Folds in the title, the disposition (so a fenced thesis cannot be relabelled publishable
+    undetected), and each claim's id and content hash. The claims are sorted, so the seal is over the
+    set: swapping a claim's content or relabelling its id breaks the seal; reordering does not.
     """
     objs = [{"id": c.id, "sha256": c.sha256} for c in claims]
     objs.sort(key=lambda d: json.dumps(d, sort_keys=True, ensure_ascii=False))
-    canon = json.dumps(objs, sort_keys=True, ensure_ascii=False)
+    payload = {"title": title, "disposition": disposition, "claims": objs}
+    canon = json.dumps(payload, sort_keys=True, ensure_ascii=False)
     return hashlib.sha256(canon.encode("utf-8")).hexdigest()
 
 
@@ -53,7 +56,7 @@ def make_thesis(
     """Register a thesis from its claims, computing its seal and stamping the registration time.
 
     The clock is injected, so a registration replays. The id defaults to the first 16 hex of the
-    seal. The disposition must be publishable or fenced.
+    seal, so identical thesis content yields the same id. The disposition must be publishable or fenced.
     """
     t = title.strip()
     if not t:
@@ -63,17 +66,14 @@ def make_thesis(
         raise ValueError("a thesis needs at least one claim")
     if disposition not in (PUBLISHABLE, FENCED):
         raise ValueError(f"disposition must be {PUBLISHABLE!r} or {FENCED!r}, got {disposition!r}")
-    seal = thesis_seal(cs)
-    return Thesis(
-        id=id or seal[:16],
-        title=t,
-        claims=cs,
-        registered_at=float(clock()),
-        disposition=disposition,
-        seal=seal,
-    )
+    seal = thesis_seal(t, disposition, cs)
+    return Thesis(id=id or seal[:16], title=t, claims=cs, registered_at=float(clock()),
+                  disposition=disposition, seal=seal)
 
 
 def verify_thesis(t: Thesis) -> bool:
-    """Recompute the seal and verify each claim: the thesis is these claims, unaltered."""
-    return thesis_seal(t.claims) == t.seal and all(c.verify() for c in t.claims)
+    """Recompute the seal and verify each claim: the thesis is these claims, with this title and
+    disposition, unaltered. Catches a body edit (a claim no longer hashes), a claim swap or
+    relabelling, and a flipped disposition. It cannot detect a fully consistent re-forge (every field
+    and the seal rewritten together): the seal proves integrity, not authorship."""
+    return thesis_seal(t.title, t.disposition, t.claims) == t.seal and all(c.verify() for c in t.claims)

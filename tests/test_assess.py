@@ -3,7 +3,13 @@ from __future__ import annotations
 
 import dataclasses
 
-from crucible.assess import Assessment, assess, verdict_seal, verify_assessment
+from crucible.assess import (
+    Assessment,
+    assess,
+    recheck_assessment,
+    verdict_seal,
+    verify_assessment,
+)
 from crucible.claim import make_claim
 from crucible.registry import Registry
 from crucible.thesis import make_thesis
@@ -80,3 +86,40 @@ def test_no_measurements_all_unverifiable():
     t = _thesis()
     a, verdicts = assess(t, None, clock=CLOCK)
     assert a.unverifiable == 3 and a.match == 0 and a.drift == 0
+
+
+def test_recheck_rederives_verdicts_from_thesis_and_measurements():
+    t = _thesis()
+    a, _ = assess(t, _measurements(t), clock=CLOCK)
+    assert recheck_assessment(t, a) == {"seals_ok": True, "thesis_ok": True, "verdicts_rederive": True}
+
+
+def test_tampered_measurement_breaks_verify():
+    t = _thesis()
+    a, _ = assess(t, _measurements(t), clock=CLOCK)
+    bad = [dict(m) for m in a.measurements]
+    bad[0]["deviation"] = 999.0  # edit a measurement without resealing
+    assert not verify_assessment(dataclasses.replace(a, measurements=tuple(bad)))
+
+
+def test_recheck_exposes_a_forged_but_internally_consistent_verdict():
+    # The differentiator: a verdict flipped DRIFT -> MATCH and fully re-sealed passes every seal
+    # check, yet re-deriving it from the measurements exposes it. A verdict cannot be asserted.
+    from crucible.assess import _VSEAL_FIELDS, _record_fields, _seal_record, _seal_rows
+
+    t = _thesis()
+    a, _ = assess(t, _measurements(t), clock=CLOCK)
+    forged_verdicts = []
+    for vr in a.verdicts:
+        vr = dict(vr)
+        if vr["status"] == "DRIFT":
+            vr["status"] = "MATCH"  # quietly turn a break into a pass
+        forged_verdicts.append(vr)
+    new_vseal = _seal_rows(forged_verdicts, _VSEAL_FIELDS)
+    fields = _record_fields(a.started_at, a.thesis_id, a.thesis_seal, a.claims, 2, 0, 1,
+                            new_vseal, a.measurement_seal, a.stored)
+    forged = dataclasses.replace(a, verdicts=tuple(forged_verdicts), match=2, drift=0,
+                                 verdict_seal=new_vseal, seal=_seal_record(fields))
+    assert verify_assessment(forged)  # the forgery is internally consistent: every seal matches
+    result = recheck_assessment(t, forged)
+    assert result["seals_ok"] and not result["verdicts_rederive"]  # re-derivation exposes the lie

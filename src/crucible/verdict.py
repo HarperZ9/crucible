@@ -10,6 +10,8 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 
+from crucible.claim import Claim
+
 MATCH = "MATCH"
 DRIFT = "DRIFT"
 UNVERIFIABLE = "UNVERIFIABLE"
@@ -59,7 +61,7 @@ def _unverifiable(cid: str, csha: str, deviation: float | None, tolerance: float
     return Verdict(cid, csha, UNVERIFIABLE, deviation, tolerance, None, method, grounds)
 
 
-def verdict_for(claim, measurement: Measurement | None) -> Verdict:
+def verdict_for(claim: Claim, measurement: Measurement | None) -> Verdict:
     """Compute a claim's verdict from its measurement. PURE: no model, recomputable from the record.
 
     The order of the checks is the honesty ladder:

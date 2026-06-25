@@ -50,8 +50,19 @@ def test_tampered_claim_breaks_verify():
 def test_dropped_claim_breaks_seal_recheck():
     t = make_thesis("t", _claims(), clock=CLOCK)
     tampered = dataclasses.replace(t, claims=(t.claims[0],))
-    assert thesis_seal(tampered.claims) != tampered.seal
+    assert thesis_seal(tampered.title, tampered.disposition, tampered.claims) != tampered.seal
     assert not verify_thesis(tampered)
+
+
+def test_flipped_disposition_breaks_seal():
+    t = make_thesis("t", _claims(), clock=CLOCK, disposition=PUBLISHABLE)
+    relabelled = dataclasses.replace(t, disposition=FENCED)
+    assert not verify_thesis(relabelled)  # the disposition is sealed; the publication gate can trust it
+
+
+def test_relabelled_title_breaks_seal():
+    t = make_thesis("t", _claims(), clock=CLOCK)
+    assert not verify_thesis(dataclasses.replace(t, title="a different title"))
 
 
 def test_empty_title_and_empty_claims_rejected():

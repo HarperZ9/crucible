@@ -20,10 +20,19 @@ def _thesis(title="t"):
 def test_register_writes_objects_and_a_row(tmp_path):
     reg = Registry(str(tmp_path), fsync=False)
     summary = reg.register(_thesis())
-    assert summary == {"added": 2, "deduped": 2 - 2, "total": 2}
+    assert summary == {"added": 2, "deduped": 0, "total": 2, "registered": True}
     rows = list(reg.theses())
     assert len(rows) == 1 and len(rows[0]["claims"]) == 2
     assert os.path.isdir(tmp_path / "objects")
+
+
+def test_reregister_is_idempotent_at_the_row_level(tmp_path):
+    reg = Registry(str(tmp_path), fsync=False)
+    t = _thesis()
+    reg.register(t)
+    again = reg.register(t)
+    assert again["registered"] is False
+    assert len(list(reg.theses())) == 1
 
 
 def test_identical_claim_body_is_deduped(tmp_path):
@@ -73,6 +82,34 @@ def test_load_thesis_reconstructs_and_reverifies(tmp_path):
     assert loaded.seal == t.seal
     assert verify_thesis(loaded)
     assert reg.get_thesis("nonexistent") is None
+
+
+def test_get_thesis_refuses_a_tampered_body(tmp_path):
+    reg = Registry(str(tmp_path), fsync=False)
+    t = _thesis()
+    reg.register(t)
+    sha = t.claims[0].sha256  # overwrite the body so it no longer hashes to its receipt
+    (tmp_path / "objects" / sha[:2] / sha[2:]).write_text(
+        '{"text": "evil", "falsification": "x"}', encoding="utf-8")
+    with pytest.raises(ValueError, match="failed verification"):
+        reg.get_thesis(t.id)
+
+
+def test_verify_seals_catches_a_swapped_claim_that_body_verify_misses(tmp_path):
+    import json
+
+    reg = Registry(str(tmp_path), fsync=False)
+    t = _thesis()
+    reg.register(t)
+    # Repoint the first claim's sha at the second claim's (intact) body: a swap without re-sealing.
+    theses_path = tmp_path / "theses.jsonl"
+    row = json.loads(theses_path.read_text(encoding="utf-8").strip())
+    row["claims"][0]["sha256"] = t.claims[1].sha256
+    theses_path.write_text(json.dumps(row) + "\n", encoding="utf-8")
+    # Body-level verify sees two intact bodies and reports all MATCH...
+    assert all(r["status"] == MATCH for r in reg.verify())
+    # ...but the seal pass catches that the thesis is no longer the claims it was sealed over.
+    assert any(r["status"] == "SEAL_BROKEN" for r in reg.verify_seals())
 
 
 def test_assessment_history_appends_and_streams(tmp_path):

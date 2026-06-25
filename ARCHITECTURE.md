@@ -38,15 +38,23 @@ with no falsification condition can only ever be UNVERIFIABLE: nothing would set
 ## The thesis and its seal
 
 A `Thesis` is a set of claims with a re-checkable seal over them (sorted, canonical JSON, sha256),
-mirroring Gather's digest seal. Reordering, swapping, or relabelling a claim breaks the seal exactly
-as tampering with content does. A thesis also carries a `disposition` (publishable or fenced) for the
-publication gate.
+mirroring Gather's digest seal. The seal folds in the title, the disposition, and each claim's id and
+content hash, so swapping a claim's content, relabelling its id, or flipping the disposition breaks
+the seal; reordering does not, because a thesis is a set. The disposition being sealed is what lets
+the publication gate trust the label.
 
 ## The witnessed assessment
 
-An assessment folds the per-claim verdicts into a record with its own seal: when it ran, the thesis
-seal, the counts of MATCH / DRIFT / UNVERIFIABLE, and the seal over the verdicts. It is re-checkable
-from disk, so a reader confirms both that the verdicts are these and that they were not altered.
+An assessment folds the per-claim verdicts into a record with its own seal, and it persists the
+verdicts and the measurements alongside, so the seal has a preimage on disk rather than fingerprinting
+discarded data. `verify_assessment` recomputes every seal from the stored arrays (the verdict seal
+from the stored verdicts, the measurement seal from the stored measurements, the record seal from the
+fields that bind both); it is not a tautology. `recheck_assessment` goes further: from the thesis and
+the stored measurements it re-derives each verdict via `verdict_for` and confirms the stored verdicts
+are exactly what the pure function yields, so a verdict that was asserted rather than computed is
+exposed even when its seals are internally consistent. The CLI surfaces this as `crucible verdicts
+--verify`. The seal proves integrity, not authorship: a fully consistent re-forge (every field and
+seal rewritten together) is out of scope without a signature, and the docs say so where a user meets it.
 
 ## The seams (the impure and the optional)
 

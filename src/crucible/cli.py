@@ -9,7 +9,7 @@ from __future__ import annotations
 import argparse
 
 from crucible import __version__
-from crucible.commands import cmd_assess, cmd_register, cmd_registry
+from crucible.commands import cmd_assess, cmd_register, cmd_registry, cmd_verdicts
 
 
 def _add_common(p: argparse.ArgumentParser) -> None:
@@ -40,6 +40,13 @@ def build_parser() -> argparse.ArgumentParser:
     rgy.add_argument("dir", help="the registry directory (created by --registry)")
     rgy.add_argument("--json", action="store_true", help="emit JSON instead of human text")
     rgy.set_defaults(func=cmd_registry)
+
+    vd = sub.add_parser("verdicts", help="list or re-check witnessed assessments in a registry")
+    vd.add_argument("dir", help="the registry directory")
+    vd.add_argument("--verify", action="store_true",
+                    help="re-derive each assessment's verdicts from the thesis and measurements on disk")
+    vd.add_argument("--json", action="store_true", help="emit JSON instead of human text")
+    vd.set_defaults(func=cmd_verdicts)
 
     return parser
 

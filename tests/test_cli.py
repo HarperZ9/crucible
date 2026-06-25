@@ -42,7 +42,7 @@ def test_assess_from_file_reports_outcomes(tmp_path, capsys):
     assert code == 0
     out = capsys.readouterr().out
     assert "MATCH 1" in out and "DRIFT 1" in out and "UNVERIFIABLE 1" in out
-    assert "verified: True" in out
+    assert "self-consistent: True" in out
 
 
 def test_assess_json_mode(tmp_path, capsys):
@@ -134,3 +134,54 @@ def test_assess_measurement_with_unknown_claim_is_an_error(tmp_path, capsys):
     code = main(["assess", _thesis_file(tmp_path), "--measurements", m])
     assert code == 1
     assert "unknown claim" in capsys.readouterr().err
+
+
+def test_verdicts_verify_roundtrip_from_disk(tmp_path, capsys):
+    reg = str(tmp_path / "reg")
+    main(["assess", _thesis_file(tmp_path), "--measurements", _measurements_file(tmp_path), "--registry", reg])
+    capsys.readouterr()
+    code = main(["verdicts", reg, "--verify"])
+    assert code == 0
+    out = capsys.readouterr().out
+    assert "ok=True" in out and "rederive=True" in out
+
+
+def test_verdicts_verify_detects_a_tampered_assessment(tmp_path, capsys):
+    import json as _json
+
+    reg_dir = tmp_path / "reg"
+    reg = str(reg_dir)
+    main(["assess", _thesis_file(tmp_path), "--measurements", _measurements_file(tmp_path), "--registry", reg])
+    capsys.readouterr()
+    # Edit a stored assessment's measurement deviation without re-sealing.
+    apath = reg_dir / "assessments.jsonl"
+    rec = _json.loads(apath.read_text(encoding="utf-8").strip())
+    rec["measurements"][0]["deviation"] = 12345.0
+    apath.write_text(_json.dumps(rec) + "\n", encoding="utf-8")
+    assert main(["verdicts", reg, "--verify"]) == 1
+
+
+def test_verdicts_list_human(tmp_path, capsys):
+    reg = str(tmp_path / "reg")
+    main(["assess", _thesis_file(tmp_path), "--measurements", _measurements_file(tmp_path), "--registry", reg])
+    capsys.readouterr()
+    assert main(["verdicts", reg]) == 0
+    out = capsys.readouterr().out
+    assert "assessment(s)" in out and "MATCH 1" in out
+
+
+def test_registry_verify_json(tmp_path, capsys):
+    reg = str(tmp_path / "reg")
+    main(["register", _thesis_file(tmp_path), "--registry", reg])
+    capsys.readouterr()
+    assert main(["registry", "verify", reg, "--json"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["ok"] is True and "bodies" in payload and "seals" in payload
+
+
+def test_register_json_with_registry_reports_stored(tmp_path, capsys):
+    reg = str(tmp_path / "reg")
+    code = main(["register", _thesis_file(tmp_path), "--registry", reg, "--json"])
+    assert code == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["stored"]["registered"] is True and payload["stored"]["added"] == 3

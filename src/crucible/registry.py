@@ -11,14 +11,15 @@ from __future__ import annotations
 
 import json
 import os
-from typing import Iterator
+from typing import Iterator, Mapping
 
 from crucible.claim import Claim, claim_body, content_hash
-from crucible.thesis import PUBLISHABLE, Thesis
+from crucible.thesis import PUBLISHABLE, Thesis, verify_thesis
 
 MATCH = "MATCH"
 MISSING = "MISSING"
 CORRUPT = "CORRUPT"
+SEAL_BROKEN = "SEAL_BROKEN"
 
 _HEX = set("0123456789abcdef")
 
@@ -28,6 +29,14 @@ def _check_sha(sha: object) -> str:
     if not isinstance(sha, str) or len(sha) != 64 or any(c not in _HEX for c in sha):
         raise ValueError(f"not a sha256 hex digest: {sha!r}")
     return sha
+
+
+def _field(row: Mapping, key: str, what: str):
+    """Read a required field from a row that came from disk, with a located error if it is missing
+    (rows can be hand-edited, so a missing field is diagnosed, not a bare KeyError)."""
+    if key not in row:
+        raise ValueError(f"registry {what} row is missing field {key!r}")
+    return row[key]
 
 
 class Registry:
@@ -80,10 +89,16 @@ class Registry:
         for c in thesis.claims:
             _sha, is_new = self._write_object(claim_body(c.text, c.falsification))
             added, deduped = (added + 1, deduped) if is_new else (added, deduped + 1)
-        self._append(self._theses, self._thesis_row(thesis))
+        registered = not self._has_thesis(thesis.id, thesis.seal)
+        if registered:
+            self._append(self._theses, self._thesis_row(thesis))
         if self._fsync:
             self._fsync_dir(self._root)
-        return {"added": added, "deduped": deduped, "total": len(thesis.claims)}
+        return {"added": added, "deduped": deduped, "total": len(thesis.claims), "registered": registered}
+
+    def _has_thesis(self, thesis_id: str, seal: str) -> bool:
+        """True if an identical thesis (same id and seal) is already in the catalog."""
+        return any(r.get("id") == thesis_id and r.get("seal") == seal for r in self.theses())
 
     @staticmethod
     def _thesis_row(t: Thesis) -> dict:
@@ -97,23 +112,30 @@ class Registry:
         """Stream the thesis catalog, one row per registered thesis."""
         yield from self._stream_jsonl(self._theses, "theses")
 
-    def load_thesis(self, row: dict) -> Thesis:
-        """Reconstruct a Thesis from a catalog row, reading each claim body from the object store."""
+    def load_thesis(self, row: Mapping) -> Thesis:
+        """Reconstruct a Thesis from a catalog row, reading each claim body from the object store.
+        Pure reconstruction, no verification (a missing field raises a located error); use
+        ``get_thesis`` for a verified load."""
         claims = []
-        for cr in row["claims"]:
-            sha = _check_sha(cr["sha256"])
+        for cr in _field(row, "claims", "theses"):
+            sha = _check_sha(_field(cr, "sha256", "claim"))
             data = json.loads(self.read_body(sha))
-            claims.append(Claim(id=cr["id"], text=data["text"],
-                                falsification=data["falsification"], sha256=sha))
-        return Thesis(id=row["id"], title=row["title"], claims=tuple(claims),
-                      registered_at=row["registered_at"],
-                      disposition=row.get("disposition", PUBLISHABLE), seal=row["seal"])
+            claims.append(Claim(id=_field(cr, "id", "claim"), text=_field(data, "text", "claim body"),
+                                falsification=_field(data, "falsification", "claim body"), sha256=sha))
+        return Thesis(id=_field(row, "id", "theses"), title=_field(row, "title", "theses"),
+                      claims=tuple(claims), registered_at=row.get("registered_at", 0.0),
+                      disposition=row.get("disposition", PUBLISHABLE), seal=_field(row, "seal", "theses"))
 
     def get_thesis(self, thesis_id: str) -> Thesis | None:
-        """Find and reconstruct a thesis by id, or None if it is not registered."""
+        """Find and reconstruct a thesis by id, verifying it; None if it is not registered. Raises
+        ValueError if the stored thesis fails verification (a tampered registry), so a caller never
+        assesses over unverified claims."""
         for row in self.theses():
             if row.get("id") == thesis_id:
-                return self.load_thesis(row)
+                t = self.load_thesis(row)
+                if not verify_thesis(t):
+                    raise ValueError(f"thesis {thesis_id!r} failed verification: registry may be tampered")
+                return t
         return None
 
     # --- assessments ---
@@ -140,17 +162,33 @@ class Registry:
                 results.append(self._verify_claim(tid, cr))
         return results
 
-    def _verify_claim(self, tid: str, cr: dict) -> dict:
+    def _verify_claim(self, tid: str, cr: Mapping) -> dict:
         cid, sha = cr.get("id", ""), cr.get("sha256")
         base = {"thesis_id": tid, "claim_id": cid, "sha256": sha if isinstance(sha, str) else ""}
+        if not isinstance(sha, str):  # a row with a non-string sha is tampered, not merely absent
+            return {**base, "status": CORRUPT}
         try:
-            path = self._object_path(sha)  # type: ignore[arg-type]
+            path = self._object_path(sha)
         except ValueError:
             return {**base, "status": CORRUPT}
         if not os.path.exists(path):
             return {**base, "status": MISSING}
-        status = MATCH if content_hash(self.read_body(sha)) == sha else CORRUPT  # type: ignore[arg-type]
-        return {**base, "status": status}
+        return {**base, "status": MATCH if content_hash(self.read_body(sha)) == sha else CORRUPT}
+
+    def verify_seals(self) -> list[dict]:
+        """Re-check each thesis's seal: load its claims and confirm the seal binds them, the title, and
+        the disposition. Catches a swapped or relabelled claim and a flipped disposition that a
+        body-level ``verify`` would miss. One row per thesis with a status of MATCH or SEAL_BROKEN."""
+        out: list[dict] = []
+        for row in self.theses():
+            tid = row.get("id", "")
+            try:
+                t = self.load_thesis(row)
+                ok = verify_thesis(t) and t.seal == row.get("seal")
+            except (ValueError, KeyError, FileNotFoundError, json.JSONDecodeError):
+                ok = False
+            out.append({"thesis_id": tid, "status": MATCH if ok else SEAL_BROKEN})
+        return out
 
     # --- jsonl helpers ---
 

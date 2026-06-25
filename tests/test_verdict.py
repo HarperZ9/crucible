@@ -80,3 +80,15 @@ def test_margin_formula():
     c = _claim()
     v = verdict_for(c, _m(c, 0.02, tolerance=0.1))
     assert math.isclose(v.margin, (0.1 - 0.02) / 0.1)
+
+
+def test_bool_deviation_is_unverifiable_not_one():
+    c = _claim()
+    # True must not be read as 1.0; a bool is not a measurement.
+    assert verdict_for(c, _m(c, True)).status == UNVERIFIABLE
+
+
+def test_non_finite_tolerance_is_unverifiable():
+    c = _claim()
+    assert verdict_for(c, _m(c, 0.05, tolerance=float("nan"))).status == UNVERIFIABLE
+    assert verdict_for(c, _m(c, 0.05, tolerance=float("inf"))).status == UNVERIFIABLE
