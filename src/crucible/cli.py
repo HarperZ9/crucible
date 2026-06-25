@@ -9,7 +9,13 @@ from __future__ import annotations
 import argparse
 
 from crucible import __version__
-from crucible.commands import cmd_assess, cmd_register, cmd_registry, cmd_verdicts
+from crucible.commands import (
+    cmd_assess,
+    cmd_register,
+    cmd_registry,
+    cmd_steelman,
+    cmd_verdicts,
+)
 
 
 def _add_common(p: argparse.ArgumentParser) -> None:
@@ -34,6 +40,13 @@ def build_parser() -> argparse.ArgumentParser:
                      help="path to a measurements JSON; a claim with no measurement is UNVERIFIABLE")
     _add_common(ass)
     ass.set_defaults(func=cmd_assess)
+
+    stl = sub.add_parser("steelman",
+                         help="propose the strongest refutation of each claim (adversaries propose; the measurement decides)")
+    stl.add_argument("thesis", help="path to a thesis JSON, or a thesis id when --registry is given")
+    stl.add_argument("--registry", default=None, metavar="DIR", help="resolve a thesis id from a registry at DIR")
+    stl.add_argument("--json", action="store_true", help="emit JSON instead of human text")
+    stl.set_defaults(func=cmd_steelman)
 
     rgy = sub.add_parser("registry", help="inspect a stored registry: list or verify")
     rgy.add_argument("action", choices=["list", "verify"], help="list theses or verify stored claims")

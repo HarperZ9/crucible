@@ -18,6 +18,7 @@ from crucible.assess import (
 )
 from crucible.claim import Claim, claim_body, claim_hash, content_hash, make_claim
 from crucible.registry import Registry
+from crucible.steelman import NullSteelman, Refutation, Steelman, steelman_thesis
 from crucible.thesis import (
     FENCED,
     PUBLISHABLE,
@@ -35,12 +36,13 @@ from crucible.verdict import (
     verdict_for,
 )
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 __all__ = [
-    "Assessment", "Claim", "Measurement", "Registry", "Thesis", "Verdict",
+    "Assessment", "Claim", "Measurement", "NullSteelman", "Refutation", "Registry", "Steelman",
+    "Thesis", "Verdict",
     "DRIFT", "FENCED", "MATCH", "PUBLISHABLE", "UNVERIFIABLE",
     "assess", "claim_body", "claim_hash", "content_hash", "make_claim", "make_thesis",
-    "recheck_assessment", "thesis_seal", "verdict_for", "verdict_seal", "verify_assessment",
-    "verify_thesis", "__version__",
+    "recheck_assessment", "steelman_thesis", "thesis_seal", "verdict_for", "verdict_seal",
+    "verify_assessment", "verify_thesis", "__version__",
 ]

@@ -185,3 +185,32 @@ def test_register_json_with_registry_reports_stored(tmp_path, capsys):
     assert code == 0
     payload = json.loads(capsys.readouterr().out)
     assert payload["stored"]["registered"] is True and payload["stored"]["added"] == 3
+
+
+def test_steelman_human(tmp_path, capsys):
+    code = main(["steelman", _thesis_file(tmp_path)])
+    assert code == 0
+    out = capsys.readouterr().out
+    assert "steelmanned thesis" in out and "-> measure:" in out
+
+
+def test_steelman_json(tmp_path, capsys):
+    code = main(["steelman", _thesis_file(tmp_path), "--json"])
+    assert code == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert len(payload["refutations"]) == 3
+    assert all(r["source"] == "null" for r in payload["refutations"])
+
+
+def test_steelman_by_id_from_registry(tmp_path, capsys):
+    reg = str(tmp_path / "reg")
+    main(["register", _thesis_file(tmp_path), "--registry", reg])
+    capsys.readouterr()
+    main(["registry", "list", reg, "--json"])
+    tid = json.loads(capsys.readouterr().out)[0]["id"]
+    assert main(["steelman", tid, "--registry", reg]) == 0
+
+
+def test_steelman_missing_file_is_an_error(capsys):
+    assert main(["steelman", "nope.json"]) == 1
+    assert "steelman failed" in capsys.readouterr().err
