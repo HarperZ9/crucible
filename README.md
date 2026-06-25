@@ -31,6 +31,10 @@ cannot fake it.
 The continuous part is the loop: substrates, measurements, and theses all improve across rounds,
 and the witnessed verdicts track which moved.
 
+Shipped today (0.1.0): steps 1 and 5, the spine. You register a thesis and witness a re-derivable
+verdict per claim from supplied measurements. The steelman seam (step 2), the measurement harness
+(step 3), and the continuous refine (step 4) land in the releases that follow; see Status below.
+
 ## The differentiator (do not lose this)
 
 A claim's standing is a verdict grounded in a measurement, not a judge's say-so. Steelman
@@ -77,7 +81,16 @@ whole-branch review before merge. The operator floor is 1.0; the target is organ
 
 Shipped:
 
-- (the P1 foundation is the first release; this section grows with each increment)
+- The verdict spine: a pure `verdict_for` returning MATCH / DRIFT / UNVERIFIABLE from a measurement,
+  with no model in the verdict step and UNVERIFIABLE fail-closed.
+- A content-hash receipt on every claim, and a thesis seal that binds the claims, the title, and the
+  disposition (so the publication gate can trust the label).
+- A witnessed assessment that persists its verdicts and measurements, so `verify_assessment`
+  recomputes the seals from the stored data and `recheck_assessment` re-derives each verdict from the
+  thesis and the measurements: a verdict cannot be asserted, it must follow from the record.
+- A content-addressed registry that re-verifies stored claims (MATCH / MISSING / CORRUPT), checks
+  thesis seals (catching a swapped claim a body check would miss), and refuses to load a tampered thesis.
+- The `crucible` CLI: `register`, `assess`, `registry list|verify`, `verdicts [--verify]`.
 
 ## License
 
