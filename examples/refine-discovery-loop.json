@@ -1,0 +1,38 @@
+{
+  "title": "Discovery loop margins",
+  "disposition": "publishable",
+  "claims": [
+    {
+      "text": "position error stays within tolerance",
+      "falsification": "position error exceeds tolerance"
+    },
+    {
+      "text": "energy error stays within tolerance",
+      "falsification": "energy error exceeds tolerance"
+    }
+  ],
+  "specs": {
+    "position error stays within tolerance": {
+      "predicted": 0.0,
+      "tolerance": 0.5,
+      "observe": "position_error"
+    },
+    "energy error stays within tolerance": {
+      "predicted": 0.0,
+      "tolerance": 0.5,
+      "observe": "energy_error"
+    }
+  },
+  "rounds": [
+    {
+      "position_error": 0.1,
+      "energy_error": 1.4
+    },
+    {
+      "position_error": 0.1,
+      "energy_error": 0.1
+    }
+  ],
+  "target_margin": 0.25,
+  "cohesion_bar": 0.5
+}

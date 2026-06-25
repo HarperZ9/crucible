@@ -11,6 +11,7 @@ import argparse
 
 from crucible import __version__
 from crucible.commands import cmd_assess, cmd_measure, cmd_register, cmd_steelman
+from crucible.refine_cmd import cmd_refine
 from crucible.registry_cmd import cmd_registry, cmd_verdicts
 
 
@@ -52,6 +53,15 @@ def build_parser() -> argparse.ArgumentParser:
                      help="path to a substrate JSON: per-claim specs (predicted, tolerance, observe) plus observed values")
     _add_common(mea)
     mea.set_defaults(func=cmd_measure)
+
+    ref = sub.add_parser("refine",
+                         help="refine over rounds of substrate until the thesis is cohesively verified, or report the weakest claim")
+    ref.add_argument("config", help="path to a refine config JSON (claims or a thesis, specs, rounds, target_margin, cohesion_bar)")
+    ref.add_argument("--thesis", default=None,
+                     help="resolve the thesis from a file or a registry id instead of the config's own claims")
+    ref.add_argument("--registry", default=None, metavar="DIR", help="resolve a thesis id from a registry at DIR")
+    ref.add_argument("--json", action="store_true", help="emit JSON instead of human text")
+    ref.set_defaults(func=cmd_refine)
 
     rgy = sub.add_parser("registry", help="inspect a stored registry: list or verify")
     rgy.add_argument("action", choices=["list", "verify"], help="list theses or verify stored claims")

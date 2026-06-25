@@ -170,20 +170,25 @@ def cmd_steelman(args) -> int:
     return 0
 
 
-def _load_substrate(thesis: Thesis, path: str) -> tuple[dict, dict]:
-    """Load a measure substrate JSON: ``{specs: {claim: {predicted, tolerance, observe, metric}},
-    substrate: {key: value}}``. Specs are resolved against the thesis by claim id or exact text.
-    Returns ``(specs_by_claim_id, substrate)``."""
-    data = _read_json(path)
+def build_specs(thesis: Thesis, raw: dict) -> dict:
+    """Resolve a ``{claim: {predicted, tolerance, observe, metric}}`` mapping against a thesis (by
+    claim id or exact text) into ``{claim_id: MetricSpec}``. Shared by measure and refine."""
     by_id = {c.id: c for c in thesis.claims}
     by_text = {c.text: c for c in thesis.claims}
     specs: dict[str, MetricSpec] = {}
-    for ref, s in (data.get("specs") or {}).items():
+    for ref, s in (raw or {}).items():
         claim = by_id.get(ref) or by_text.get(ref)
         if claim is None:
             raise ValueError(f"spec references unknown claim {ref!r}")
         specs[claim.id] = MetricSpec(float(s["predicted"]), _as_float(s.get("tolerance"), 0.0),
                                      s.get("observe", ""), s.get("metric", "abs"))
+    return specs
+
+
+def _load_substrate(thesis: Thesis, path: str) -> tuple[dict, dict]:
+    """Load a measure substrate JSON: ``{specs: {claim: {...}}, substrate: {key: value}}``."""
+    data = _read_json(path)
+    specs = build_specs(thesis, data.get("specs") or {})
     substrate = {k: float(v) for k, v in (data.get("substrate") or {}).items()}
     return specs, substrate
 

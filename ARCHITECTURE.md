@@ -72,6 +72,10 @@ default, exactly as Gather isolates its synthesizer.
   oracle (the Telos verifier, or a symbolic or proof oracle for abstract math) plugs in through the
   same shape, and `verdict_for` decides from the `Measurement` it produces. This is where the verdict
   is grounded.
+- **Refine** (`refine_thesis`): the continuous loop that measures a thesis, grades each claim by its
+  normalized margin, computes harmonic-mean cohesion, reflects the weakest claim, and re-iterates via
+  a caller-provided adjuster. It never returns `correct` unless every claim has enough margin and the
+  margins are cohesive; if the budget is spent it reports the weakest claim.
 
 The core imports neither the Null nor any model, so the package keeps zero third-party dependencies.
 

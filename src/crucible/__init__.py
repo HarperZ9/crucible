@@ -2,10 +2,10 @@
 
 Register a thesis and emit a re-checkable verdict per claim (MATCH / DRIFT / UNVERIFIABLE), grounded
 in a measurement rather than asserted: the verdict recomputes from the record, so a confident
-assertion cannot fake it. The steelman and measurement seams and the continuous refine loop are
-forthcoming; the verdict spine and the witnessed, re-derivable record ship first. The core is pure
-standard library; impure and optional edges live behind Protocol seams with a Null default, so
-Crucible stands alone and composes as a peer.
+assertion cannot fake it. A thesis is steelmanned (adversaries propose the test), measured against a
+sound oracle (the measurement decides), and refined toward a cohesively verified standing or an honest
+weakest axis. The core is pure standard library; impure and optional edges live behind Protocol seams
+with a Null default, so Crucible stands alone and composes as a peer.
 """
 from __future__ import annotations
 
@@ -23,6 +23,15 @@ from crucible.measure import (
     NullMeasure,
     TableMeasure,
     measure_thesis,
+)
+from crucible.refine import (
+    GradedCriterion,
+    RefineOutcome,
+    RefineReport,
+    Reflection,
+    cohesion,
+    refine,
+    refine_thesis,
 )
 from crucible.registry import Registry
 from crucible.steelman import NullSteelman, Refutation, Steelman, steelman_thesis
@@ -43,13 +52,14 @@ from crucible.verdict import (
     verdict_for,
 )
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 
 __all__ = [
-    "Assessment", "Claim", "Measure", "Measurement", "MetricSpec", "NullMeasure", "NullSteelman",
-    "Refutation", "Registry", "Steelman", "TableMeasure", "Thesis", "Verdict",
+    "Assessment", "Claim", "GradedCriterion", "Measure", "Measurement", "MetricSpec", "NullMeasure",
+    "NullSteelman", "RefineOutcome", "RefineReport", "Reflection", "Refutation", "Registry",
+    "Steelman", "TableMeasure", "Thesis", "Verdict",
     "DRIFT", "FENCED", "MATCH", "PUBLISHABLE", "UNVERIFIABLE",
-    "assess", "claim_body", "claim_hash", "content_hash", "make_claim", "make_thesis",
-    "measure_thesis", "recheck_assessment", "steelman_thesis", "thesis_seal", "verdict_for",
-    "verdict_seal", "verify_assessment", "verify_thesis", "__version__",
+    "assess", "claim_body", "claim_hash", "cohesion", "content_hash", "make_claim", "make_thesis",
+    "measure_thesis", "recheck_assessment", "refine", "refine_thesis", "steelman_thesis",
+    "thesis_seal", "verdict_for", "verdict_seal", "verify_assessment", "verify_thesis", "__version__",
 ]

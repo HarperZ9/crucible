@@ -3,6 +3,21 @@
 All notable changes to Crucible. Versions follow semantic versioning; each minor release is built
 behind a feature branch and reviewed before merge.
 
+## 0.4.0
+
+The refine loop: margin, cohesion, reflection, and re-iteration over a thesis.
+
+- `crucible.refine`: a zero-dependency refinement primitive with graded criteria, harmonic-mean
+  cohesion, reflect-weakest feedback, and fail-closed handling for broken generators, adjusters, and
+  non-numeric measurements.
+- `refine_thesis`: points the primitive at a thesis and a `Measure` oracle, grading each claim by its
+  normalized measurement margin and returning a `RefineReport` with final verdicts and the cohesion
+  trajectory.
+- CLI: `crucible refine <config.json>` runs ordered substrate rounds, stops on a cohesively verified
+  thesis, or reports the weakest claim when the budget is spent.
+- Public API: exports `GradedCriterion`, `Reflection`, `RefineOutcome`, `RefineReport`, `cohesion`,
+  `refine`, and `refine_thesis`.
+
 ## 0.3.0
 
 The measure seam: a sound oracle decides a claim against a substrate. This is where the verdict is

@@ -31,9 +31,9 @@ from the record, so a confident assertion cannot fake it.
 The continuous part is the loop: substrates, measurements, and theses all improve across rounds,
 and the witnessed verdicts track which moved.
 
-Shipped today (0.3.0): steps 1, 2, 3, and 5. You register a thesis, steelman it (adversaries propose
-the test), measure each claim against a substrate oracle, and witness a re-derivable verdict per claim.
-The continuous refine loop (step 4) lands next; see Status below.
+Shipped today (0.4.0): the full first loop. You register a thesis, steelman it (adversaries propose
+the test), measure each claim against a substrate oracle, refine across substrate rounds toward a
+cohesively verified thesis, and witness a re-derivable verdict per claim.
 
 ## The differentiator (do not lose this)
 
@@ -97,8 +97,11 @@ Shipped:
   computes each claim's deviation from a predicted value over a provided substrate (offline, no model);
   the `NullMeasure` default measures nothing (UNVERIFIABLE). The Telos verifier or a proof oracle for
   abstract math plugs in through the same shape, so the verdict stays grounded, never asserted.
+- The refine loop: grade each claim's measured margin, compute harmonic-mean cohesion, reflect the
+  weakest claim, and re-measure across substrate rounds until the thesis is cohesively verified or the
+  budget is spent honestly. The loop reports the weakest claim instead of pretending a short thesis held.
 - The `crucible` CLI: `register`, `assess`, `steelman`, `measure`, `registry list|verify`,
-  `verdicts [--verify]`.
+  `refine`, `verdicts [--verify]`.
 
 ## License
 
