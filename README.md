@@ -11,10 +11,10 @@ than a record, and the loudest version wins. Crucible is the organ that holds an
 It is the cognition counterpart to Gather. Where Gather brings evidence in and records how it was
 obtained (the afferent organ), Crucible tests a thesis against that evidence and emits a verdict you
 can re-check (the efferent organ). You register a thesis as a set of claims, and for each claim the
-observation that would refute it. Crucible steelmans the claims, measures them against a substrate,
-and writes a verdict per claim: MATCH, DRIFT, or UNVERIFIABLE. The verdict is grounded in the
-measurement, not in a judge's opinion, and it recomputes from the record, so a confident assertion
-cannot fake it.
+observation that would refute it. Crucible steelmans the claims (proposing the test that would settle
+each) and, once a measurement is supplied, writes a verdict per claim: MATCH, DRIFT, or UNVERIFIABLE.
+The verdict is grounded in the measurement, not in a judge's opinion, and it recomputes from the
+record, so a confident assertion cannot fake it.
 
 ## The loop
 

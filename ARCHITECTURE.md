@@ -58,15 +58,22 @@ seal rewritten together) is out of scope without a signature, and the docs say s
 
 ## The seams (the impure and the optional)
 
-Crucible's core is pure standard library. Two edges are optional and live behind a Protocol seam with
-a Null default, exactly as Gather isolates its synthesizer:
+Crucible's core is pure standard library. Optional edges live behind a Protocol seam with a Null
+default, exactly as Gather isolates its synthesizer.
+
+Shipped:
 
 - **Steelman** (`Steelman` protocol): independent adversaries propose refutations. The default
   `NullSteelman` surfaces the claim's own stated falsification as the standing test and invents
   nothing; a model edge plugs in to generate independent refutations. Adversaries propose what to
-  measure; the measurement decides.
-- **Measure** (`Measure` protocol): produces a measurement of a claim against a substrate. The
-  default `NullMeasure` makes no measurement (UNVERIFIABLE); a real oracle or metric plugs in.
+  measure; the measurement decides. `steelman_thesis` stamps each refutation's source from the
+  producing steelman's name, so the label is the producer's.
+
+Forthcoming (P3, the measurement harness; not yet built, the spec describes it):
+
+- **Measure** (a `Measure` protocol with a `NullMeasure` default): a sound oracle that produces a
+  measurement of a claim against a substrate (the Telos verifier, or a symbolic or proof oracle for
+  abstract math). `verdict_for` already accepts the `Measurement` such an oracle would produce.
 
 The core imports neither the Null nor any model, so the package keeps zero third-party dependencies.
 
@@ -86,12 +93,15 @@ impure edge.
 
 ## Protocol interoperability (the dual mandate)
 
-Crucible stands alone and serves the constellation at once. It consumes other organs through their
-documented on-disk contracts (a Gather witnessed digest as evidence, an index verified map as a
-substrate) without importing their internals, and it is consumed through its own published contract
-(the sealed assessment and verdicts). Shared primitives, such as the `refine` loop, are integrated
-natively rather than taken as third-party dependencies, so reuse never costs standing alone. Seams
-default to Null, so the absence of a peer is a quieter capability, never a failure.
+Crucible stands alone and serves the constellation at once. What ships today is the standing-alone
+half and the published contract: a sealed assessment and its verdicts, re-checkable from disk, that a
+downstream organ reads to learn a thesis's standing. Crucible is built to consume other organs through
+their documented on-disk contracts (a Gather witnessed digest as evidence, an index verified map or
+the Telos verifier as a measurement oracle) without importing their internals; those composition
+milestones are on the spec's ladder, Telos at 1.1.0, and are not yet built. Shared primitives, such as
+the `refine` loop, are to be integrated natively rather than taken as third-party dependencies, so
+reuse never costs standing alone. Seams default to Null, so the absence of a peer is a quieter
+capability, never a failure.
 
 ## Peer composition
 

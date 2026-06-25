@@ -1,4 +1,6 @@
-"""The CLI surface: register, assess, registry list/verify, human and JSON, honest exit codes."""
+"""The CLI surface: register, assess, steelman, registry list/verify, verdicts [--verify].
+
+Human and JSON output, honest exit codes."""
 from __future__ import annotations
 
 import json
@@ -214,3 +216,17 @@ def test_steelman_by_id_from_registry(tmp_path, capsys):
 def test_steelman_missing_file_is_an_error(capsys):
     assert main(["steelman", "nope.json"]) == 1
     assert "steelman failed" in capsys.readouterr().err
+
+
+def test_steelman_flags_an_unfalsifiable_claim(tmp_path, capsys):
+    thesis = _write(tmp_path / "t.json", {"title": "T", "claims": [
+        {"text": "a testable claim", "falsification": "a counterexample"},
+        {"text": "an untestable claim", "falsification": ""},
+    ]})
+    assert main(["steelman", thesis]) == 0
+    assert "(no test: the claim is unfalsifiable)" in capsys.readouterr().out
+    # and the JSON binds the unfalsifiable claim with an empty measurable
+    assert main(["steelman", thesis, "--json"]) == 0
+    refutations = json.loads(capsys.readouterr().out)["refutations"]
+    empty = [r for r in refutations if r["measurable"] == ""]
+    assert len(empty) == 1 and empty[0]["claim_sha256"]

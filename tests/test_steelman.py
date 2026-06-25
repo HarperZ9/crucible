@@ -27,10 +27,10 @@ def test_null_steelman_flags_an_unfalsifiable_claim():
 
 
 def test_null_steelman_invents_no_independent_attack():
-    # The Null default only restates the claim's own falsification; it does not conjure a new attack.
+    # The Null default only restates the claim's own falsification, verbatim, with no added attack.
     c = make_claim("p implies q", "an instance where p holds and q fails")
     r = NullSteelman().refute(c)[0]
-    assert c.falsification in r.challenge
+    assert r.challenge == f"test the stated falsification: {c.falsification}"
 
 
 def test_steelman_thesis_proposes_one_test_per_claim_in_order():
@@ -38,3 +38,23 @@ def test_steelman_thesis_proposes_one_test_per_claim_in_order():
     refutations = steelman_thesis(NullSteelman(), t)
     assert [r.claim_id for r in refutations] == [c.id for c in t.claims]
     assert all(r.source == "null" for r in refutations)
+
+
+class _FakeSteelman:
+    """A second, conforming Steelman: proves the seam is engine-agnostic (a model edge plugs in
+    without the core importing it). It claims one independent attack per claim."""
+
+    name = "fake-model"
+
+    def refute(self, claim):
+        return (Refutation(claim.id, claim.sha256, "an independent attack the claim did not anticipate",
+                           "run the independent attack", "lies-about-source"),)
+
+
+def test_seam_is_engine_agnostic_and_stamps_the_producer_source():
+    t = make_thesis("t", [make_claim("a", "ra"), make_claim("b", "rb")], clock=CLOCK)
+    refutations = steelman_thesis(_FakeSteelman(), t)
+    assert [r.claim_id for r in refutations] == [c.id for c in t.claims]
+    assert [r.challenge for r in refutations] == ["an independent attack the claim did not anticipate"] * 2
+    # source is stamped from the steelman's name by the runner, not self-reported inside refute
+    assert all(r.source == "fake-model" for r in refutations)
