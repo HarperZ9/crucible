@@ -1,0 +1,18 @@
+{
+  "measurements": [
+    {
+      "claim": "binary search over a sorted array of 1024 elements does at most 11 comparisons",
+      "deviation": 0.0,
+      "tolerance": 0.5,
+      "method": "comparison-count",
+      "evidence": ["worst-case probes for n=1024 is floor(log2(1024)) + 1 = 11"]
+    },
+    {
+      "claim": "binary search over a sorted array of 1024 elements does at most 3 comparisons",
+      "deviation": 8.0,
+      "tolerance": 0.5,
+      "method": "comparison-count",
+      "evidence": ["worst case is 11, claimed bound 3, excess 8"]
+    }
+  ]
+}

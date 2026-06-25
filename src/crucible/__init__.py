@@ -7,6 +7,32 @@ live behind Protocol seams with a Null default, so Crucible stands alone and com
 """
 from __future__ import annotations
 
-__version__ = "0.0.0"
+from crucible.assess import Assessment, assess, verdict_seal, verify_assessment
+from crucible.claim import Claim, claim_body, claim_hash, content_hash, make_claim
+from crucible.registry import Registry
+from crucible.thesis import (
+    FENCED,
+    PUBLISHABLE,
+    Thesis,
+    make_thesis,
+    thesis_seal,
+    verify_thesis,
+)
+from crucible.verdict import (
+    DRIFT,
+    MATCH,
+    UNVERIFIABLE,
+    Measurement,
+    Verdict,
+    verdict_for,
+)
 
-__all__ = ["__version__"]
+__version__ = "0.1.0"
+
+__all__ = [
+    "Assessment", "Claim", "Measurement", "Registry", "Thesis", "Verdict",
+    "DRIFT", "FENCED", "MATCH", "PUBLISHABLE", "UNVERIFIABLE",
+    "assess", "claim_body", "claim_hash", "content_hash", "make_claim", "make_thesis",
+    "thesis_seal", "verdict_for", "verdict_seal", "verify_assessment", "verify_thesis",
+    "__version__",
+]
