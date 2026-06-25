@@ -12,9 +12,9 @@ It is the cognition counterpart to Gather. Where Gather brings evidence in and r
 obtained (the afferent organ), Crucible tests a thesis against that evidence and emits a verdict you
 can re-check (the efferent organ). You register a thesis as a set of claims, and for each claim the
 observation that would refute it. Crucible steelmans the claims (proposing the test that would settle
-each) and, once a measurement is supplied, writes a verdict per claim: MATCH, DRIFT, or UNVERIFIABLE.
-The verdict is grounded in the measurement, not in a judge's opinion, and it recomputes from the
-record, so a confident assertion cannot fake it.
+each), measures them against a substrate oracle, and writes a verdict per claim: MATCH, DRIFT, or
+UNVERIFIABLE. The verdict is grounded in the measurement, not in a judge's opinion, and it recomputes
+from the record, so a confident assertion cannot fake it.
 
 ## The loop
 
@@ -31,10 +31,9 @@ record, so a confident assertion cannot fake it.
 The continuous part is the loop: substrates, measurements, and theses all improve across rounds,
 and the witnessed verdicts track which moved.
 
-Shipped today (0.2.0): steps 1, 2, and 5. You register a thesis, steelman it (adversaries propose the
-test that would settle each claim), and witness a re-derivable verdict per claim from supplied
-measurements. The measurement harness (step 3) and the continuous refine (step 4) land in the releases
-that follow; see Status below.
+Shipped today (0.3.0): steps 1, 2, 3, and 5. You register a thesis, steelman it (adversaries propose
+the test), measure each claim against a substrate oracle, and witness a re-derivable verdict per claim.
+The continuous refine loop (step 4) lands next; see Status below.
 
 ## The differentiator (do not lose this)
 
@@ -94,7 +93,12 @@ Shipped:
 - The steelman seam: independent adversaries propose the strongest refutation of each claim and the
   test that would settle it (they propose; the measurement decides). The Null default surfaces the
   claim's own falsification and invents nothing; a model edge plugs in through the same shape later.
-- The `crucible` CLI: `register`, `assess`, `steelman`, `registry list|verify`, `verdicts [--verify]`.
+- The measure seam: a sound oracle that decides a claim against a substrate. The `TableMeasure`
+  computes each claim's deviation from a predicted value over a provided substrate (offline, no model);
+  the `NullMeasure` default measures nothing (UNVERIFIABLE). The Telos verifier or a proof oracle for
+  abstract math plugs in through the same shape, so the verdict stays grounded, never asserted.
+- The `crucible` CLI: `register`, `assess`, `steelman`, `measure`, `registry list|verify`,
+  `verdicts [--verify]`.
 
 ## License
 

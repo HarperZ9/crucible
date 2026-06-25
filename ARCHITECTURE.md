@@ -61,19 +61,17 @@ seal rewritten together) is out of scope without a signature, and the docs say s
 Crucible's core is pure standard library. Optional edges live behind a Protocol seam with a Null
 default, exactly as Gather isolates its synthesizer.
 
-Shipped:
-
 - **Steelman** (`Steelman` protocol): independent adversaries propose refutations. The default
   `NullSteelman` surfaces the claim's own stated falsification as the standing test and invents
   nothing; a model edge plugs in to generate independent refutations. Adversaries propose what to
   measure; the measurement decides. `steelman_thesis` stamps each refutation's source from the
   producing steelman's name, so the label is the producer's.
-
-Forthcoming (P3, the measurement harness; not yet built, the spec describes it):
-
-- **Measure** (a `Measure` protocol with a `NullMeasure` default): a sound oracle that produces a
-  measurement of a claim against a substrate (the Telos verifier, or a symbolic or proof oracle for
-  abstract math). `verdict_for` already accepts the `Measurement` such an oracle would produce.
+- **Measure** (`Measure` protocol): the sound-oracle edge that decides a claim against a substrate.
+  The default `NullMeasure` measures nothing (UNVERIFIABLE); the deterministic `TableMeasure` computes
+  a claim's deviation from a predicted value over a provided substrate (offline, no model). A real
+  oracle (the Telos verifier, or a symbolic or proof oracle for abstract math) plugs in through the
+  same shape, and `verdict_for` decides from the `Measurement` it produces. This is where the verdict
+  is grounded.
 
 The core imports neither the Null nor any model, so the package keeps zero third-party dependencies.
 

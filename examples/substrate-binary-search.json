@@ -1,0 +1,17 @@
+{
+  "specs": {
+    "binary search over a sorted array of 1024 elements does at most 11 comparisons": {
+      "predicted": 11,
+      "tolerance": 0.5,
+      "observe": "worst_case_probes_1024"
+    },
+    "binary search over a sorted array of 1024 elements does at most 3 comparisons": {
+      "predicted": 3,
+      "tolerance": 0.5,
+      "observe": "worst_case_probes_1024"
+    }
+  },
+  "substrate": {
+    "worst_case_probes_1024": 11
+  }
+}

@@ -18,9 +18,9 @@ import dataclasses  # noqa: E402
 
 from crucible.assess import assess, verify_assessment  # noqa: E402
 from crucible.claim import make_claim  # noqa: E402
+from crucible.measure import MetricSpec, TableMeasure, measure_thesis  # noqa: E402
 from crucible.steelman import NullSteelman, steelman_thesis  # noqa: E402
 from crucible.thesis import make_thesis  # noqa: E402
-from crucible.verdict import Measurement  # noqa: E402
 
 CLOCK = lambda: 1_700_000_000.0  # noqa: E731 (a fixed clock so the demo output is stable)
 
@@ -44,17 +44,18 @@ def main() -> int:
     for r in steelman_thesis(NullSteelman(), thesis):
         print(f"  steelman[{r.source}] {r.claim_id}: {r.measurable or '(unfalsifiable)'}")
 
-    # The measurement decides. The worst case for n=1024 is floor(log2(1024)) + 1 = 11 probes.
-    measurements = [
-        Measurement(holds.id, holds.sha256, deviation=0.0, tolerance=0.5,
-                    method="comparison-count", measured_at=CLOCK(),
-                    evidence=("worst-case probes for n=1024 is 11",)),
-        Measurement(breaks.id, breaks.sha256, deviation=8.0, tolerance=0.5,
-                    method="comparison-count", measured_at=CLOCK(),
-                    evidence=("worst case is 11, claimed bound 3, excess 8",)),
-        # untestable gets no measurement
-    ]
-
+    # The measurement decides. A sound oracle reads the substrate: the worst case for n=1024 is
+    # floor(log2(1024)) + 1 = 11 probes. The oracle computes each claim's deviation from that.
+    oracle = TableMeasure(
+        specs={
+            holds.id: MetricSpec(predicted=11.0, tolerance=0.5, observe="probes_1024"),
+            breaks.id: MetricSpec(predicted=3.0, tolerance=0.5, observe="probes_1024"),
+            # the untestable claim gets no spec, so the oracle returns UNVERIFIABLE
+        },
+        substrate={"probes_1024": 11.0},
+        clock=CLOCK,
+    )
+    measurements = measure_thesis(oracle, thesis)
     assessment, verdicts = assess(thesis, measurements, clock=CLOCK)
     print()
     for v in verdicts:
