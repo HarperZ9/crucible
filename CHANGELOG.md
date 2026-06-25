@@ -3,6 +3,14 @@
 All notable changes to crucible. Versions follow semantic versioning; each minor release is built
 behind a feature branch and reviewed before merge.
 
+## 0.9.0
+
+1.0-readiness hardening.
+
+- Examples: the bundled demo and JSON examples are now regression-tested through the public CLI.
+- CLI surface: help output is covered for the shipped commands and registry actions.
+- Docs: adds a release-readiness checklist for the 1.0 review gate.
+
 ## 0.8.0
 
 Optional subprocess-backed seam adapters.

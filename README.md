@@ -31,8 +31,8 @@ from the record, so a confident assertion cannot fake it.
 The continuous part is the loop: substrates, measurements, and theses all improve across rounds,
 and the witnessed verdicts track which moved.
 
-Shipped today (0.8.0): the full first loop plus drift tracking, publication-gated export, registry
-operations, and optional subprocess-backed seam adapters. You register a thesis, steelman it
+Shipped today (0.9.0): the full first loop plus drift tracking, publication-gated export, registry
+operations, optional subprocess-backed seam adapters, and 1.0-readiness coverage. You register a thesis, steelman it
 (adversaries propose the test), measure each claim against a substrate oracle, refine across
 substrate rounds toward a cohesively verified thesis, witness a re-derivable verdict per claim,
 compare assessment rounds to see what held, moved, improved, or regressed, inspect a growing
@@ -117,6 +117,8 @@ Shipped:
 - Optional subprocess edges: `SubprocessSteelman` and `SubprocessMeasure` run configured commands
   through bounded JSON stdin/stdout, reject shell strings, enforce timeouts, and stamp claim identity
   locally. The default seams remain Null and the verdict step still has no model in it.
+- Readiness coverage: the bundled examples run through the public CLI under test, help output covers
+  the shipped command surface, and `docs/RELEASE-READINESS.md` records the 1.0 gate checklist.
 - The `crucible` CLI: `register`, `assess`, `steelman`, `measure`,
   `registry list|verify|stats|search|prune`, `refine`, `drift`, `export`, `verdicts [--verify]`.
 
