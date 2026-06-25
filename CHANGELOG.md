@@ -1,7 +1,18 @@
 # Changelog
 
-All notable changes to Crucible. Versions follow semantic versioning; each minor release is built
+All notable changes to crucible. Versions follow semantic versioning; each minor release is built
 behind a feature branch and reviewed before merge.
+
+## 0.5.0
+
+Drift tracking across witnessed assessment rounds.
+
+- `crucible.drift`: compares two assessments of the same thesis and classifies each claim as held,
+  moved, improved, or regressed. Numeric margins decide direction; unrankable transitions such as
+  UNVERIFIABLE to MATCH are reported as moved.
+- CLI: `crucible drift REGISTRY` compares the latest two stored assessments, with human and JSON
+  output and clean errors for too-short or mixed-thesis histories.
+- Public API: exports `DriftRow`, `DriftReport`, and `drift_track`.
 
 ## 0.4.0
 

@@ -1,12 +1,12 @@
-# Crucible: architecture
+# crucible: architecture
 
-Crucible is the cognition organ of the constellation: it tests a thesis against evidence and emits a
+crucible is the cognition organ of the constellation: it tests a thesis against evidence and emits a
 verdict you can re-check. This document is the map of how it is built and why. It grows as the organ
 does; sections describe what is shipped.
 
 ## The one shape: a grounded `Verdict`
 
-Every judgment Crucible makes reduces to one shape: a verdict per claim, computed from a measurement,
+Every judgment crucible makes reduces to one shape: a verdict per claim, computed from a measurement,
 never asserted.
 
 ```python
@@ -58,7 +58,7 @@ seal rewritten together) is out of scope without a signature, and the docs say s
 
 ## The seams (the impure and the optional)
 
-Crucible's core is pure standard library. Optional edges live behind a Protocol seam with a Null
+crucible's core is pure standard library. Optional edges live behind a Protocol seam with a Null
 default, exactly as Gather isolates its synthesizer.
 
 - **Steelman** (`Steelman` protocol): independent adversaries propose refutations. The default
@@ -79,6 +79,14 @@ default, exactly as Gather isolates its synthesizer.
 
 The core imports neither the Null nor any model, so the package keeps zero third-party dependencies.
 
+## Drift tracking
+
+The continuous loop needs an honest account of what changed between rounds. `drift_track(previous,
+current)` compares two witnessed assessments of the same thesis and classifies each claim as held,
+moved, improved, or regressed. Numeric margins decide improvement and regression. Unrankable
+transitions, such as UNVERIFIABLE to MATCH, are reported as moved rather than silently promoted.
+The CLI exposes this as `crucible drift REGISTRY`, comparing the latest two stored assessments.
+
 ## The registry
 
 A `Registry` is durable, content-addressed storage for theses and their assessments, mirroring
@@ -95,9 +103,9 @@ impure edge.
 
 ## Protocol interoperability (the dual mandate)
 
-Crucible stands alone and serves the constellation at once. What ships today is the standing-alone
+crucible stands alone and serves the constellation at once. What ships today is the standing-alone
 half and the published contract: a sealed assessment and its verdicts, re-checkable from disk, that a
-downstream organ reads to learn a thesis's standing. Crucible is built to consume other organs through
+downstream organ reads to learn a thesis's standing. crucible is built to consume other organs through
 their documented on-disk contracts (a Gather witnessed digest as evidence, an index verified map or
 the Telos verifier as a measurement oracle) without importing their internals; those composition
 milestones are on the spec's ladder, Telos at 1.1.0, and are not yet built. Shared primitives, such as
@@ -107,6 +115,6 @@ capability, never a failure.
 
 ## Peer composition
 
-Crucible composes with the rest of the constellation (telos, index, forum, gather) through clean
+crucible composes with the rest of the constellation (telos, index, forum, gather) through clean
 protocol seams; it does not absorb or get absorbed. The sealed assessment is the contract a
-downstream reader consumes. This is why Crucible is a peer organ, not a feature of index or of refine.
+downstream reader consumes. This is why crucible is a peer organ, not a feature of index or of refine.

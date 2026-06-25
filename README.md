@@ -1,4 +1,4 @@
-# Crucible
+# crucible
 
 ![python: 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)
 ![deps: none (core)](https://img.shields.io/badge/core%20deps-none-success.svg)
@@ -6,12 +6,12 @@
 
 Ideas are cheap to assert and expensive to check. A claim gets repeated until it sounds true.
 A correction arrives quietly and never catches up. A theory's standing becomes a vibe rather
-than a record, and the loudest version wins. Crucible is the organ that holds an idea to account.
+than a record, and the loudest version wins. crucible is the organ that holds an idea to account.
 
 It is the cognition counterpart to Gather. Where Gather brings evidence in and records how it was
-obtained (the afferent organ), Crucible tests a thesis against that evidence and emits a verdict you
+obtained (the afferent organ), crucible tests a thesis against that evidence and emits a verdict you
 can re-check (the efferent organ). You register a thesis as a set of claims, and for each claim the
-observation that would refute it. Crucible steelmans the claims (proposing the test that would settle
+observation that would refute it. crucible steelmans the claims (proposing the test that would settle
 each), measures them against a substrate oracle, and writes a verdict per claim: MATCH, DRIFT, or
 UNVERIFIABLE. The verdict is grounded in the measurement, not in a judge's opinion, and it recomputes
 from the record, so a confident assertion cannot fake it.
@@ -31,9 +31,10 @@ from the record, so a confident assertion cannot fake it.
 The continuous part is the loop: substrates, measurements, and theses all improve across rounds,
 and the witnessed verdicts track which moved.
 
-Shipped today (0.4.0): the full first loop. You register a thesis, steelman it (adversaries propose
-the test), measure each claim against a substrate oracle, refine across substrate rounds toward a
-cohesively verified thesis, and witness a re-derivable verdict per claim.
+Shipped today (0.5.0): the full first loop plus drift tracking. You register a thesis, steelman it
+(adversaries propose the test), measure each claim against a substrate oracle, refine across substrate
+rounds toward a cohesively verified thesis, witness a re-derivable verdict per claim, and compare
+assessment rounds to see what held, moved, improved, or regressed.
 
 ## The differentiator (do not lose this)
 
@@ -51,7 +52,7 @@ measured is never read as holding.
   measurement within tolerance is MATCH, outside is DRIFT, absent or unmeasurable is UNVERIFIABLE.
 - **A witnessed assessment out.** An assessment folds its verdicts into one re-checkable seal that a
   downstream organ consumes.
-- **Stands alone, serves the constellation.** Crucible runs on its own with zero third-party
+- **Stands alone, serves the constellation.** crucible runs on its own with zero third-party
   dependencies and Null seams, and it composes with the other Telos organs (Gather's evidence,
   index's maps) as a peer through clean protocol contracts. Compose, do not absorb.
 - **Publication-gated.** Theses and verdicts carry a disposition; fenced material is refused at the
@@ -74,7 +75,7 @@ pip install -e ".[dev]"
 
 ## Status
 
-Crucible is in active construction, built the way Gather and Forum were: one reviewed release per
+crucible is in active construction, built the way Gather and Forum were: one reviewed release per
 increment, behind a feature branch, with tests, lint, and type checks green and an independent
 whole-branch review before merge. The operator floor is 1.0; the target is organic completion at
 1.5 or beyond.
@@ -100,11 +101,14 @@ Shipped:
 - The refine loop: grade each claim's measured margin, compute harmonic-mean cohesion, reflect the
   weakest claim, and re-measure across substrate rounds until the thesis is cohesively verified or the
   budget is spent honestly. The loop reports the weakest claim instead of pretending a short thesis held.
+- Drift tracking across witnessed assessments: `drift_track(previous, current)` and
+  `crucible drift REGISTRY` compare the latest two rounds and classify each claim as held, moved,
+  improved, or regressed from the recorded margins.
 - The `crucible` CLI: `register`, `assess`, `steelman`, `measure`, `registry list|verify`,
-  `refine`, `verdicts [--verify]`.
+  `refine`, `drift`, `verdicts [--verify]`.
 
 ## License
 
-Crucible is fair-source: the code is open to read, run, and build on, with commercial use reserved
+crucible is fair-source: the code is open to read, run, and build on, with commercial use reserved
 so the project can fund its own development. Copyright stays with the author. See
 [LICENSE](LICENSE) for the exact terms.

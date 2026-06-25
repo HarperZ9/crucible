@@ -1,11 +1,11 @@
 """refine: the reconcile, deepened into a self-improving, refine-until-correct primitive.
 
 This module is natively integrated from the coherence-membrane project (the original `refine`
-primitive, the reconcile deepened), adapted into Crucible so the discovery loop reuses the proven
+primitive, the reconcile deepened), adapted into crucible so the discovery loop reuses the proven
 shape rather than re-deriving it. It is integrated, not taken as a third-party dependency, so
-Crucible keeps standing alone with zero external dependencies. The lower half is the generic primitive
+crucible keeps standing alone with zero external dependencies. The lower half is the generic primitive
 (graded criteria, harmonic-mean cohesion, reflect-the-weakest, refine-until-correct); the upper half,
-below the separator, is the Crucible layer that points the loop at a thesis and a measurement oracle.
+below the separator, is the crucible layer that points the loop at a thesis and a measurement oracle.
 
 The reconcile judges an artifact once (perceive, criterion, certificate). refine generalizes it: judge
 against GRADED criteria (each yielding a margin, labelled objective or subjective), measure their
@@ -184,7 +184,7 @@ def refine(generate, graders, adjust, *, guard=None, target_margin: float, cohes
     return RefineOutcome(out_candidate, "short", tuple(trajectory), short_axis)
 
 
-# --- Crucible layer: point the refine loop at a thesis and a measurement oracle ---------------------
+# --- crucible layer: point the refine loop at a thesis and a measurement oracle ---------------------
 #
 # A claim's grader reads its own measurement from the candidate and normalizes the deviation by the
 # claim's tolerance (so the grader's tolerance is 1.0 and its margin equals verdict_for's margin: an

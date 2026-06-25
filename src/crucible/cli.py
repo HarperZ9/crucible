@@ -11,6 +11,7 @@ import argparse
 
 from crucible import __version__
 from crucible.commands import cmd_assess, cmd_measure, cmd_register, cmd_steelman
+from crucible.drift_cmd import cmd_drift
 from crucible.refine_cmd import cmd_refine
 from crucible.registry_cmd import cmd_registry, cmd_verdicts
 
@@ -22,7 +23,7 @@ def _add_common(p: argparse.ArgumentParser) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="crucible", description="Crucible: accountable judgment of ideas.")
+    parser = argparse.ArgumentParser(prog="crucible", description="crucible: accountable judgment of ideas.")
     parser.add_argument("--version", action="version", version=f"crucible {__version__}")
     sub = parser.add_subparsers(dest="command")
 
@@ -75,6 +76,11 @@ def build_parser() -> argparse.ArgumentParser:
                     help="re-derive each assessment's verdicts from the thesis and measurements on disk")
     vd.add_argument("--json", action="store_true", help="emit JSON instead of human text")
     vd.set_defaults(func=cmd_verdicts)
+
+    dr = sub.add_parser("drift", help="compare the latest two witnessed assessments in a registry")
+    dr.add_argument("dir", help="the registry directory")
+    dr.add_argument("--json", action="store_true", help="emit JSON instead of human text")
+    dr.set_defaults(func=cmd_drift)
 
     return parser
 
