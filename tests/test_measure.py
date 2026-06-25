@@ -2,12 +2,22 @@
 MATCH / DRIFT / UNVERIFIABLE. The Null default measures nothing; the table oracle is fail-closed."""
 from __future__ import annotations
 
+import pytest
+
 from crucible.claim import make_claim
 from crucible.measure import MetricSpec, NullMeasure, TableMeasure, measure_thesis
 from crucible.thesis import make_thesis
 from crucible.verdict import DRIFT, MATCH, UNVERIFIABLE, verdict_for
 
 CLOCK = lambda: 1000.0  # noqa: E731
+
+
+def test_metric_spec_rejects_an_unknown_metric():
+    # An unknown metric is a misconfiguration; it must not silently compute absolute difference.
+    with pytest.raises(ValueError, match="metric must be"):
+        MetricSpec(1.0, 0.1, "x", metric="relative")
+    MetricSpec(1.0, 0.1, "x", metric="abs")  # the valid ones do not raise
+    MetricSpec(1.0, 0.1, "x", metric="rel")
 
 
 def test_null_measure_produces_no_measurement():

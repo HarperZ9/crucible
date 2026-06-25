@@ -28,6 +28,12 @@ class MetricSpec:
     observe: str
     metric: str = "abs"  # "abs" -> |observed - predicted|; "rel" -> |observed - predicted| / |predicted|
 
+    def __post_init__(self) -> None:
+        # Validate the metric at construction (the way the refine lineage validates a criterion's kind),
+        # so an unknown metric fails fast as a misconfiguration rather than silently computing abs.
+        if self.metric not in ("abs", "rel"):
+            raise ValueError(f"metric must be 'abs' or 'rel', got {self.metric!r}")
+
 
 class Measure(Protocol):
     """The measurement seam, the sound-oracle edge. ``measure`` returns a Measurement of a claim
@@ -53,10 +59,13 @@ class NullMeasure:
 
 
 def _deviation(spec: MetricSpec, observed: float) -> float | None:
+    """The deviation of an observation from what a claim predicts. ``metric`` is validated to be abs
+    or rel at MetricSpec construction. A relative metric at a zero prediction is undefined, so it
+    returns None (UNVERIFIABLE), fail-closed."""
     diff = abs(observed - spec.predicted)
     if spec.metric == "rel":
         return None if spec.predicted == 0 else diff / abs(spec.predicted)
-    return diff
+    return diff  # "abs"
 
 
 class TableMeasure:

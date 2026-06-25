@@ -273,6 +273,14 @@ def test_measure_spec_for_unknown_claim_is_an_error(tmp_path, capsys):
     assert "unknown claim" in capsys.readouterr().err
 
 
+def test_measure_unknown_metric_is_a_clean_error(tmp_path, capsys):
+    sub = _write(tmp_path / "bad.json", {
+        "specs": {"c-match": {"predicted": 1, "tolerance": 0.1, "observe": "v", "metric": "relative"}},
+        "substrate": {"v": 1}})
+    assert main(["measure", _thesis_file(tmp_path), "--substrate", sub]) == 1
+    assert "measure failed" in capsys.readouterr().err
+
+
 def test_steelman_flags_an_unfalsifiable_claim(tmp_path, capsys):
     thesis = _write(tmp_path / "t.json", {"title": "T", "claims": [
         {"text": "a testable claim", "falsification": "a counterexample"},
