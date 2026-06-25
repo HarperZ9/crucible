@@ -3,6 +3,25 @@
 All notable changes to Crucible. Versions follow semantic versioning; each minor release is built
 behind a feature branch and reviewed before merge.
 
+## 0.3.0
+
+The measure seam: a sound oracle decides a claim against a substrate. This is where the verdict is
+grounded, the half the differentiator names.
+
+- `crucible.measure`: a `Measure` protocol and a `MetricSpec` (the value a claim predicts, the
+  tolerance, the substrate key to observe, and the metric). `verdict_for` already consumes the
+  `Measurement` an oracle produces, so there is still no model in the verdict step.
+- `NullMeasure`: the standing default, produces no measurement (UNVERIFIABLE); it invents nothing.
+- `TableMeasure`: a deterministic, offline oracle. The deviation is the absolute or relative
+  difference between the observed value (from the substrate) and the value the claim predicts. An
+  unknown claim or a missing observation is UNVERIFIABLE, fail-closed. The shape a real oracle (the
+  Telos verifier, a proof or type checker) plugs into.
+- `measure_thesis` runs an oracle over every claim in a thesis.
+- CLI: `crucible measure <thesis> --substrate FILE` measures each claim and witnesses the verdicts; the
+  oracle-produced measurements re-derive from disk via `verdicts --verify`.
+- Refactor: the registry-inspecting commands moved to `crucible.registry_cmd` so no module exceeds the
+  size budget.
+
 ## 0.2.0
 
 The steelman seam: adversarial refutation as a pluggable shape, the conjecture-and-attack half of

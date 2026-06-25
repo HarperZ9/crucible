@@ -10,13 +10,8 @@ from __future__ import annotations
 import argparse
 
 from crucible import __version__
-from crucible.commands import (
-    cmd_assess,
-    cmd_register,
-    cmd_registry,
-    cmd_steelman,
-    cmd_verdicts,
-)
+from crucible.commands import cmd_assess, cmd_measure, cmd_register, cmd_steelman
+from crucible.registry_cmd import cmd_registry, cmd_verdicts
 
 
 def _add_common(p: argparse.ArgumentParser) -> None:
@@ -49,6 +44,14 @@ def build_parser() -> argparse.ArgumentParser:
     stl.add_argument("--registry", default=None, metavar="DIR", help="resolve a thesis id from a registry at DIR")
     stl.add_argument("--json", action="store_true", help="emit JSON instead of human text")
     stl.set_defaults(func=cmd_steelman)
+
+    mea = sub.add_parser("measure",
+                         help="measure each claim against a substrate oracle, then witness the verdicts")
+    mea.add_argument("thesis", help="path to a thesis JSON, or a thesis id when --registry is given")
+    mea.add_argument("--substrate", required=True, metavar="FILE",
+                     help="path to a substrate JSON: per-claim specs (predicted, tolerance, observe) plus observed values")
+    _add_common(mea)
+    mea.set_defaults(func=cmd_measure)
 
     rgy = sub.add_parser("registry", help="inspect a stored registry: list or verify")
     rgy.add_argument("action", choices=["list", "verify"], help="list theses or verify stored claims")

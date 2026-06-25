@@ -11,7 +11,8 @@ import time
 
 from crucible.assess import Assessment, assess, recheck_assessment, verify_assessment
 from crucible.claim import make_claim
-from crucible.registry import MATCH, Registry
+from crucible.measure import MetricSpec, TableMeasure, measure_thesis
+from crucible.registry import Registry
 from crucible.steelman import NullSteelman, Refutation, steelman_thesis
 from crucible.thesis import PUBLISHABLE, Thesis, make_thesis
 from crucible.verdict import Measurement, Verdict
@@ -169,88 +170,44 @@ def cmd_steelman(args) -> int:
     return 0
 
 
-def cmd_registry(args) -> int:
-    reg = Registry(args.dir)
+def _load_substrate(thesis: Thesis, path: str) -> tuple[dict, dict]:
+    """Load a measure substrate JSON: ``{specs: {claim: {predicted, tolerance, observe, metric}},
+    substrate: {key: value}}``. Specs are resolved against the thesis by claim id or exact text.
+    Returns ``(specs_by_claim_id, substrate)``."""
+    data = _read_json(path)
+    by_id = {c.id: c for c in thesis.claims}
+    by_text = {c.text: c for c in thesis.claims}
+    specs: dict[str, MetricSpec] = {}
+    for ref, s in (data.get("specs") or {}).items():
+        claim = by_id.get(ref) or by_text.get(ref)
+        if claim is None:
+            raise ValueError(f"spec references unknown claim {ref!r}")
+        specs[claim.id] = MetricSpec(float(s["predicted"]), _as_float(s.get("tolerance"), 0.0),
+                                     s.get("observe", ""), s.get("metric", "abs"))
+    substrate = {k: float(v) for k, v in (data.get("substrate") or {}).items()}
+    return specs, substrate
+
+
+def cmd_measure(args) -> int:
     try:
-        if args.action == "list":
-            return _registry_list(reg, args.json)
-        return _registry_verify(reg, args.json)
+        thesis = _resolve_thesis(args.thesis, args.registry)
+        specs, substrate = _load_substrate(thesis, args.substrate)
     except _INPUT_ERRORS as exc:
-        print(f"registry {args.action} failed: {exc}", file=sys.stderr)
+        print(f"measure failed: {exc}", file=sys.stderr)
         return 1
-
-
-def _registry_list(reg: Registry, as_json: bool) -> int:
-    rows = list(reg.theses())
-    if as_json:
-        print(json.dumps(rows, indent=2, ensure_ascii=False))
+    measurements = measure_thesis(TableMeasure(specs, substrate), thesis)
+    registry = Registry(args.registry) if args.registry else None
+    assessment, verdicts = assess(thesis, measurements, clock=time.time, registry=registry)
+    if args.json:
+        print(json.dumps({"assessment": assessment.to_dict(),
+                          "verdicts": [_verdict_dict(v) for v in verdicts]}, indent=2, ensure_ascii=False))
         return 0
-    print(f"{len(rows)} thesis(es)")
-    for r in rows:
-        n = len(r.get("claims", []))
-        print(f"  {r.get('id', ''):<16} {n:>3} claim(s)  {r.get('disposition', ''):<11} "
-              f"{r.get('title', '')[:50]}")
+    print(f'measured thesis {assessment.thesis_id} "{thesis.title}" against the table oracle: '
+          f"{assessment.claims} claim(s)")
+    print(f"  MATCH {assessment.match}  DRIFT {assessment.drift}  UNVERIFIABLE {assessment.unverifiable}")
+    for v in verdicts:
+        print(f"  {v.claim_id:<16} {v.status:<12} {v.grounds}")
+    print(f"assessment seal: {assessment.seal[:16]}... | self-consistent: {verify_assessment(assessment)}")
+    if args.registry:
+        print(f"recorded to {args.registry}")
     return 0
-
-
-def _registry_verify(reg: Registry, as_json: bool) -> int:
-    bodies = reg.verify()
-    seals = reg.verify_seals()
-    bad_b = [r for r in bodies if r["status"] != MATCH]
-    bad_s = [r for r in seals if r["status"] != MATCH]
-    ok = not bad_b and not bad_s
-    if as_json:
-        print(json.dumps({"bodies": bodies, "seals": seals, "ok": ok}, indent=2, ensure_ascii=False))
-        return 0 if ok else 1
-    print(f"bodies: {len(bodies) - len(bad_b)}/{len(bodies)} MATCH; "
-          f"theses: {len(seals) - len(bad_s)}/{len(seals)} seal MATCH")
-    for r in bad_b:
-        print(f"  body  {r['thesis_id']:<16} {r['claim_id']:<16} {r['status']}")
-    for r in bad_s:
-        print(f"  seal  {r['thesis_id']:<16} {r['status']}")
-    return 0 if ok else 1
-
-
-def cmd_verdicts(args) -> int:
-    reg = Registry(args.dir)
-    try:
-        records = list(reg.assessments())
-    except _INPUT_ERRORS as exc:
-        print(f"verdicts failed: {exc}", file=sys.stderr)
-        return 1
-    if args.verify:
-        return _verdicts_verify(reg, records, args.json)
-    return _verdicts_list(records, args.json)
-
-
-def _verdicts_list(records: list[dict], as_json: bool) -> int:
-    if as_json:
-        print(json.dumps(records, indent=2, ensure_ascii=False))
-        return 0
-    print(f"{len(records)} assessment(s)")
-    for d in records:
-        print(f"  {d.get('thesis_id', ''):<16} MATCH {d.get('match', 0)} DRIFT {d.get('drift', 0)} "
-              f"UNVERIFIABLE {d.get('unverifiable', 0)}  seal {str(d.get('seal', ''))[:12]}...")
-    return 0
-
-
-def _verdicts_verify(reg: Registry, records: list[dict], as_json: bool) -> int:
-    results = []
-    for d in records:
-        a = Assessment.from_dict(d)
-        try:
-            thesis = reg.get_thesis(a.thesis_id)
-        except _INPUT_ERRORS:
-            thesis = None
-        checks = (recheck_assessment(thesis, a) if thesis is not None
-                  else {"seals_ok": verify_assessment(a), "thesis_ok": False, "verdicts_rederive": False})
-        results.append({"thesis_id": a.thesis_id, "seal": a.seal, "ok": all(checks.values()), **checks})
-    bad = [r for r in results if not r["ok"]]
-    if as_json:
-        print(json.dumps({"results": results, "ok": not bad}, indent=2, ensure_ascii=False))
-        return 0 if not bad else 1
-    print(f"re-checked {len(results)} assessment(s): {len(results) - len(bad)} ok, {len(bad)} not")
-    for r in results:
-        print(f"  {r['thesis_id']:<16} ok={r['ok']}  seals={r['seals_ok']} "
-              f"thesis={r['thesis_ok']} rederive={r['verdicts_rederive']}")
-    return 0 if not bad else 1

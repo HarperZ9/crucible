@@ -163,6 +163,25 @@ def test_verdicts_verify_detects_a_tampered_assessment(tmp_path, capsys):
     assert main(["verdicts", reg, "--verify"]) == 1
 
 
+def test_registry_verify_on_malformed_catalog_is_a_clean_error(tmp_path, capsys):
+    reg_dir = tmp_path / "reg"
+    main(["register", _thesis_file(tmp_path), "--registry", str(reg_dir)])
+    capsys.readouterr()
+    (reg_dir / "theses.jsonl").write_text("{ not json\n", encoding="utf-8")
+    assert main(["registry", "verify", str(reg_dir)]) == 1
+    assert "registry verify failed" in capsys.readouterr().err
+
+
+def test_verdicts_on_malformed_history_is_a_clean_error(tmp_path, capsys):
+    reg_dir = tmp_path / "reg"
+    main(["assess", _thesis_file(tmp_path), "--measurements", _measurements_file(tmp_path),
+          "--registry", str(reg_dir)])
+    capsys.readouterr()
+    (reg_dir / "assessments.jsonl").write_text("{ not json\n", encoding="utf-8")
+    assert main(["verdicts", str(reg_dir)]) == 1
+    assert "verdicts failed" in capsys.readouterr().err
+
+
 def test_verdicts_list_human(tmp_path, capsys):
     reg = str(tmp_path / "reg")
     main(["assess", _thesis_file(tmp_path), "--measurements", _measurements_file(tmp_path), "--registry", reg])
@@ -216,6 +235,42 @@ def test_steelman_by_id_from_registry(tmp_path, capsys):
 def test_steelman_missing_file_is_an_error(capsys):
     assert main(["steelman", "nope.json"]) == 1
     assert "steelman failed" in capsys.readouterr().err
+
+
+def _substrate_file(tmp_path):
+    return _write(tmp_path / "sub.json", {
+        "specs": {
+            "c-match": {"predicted": 10, "tolerance": 0.5, "observe": "v"},
+            "c-drift": {"predicted": 2, "tolerance": 0.5, "observe": "v"},
+        },
+        "substrate": {"v": 10},
+    })
+
+
+def test_measure_against_substrate_decides_each_claim(tmp_path, capsys):
+    code = main(["measure", _thesis_file(tmp_path), "--substrate", _substrate_file(tmp_path)])
+    assert code == 0
+    out = capsys.readouterr().out
+    assert "measured thesis" in out
+    assert "MATCH 1" in out and "DRIFT 1" in out and "UNVERIFIABLE 1" in out
+
+
+def test_measure_json_and_recheck_from_registry(tmp_path, capsys):
+    reg = str(tmp_path / "reg")
+    code = main(["measure", _thesis_file(tmp_path), "--substrate", _substrate_file(tmp_path),
+                 "--registry", reg, "--json"])
+    assert code == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["assessment"]["match"] == 1 and payload["assessment"]["drift"] == 1
+    # the oracle-produced measurements re-derive from disk
+    assert main(["verdicts", reg, "--verify"]) == 0
+
+
+def test_measure_spec_for_unknown_claim_is_an_error(tmp_path, capsys):
+    sub = _write(tmp_path / "bad.json", {"specs": {"ghost": {"predicted": 1, "observe": "v"}},
+                                         "substrate": {"v": 1}})
+    assert main(["measure", _thesis_file(tmp_path), "--substrate", sub]) == 1
+    assert "unknown claim" in capsys.readouterr().err
 
 
 def test_steelman_flags_an_unfalsifiable_claim(tmp_path, capsys):
