@@ -31,11 +31,12 @@ from the record, so a confident assertion cannot fake it.
 The continuous part is the loop: substrates, measurements, and theses all improve across rounds,
 and the witnessed verdicts track which moved.
 
-Shipped today (0.6.0): the full first loop plus drift tracking and publication-gated export. You register a thesis, steelman it
-(adversaries propose the test), measure each claim against a substrate oracle, refine across substrate
-rounds toward a cohesively verified thesis, witness a re-derivable verdict per claim, and compare
-assessment rounds to see what held, moved, improved, or regressed. A fenced thesis can be assessed
-locally, but the export edge refuses it by default.
+Shipped today (0.7.0): the full first loop plus drift tracking, publication-gated export, and
+registry operations. You register a thesis, steelman it (adversaries propose the test), measure each
+claim against a substrate oracle, refine across substrate rounds toward a cohesively verified thesis,
+witness a re-derivable verdict per claim, compare assessment rounds to see what held, moved,
+improved, or regressed, and inspect a growing registry by status, scope, and latest verdict. A fenced
+thesis can be assessed locally, but the export edge refuses it by default.
 
 ## The differentiator (do not lose this)
 
@@ -108,8 +109,11 @@ Shipped:
 - Publication-gated export: `gate_check`, `export_guard`, `export_thesis`, and
   `crucible export THESIS` refuse fenced material and explicit restricted markers before emitting a
   public thesis contract.
-- The `crucible` CLI: `register`, `assess`, `steelman`, `measure`, `registry list|verify`,
-  `refine`, `drift`, `export`, `verdicts [--verify]`.
+- Registry operations: `registry_stats`, `search_theses`, `prune_objects`, and
+  `crucible registry stats|search|prune` summarize the corpus, recall theses by scope/status/latest
+  verdict, and prune orphan claim bodies only when explicitly applied.
+- The `crucible` CLI: `register`, `assess`, `steelman`, `measure`,
+  `registry list|verify|stats|search|prune`, `refine`, `drift`, `export`, `verdicts [--verify]`.
 
 ## License
 

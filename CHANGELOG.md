@@ -3,6 +3,17 @@
 All notable changes to crucible. Versions follow semantic versioning; each minor release is built
 behind a feature branch and reviewed before merge.
 
+## 0.7.0
+
+Registry operations for a growing corpus.
+
+- `crucible.registry_ops`: adds `registry_stats`, `search_theses`, and `prune_objects` for registry
+  health, recall, and object-store hygiene without changing the durable storage contract.
+- CLI: `crucible registry stats`, `crucible registry search`, and `crucible registry prune` summarize
+  the corpus, search by scope/status/latest verdict, and report orphaned claim bodies. Prune is
+  dry-run by default and deletes only with `--apply`.
+- Public API: exports `registry_stats`, `search_theses`, and `prune_objects`.
+
 ## 0.6.0
 
 Publication-gated thesis export.

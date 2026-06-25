@@ -1,9 +1,10 @@
 """The ``crucible`` command: an argument surface over the judgment organ.
 
 ``register``, ``assess``, and ``steelman`` work on a thesis (a JSON file, or an id with
-``--registry``); ``registry list|verify`` and ``verdicts [--verify]`` inspect a stored registry. Each
-subcommand binds a handler from ``crucible.commands`` via ``set_defaults(func=...)``; ``main``
-dispatches to it. Output is human text by default, JSON with ``--json``.
+``--registry``); ``registry list|verify|stats|search|prune`` and ``verdicts [--verify]`` inspect a
+stored registry. Each subcommand binds a handler from ``crucible.commands`` via
+``set_defaults(func=...)``; ``main`` dispatches to it. Output is human text by default, JSON with
+``--json``.
 """
 from __future__ import annotations
 
@@ -75,9 +76,15 @@ def build_parser() -> argparse.ArgumentParser:
     ref.add_argument("--json", action="store_true", help="emit JSON instead of human text")
     ref.set_defaults(func=cmd_refine)
 
-    rgy = sub.add_parser("registry", help="inspect a stored registry: list or verify")
-    rgy.add_argument("action", choices=["list", "verify"], help="list theses or verify stored claims")
+    rgy = sub.add_parser("registry", help="inspect a stored registry: list, verify, stats, search, or prune")
+    rgy.add_argument("action", choices=["list", "verify", "stats", "search", "prune"],
+                     help="list, verify, summarize, search, or prune claim objects")
     rgy.add_argument("dir", help="the registry directory (created by --registry)")
+    rgy.add_argument("query", nargs="?", help="scope text for registry search")
+    rgy.add_argument("--status", choices=["publishable", "fenced"], help="filter search by thesis status")
+    rgy.add_argument("--verdict", choices=["MATCH", "DRIFT", "UNVERIFIABLE"],
+                     help="filter search by latest verdict status")
+    rgy.add_argument("--apply", action="store_true", help="apply registry prune deletions")
     rgy.add_argument("--json", action="store_true", help="emit JSON instead of human text")
     rgy.set_defaults(func=cmd_registry)
 

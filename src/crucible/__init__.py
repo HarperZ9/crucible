@@ -40,6 +40,7 @@ from crucible.refine import (
     refine_thesis,
 )
 from crucible.registry import Registry
+from crucible.registry_ops import prune_objects, registry_stats, search_theses
 from crucible.steelman import NullSteelman, Refutation, Steelman, steelman_thesis
 from crucible.thesis import (
     FENCED,
@@ -58,7 +59,7 @@ from crucible.verdict import (
     verdict_for,
 )
 
-__version__ = "0.6.0"
+__version__ = "0.7.0"
 
 __all__ = [
     "Assessment", "Claim", "DriftReport", "DriftRow", "GradedCriterion", "Measure", "Measurement",
@@ -68,5 +69,6 @@ __all__ = [
     "assess", "claim_body", "claim_hash", "cohesion", "content_hash", "make_claim", "make_thesis",
     "drift_track", "export_guard", "export_thesis", "gate_check", "measure_thesis",
     "recheck_assessment", "refine", "refine_thesis", "steelman_thesis",
-    "thesis_seal", "verdict_for", "verdict_seal", "verify_assessment", "verify_thesis", "__version__",
+    "prune_objects", "registry_stats", "search_theses", "thesis_seal", "verdict_for", "verdict_seal",
+    "verify_assessment", "verify_thesis", "__version__",
 ]

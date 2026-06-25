@@ -102,6 +102,12 @@ Gather's corpus: claim bodies at `objects/ab/cdef...` keyed by the claim hash, a
 catalog, and an `assessments.jsonl` history. `verify()` re-hashes every stored body and reports
 MATCH / MISSING / CORRUPT, so the verdict's proof stays durable over a growing registry.
 
+`registry_ops` reads across that store without changing the storage contract. `registry_stats`
+summarizes thesis counts, claim bodies, dispositions, assessment history, and the latest verdict
+posture per thesis. `search_theses` recalls theses by scope text, thesis status, and latest verdict
+status. `prune_objects` identifies orphaned claim bodies and is dry-run by default; deletion requires
+an explicit apply path and validates each object path before unlinking it.
+
 ## Determinism and the zero-dependency core
 
 Clocks are injected everywhere time is recorded; iteration is sorted; JSON is canonical
