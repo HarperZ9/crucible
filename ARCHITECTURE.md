@@ -87,6 +87,14 @@ moved, improved, or regressed. Numeric margins decide improvement and regression
 transitions, such as UNVERIFIABLE to MATCH, are reported as moved rather than silently promoted.
 The CLI exposes this as `crucible drift REGISTRY`, comparing the latest two stored assessments.
 
+## Publication gate
+
+Assessment and export are deliberately separate. A fenced thesis may be registered and assessed
+locally, but the public export edge applies `gate_check` and refuses anything with a fenced
+disposition or an explicit fenced/restricted marker in the title, claim text, or falsification. The
+exported contract omits runtime metadata and carries only the title, disposition, thesis seal, and
+content-hashed claims needed for public re-checking.
+
 ## The registry
 
 A `Registry` is durable, content-addressed storage for theses and their assessments, mirroring

@@ -22,6 +22,7 @@ from crucible.drift import (
     DriftRow,
     drift_track,
 )
+from crucible.gate import export_guard, export_thesis, gate_check
 from crucible.measure import (
     Measure,
     MetricSpec,
@@ -57,7 +58,7 @@ from crucible.verdict import (
     verdict_for,
 )
 
-__version__ = "0.5.0"
+__version__ = "0.6.0"
 
 __all__ = [
     "Assessment", "Claim", "DriftReport", "DriftRow", "GradedCriterion", "Measure", "Measurement",
@@ -65,6 +66,7 @@ __all__ = [
     "Refutation", "Registry", "Steelman", "TableMeasure", "Thesis", "Verdict",
     "DRIFT", "FENCED", "MATCH", "PUBLISHABLE", "UNVERIFIABLE",
     "assess", "claim_body", "claim_hash", "cohesion", "content_hash", "make_claim", "make_thesis",
-    "drift_track", "measure_thesis", "recheck_assessment", "refine", "refine_thesis", "steelman_thesis",
+    "drift_track", "export_guard", "export_thesis", "gate_check", "measure_thesis",
+    "recheck_assessment", "refine", "refine_thesis", "steelman_thesis",
     "thesis_seal", "verdict_for", "verdict_seal", "verify_assessment", "verify_thesis", "__version__",
 ]

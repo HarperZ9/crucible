@@ -3,6 +3,16 @@
 All notable changes to crucible. Versions follow semantic versioning; each minor release is built
 behind a feature branch and reviewed before merge.
 
+## 0.6.0
+
+Publication-gated thesis export.
+
+- `crucible.gate`: adds `gate_check`, `export_guard`, and `export_thesis`. Fenced disposition and
+  explicit fenced/restricted markers fail closed at the public export edge.
+- CLI: `crucible export THESIS` emits the public thesis contract for publishable theses, resolves
+  thesis ids from a registry with `--registry`, and refuses fenced theses with a clean error.
+- Public API: exports `gate_check`, `export_guard`, and `export_thesis`.
+
 ## 0.5.0
 
 Drift tracking across witnessed assessment rounds.

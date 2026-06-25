@@ -11,6 +11,7 @@ import time
 
 from crucible.assess import Assessment, assess, recheck_assessment, verify_assessment
 from crucible.claim import make_claim
+from crucible.gate import export_thesis
 from crucible.measure import MetricSpec, TableMeasure, measure_thesis
 from crucible.registry import Registry
 from crucible.steelman import NullSteelman, Refutation, steelman_thesis
@@ -116,6 +117,17 @@ def cmd_register(args) -> int:
     where = f" to {args.registry}" if args.registry else ""
     extra = f" ({stored['added']} new, {stored['deduped']} deduped)" if stored else ""
     print(f'registered thesis {thesis.id} "{thesis.title}": {len(thesis.claims)} claim(s){extra}{where}')
+    return 0
+
+
+def cmd_export(args) -> int:
+    try:
+        thesis = _resolve_thesis(args.thesis, args.registry)
+        exported = export_thesis(thesis)
+    except _INPUT_ERRORS as exc:
+        print(f"export failed: {exc}", file=sys.stderr)
+        return 1
+    print(json.dumps(exported, indent=2, ensure_ascii=False))
     return 0
 
 

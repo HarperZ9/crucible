@@ -31,10 +31,11 @@ from the record, so a confident assertion cannot fake it.
 The continuous part is the loop: substrates, measurements, and theses all improve across rounds,
 and the witnessed verdicts track which moved.
 
-Shipped today (0.5.0): the full first loop plus drift tracking. You register a thesis, steelman it
+Shipped today (0.6.0): the full first loop plus drift tracking and publication-gated export. You register a thesis, steelman it
 (adversaries propose the test), measure each claim against a substrate oracle, refine across substrate
 rounds toward a cohesively verified thesis, witness a re-derivable verdict per claim, and compare
-assessment rounds to see what held, moved, improved, or regressed.
+assessment rounds to see what held, moved, improved, or regressed. A fenced thesis can be assessed
+locally, but the export edge refuses it by default.
 
 ## The differentiator (do not lose this)
 
@@ -104,8 +105,11 @@ Shipped:
 - Drift tracking across witnessed assessments: `drift_track(previous, current)` and
   `crucible drift REGISTRY` compare the latest two rounds and classify each claim as held, moved,
   improved, or regressed from the recorded margins.
+- Publication-gated export: `gate_check`, `export_guard`, `export_thesis`, and
+  `crucible export THESIS` refuse fenced material and explicit restricted markers before emitting a
+  public thesis contract.
 - The `crucible` CLI: `register`, `assess`, `steelman`, `measure`, `registry list|verify`,
-  `refine`, `drift`, `verdicts [--verify]`.
+  `refine`, `drift`, `export`, `verdicts [--verify]`.
 
 ## License
 

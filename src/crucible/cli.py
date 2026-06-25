@@ -10,7 +10,13 @@ from __future__ import annotations
 import argparse
 
 from crucible import __version__
-from crucible.commands import cmd_assess, cmd_measure, cmd_register, cmd_steelman
+from crucible.commands import (
+    cmd_assess,
+    cmd_export,
+    cmd_measure,
+    cmd_register,
+    cmd_steelman,
+)
 from crucible.drift_cmd import cmd_drift
 from crucible.refine_cmd import cmd_refine
 from crucible.registry_cmd import cmd_registry, cmd_verdicts
@@ -31,6 +37,11 @@ def build_parser() -> argparse.ArgumentParser:
     reg.add_argument("thesis", help="path to a thesis JSON")
     _add_common(reg)
     reg.set_defaults(func=cmd_register)
+
+    exp = sub.add_parser("export", help="publication-gated export of a thesis contract")
+    exp.add_argument("thesis", help="path to a thesis JSON, or a thesis id when --registry is given")
+    exp.add_argument("--registry", default=None, metavar="DIR", help="resolve a thesis id from a registry at DIR")
+    exp.set_defaults(func=cmd_export)
 
     ass = sub.add_parser("assess", help="compute and witness a verdict per claim (MATCH/DRIFT/UNVERIFIABLE)")
     ass.add_argument("thesis", help="path to a thesis JSON, or a thesis id when --registry is given")
