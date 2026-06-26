@@ -35,7 +35,14 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="crucible", description="crucible: accountable judgment of ideas.")
     parser.add_argument("--version", action="version", version=f"crucible {__version__}")
     sub = parser.add_subparsers(dest="command")
+    _add_core_commands(sub)
+    _add_refine_command(sub)
+    _add_registry_commands(sub)
+    _add_artifact_commands(sub)
+    return parser
 
+
+def _add_core_commands(sub) -> None:
     reg = sub.add_parser("register", help="register a thesis (claims + falsification) into a registry")
     reg.add_argument("thesis", help="path to a thesis JSON")
     _add_common(reg)
@@ -55,7 +62,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     stl = sub.add_parser("steelman",
                          help="propose the test that would settle each claim (the null default restates the "
-                              "claim's own falsification; a model edge proposes independent attacks later)")
+                              "claim's own falsification; custom edges plug in through the API)")
     stl.add_argument("thesis", help="path to a thesis JSON, or a thesis id when --registry is given")
     stl.add_argument("--registry", default=None, metavar="DIR", help="resolve a thesis id from a registry at DIR")
     stl.add_argument("--json", action="store_true", help="emit JSON instead of human text")
@@ -69,6 +76,8 @@ def build_parser() -> argparse.ArgumentParser:
     _add_common(mea)
     mea.set_defaults(func=cmd_measure)
 
+
+def _add_refine_command(sub) -> None:
     ref = sub.add_parser("refine",
                          help="refine over rounds of substrate until the thesis is cohesively verified, or report the weakest claim")
     ref.add_argument("config", help="path to a refine config JSON (claims or a thesis, specs, rounds, target_margin, cohesion_bar)")
@@ -78,6 +87,8 @@ def build_parser() -> argparse.ArgumentParser:
     ref.add_argument("--json", action="store_true", help="emit JSON instead of human text")
     ref.set_defaults(func=cmd_refine)
 
+
+def _add_registry_commands(sub) -> None:
     rgy = sub.add_parser("registry", help="inspect a stored registry: list, verify, stats, search, or prune")
     rgy.add_argument("action", choices=["list", "verify", "stats", "search", "prune"],
                      help="list, verify, summarize, search, or prune claim objects")
@@ -97,6 +108,8 @@ def build_parser() -> argparse.ArgumentParser:
     vd.add_argument("--json", action="store_true", help="emit JSON instead of human text")
     vd.set_defaults(func=cmd_verdicts)
 
+
+def _add_artifact_commands(sub) -> None:
     rpt = sub.add_parser("report", help="render a Markdown report for a witnessed assessment")
     rpt.add_argument("dir", help="the registry directory")
     rpt.add_argument("--index", default="-1",
@@ -118,8 +131,6 @@ def build_parser() -> argparse.ArgumentParser:
     dr.add_argument("dir", help="the registry directory")
     dr.add_argument("--json", action="store_true", help="emit JSON instead of human text")
     dr.set_defaults(func=cmd_drift)
-
-    return parser
 
 
 def main(argv: list[str] | None = None) -> int:

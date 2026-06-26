@@ -182,3 +182,16 @@ def test_recheck_exposes_a_forged_but_internally_consistent_verdict():
     assert verify_assessment(forged)  # the forgery is internally consistent: every seal matches
     result = recheck_assessment(t, forged)
     assert result["seals_ok"] and not result["verdicts_rederive"]  # re-derivation exposes the lie
+
+
+def test_tampered_verdict_margin_breaks_verify_and_recheck():
+    t = _thesis()
+    a, _ = assess(t, _measurements(t), clock=CLOCK)
+    bad_verdicts = [dict(v) for v in a.verdicts]
+    bad_verdicts[0]["margin"] = -999.0
+    tampered = dataclasses.replace(a, verdicts=tuple(bad_verdicts))
+
+    assert not verify_assessment(tampered)
+    result = recheck_assessment(t, tampered)
+    assert result["seals_ok"] is False
+    assert result["verdicts_rederive"] is False

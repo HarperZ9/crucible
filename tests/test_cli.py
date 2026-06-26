@@ -131,11 +131,35 @@ def test_register_empty_claims_is_an_error(tmp_path, capsys):
     assert "register failed" in capsys.readouterr().err
 
 
+def test_register_top_level_json_array_is_a_clean_error(tmp_path, capsys):
+    bad = tmp_path / "bad.json"
+    bad.write_text("[]", encoding="utf-8")
+
+    assert main(["register", str(bad)]) == 1
+    assert "register failed" in capsys.readouterr().err
+
+
 def test_assess_measurement_with_unknown_claim_is_an_error(tmp_path, capsys):
     m = _write(tmp_path / "m.json", {"measurements": [{"claim": "nope", "deviation": 0.0, "tolerance": 0.1}]})
     code = main(["assess", _thesis_file(tmp_path), "--measurements", m])
     assert code == 1
     assert "unknown claim" in capsys.readouterr().err
+
+
+def test_assess_measurement_with_ambiguous_claim_text_is_an_error(tmp_path, capsys):
+    thesis = _write(tmp_path / "ambiguous.json", {
+        "title": "Ambiguous",
+        "claims": [
+            {"id": "a", "text": "same text", "falsification": "first failure"},
+            {"id": "b", "text": "same text", "falsification": "second failure"},
+        ],
+    })
+    measurements = _write(tmp_path / "m.json", {
+        "measurements": [{"claim": "same text", "deviation": 0.0, "tolerance": 0.1}],
+    })
+
+    assert main(["assess", thesis, "--measurements", measurements]) == 1
+    assert "ambiguous claim" in capsys.readouterr().err
 
 
 def test_verdicts_verify_roundtrip_from_disk(tmp_path, capsys):
@@ -273,6 +297,23 @@ def test_measure_spec_for_unknown_claim_is_an_error(tmp_path, capsys):
     assert "unknown claim" in capsys.readouterr().err
 
 
+def test_measure_spec_with_ambiguous_claim_text_is_an_error(tmp_path, capsys):
+    thesis = _write(tmp_path / "ambiguous.json", {
+        "title": "Ambiguous",
+        "claims": [
+            {"id": "a", "text": "same text", "falsification": "first failure"},
+            {"id": "b", "text": "same text", "falsification": "second failure"},
+        ],
+    })
+    substrate = _write(tmp_path / "sub.json", {
+        "specs": {"same text": {"predicted": 1, "tolerance": 0.1, "observe": "v"}},
+        "substrate": {"v": 1},
+    })
+
+    assert main(["measure", thesis, "--substrate", substrate]) == 1
+    assert "ambiguous claim" in capsys.readouterr().err
+
+
 def test_measure_unknown_metric_is_a_clean_error(tmp_path, capsys):
     sub = _write(tmp_path / "bad.json", {
         "specs": {"c-match": {"predicted": 1, "tolerance": 0.1, "observe": "v", "metric": "relative"}},
@@ -311,6 +352,12 @@ def test_refine_json_reports_correct_round(tmp_path, capsys):
 
 def test_refine_invalid_target_is_a_clean_error(tmp_path, capsys):
     cfg = _refine_config(tmp_path, target_margin="not-a-number")
+    assert main(["refine", cfg]) == 1
+    assert "refine failed" in capsys.readouterr().err
+
+
+def test_refine_negative_target_is_a_clean_error(tmp_path, capsys):
+    cfg = _refine_config(tmp_path, target_margin=-1.0)
     assert main(["refine", cfg]) == 1
     assert "refine failed" in capsys.readouterr().err
 

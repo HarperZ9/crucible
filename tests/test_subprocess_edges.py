@@ -83,6 +83,33 @@ def test_subprocess_edges_enforce_input_and_output_bounds(tmp_path):
         SubprocessMeasure([sys.executable, loud], max_output_bytes=20).measure(make_claim("x", "f"))
 
 
+def test_subprocess_edges_do_not_inherit_parent_environment_by_default(tmp_path, monkeypatch):
+    monkeypatch.setenv("CRUCIBLE_SHOULD_NOT_LEAK", "secret")
+    script = _script(tmp_path, """
+import json, os
+print(json.dumps({"measurement": {
+    "deviation": 0.0 if "CRUCIBLE_SHOULD_NOT_LEAK" not in os.environ else 5.0,
+    "tolerance": 0.1,
+}}))
+""")
+
+    measurement = SubprocessMeasure([sys.executable, script]).measure(make_claim("x", "f"))
+
+    assert measurement.deviation == 0.0
+
+
+def test_subprocess_edges_discard_unbounded_stderr(tmp_path):
+    script = _script(tmp_path, """
+import json, sys
+sys.stderr.write("x" * 200000)
+print(json.dumps({"measurement": {"deviation": 0.0, "tolerance": 0.1}}))
+""")
+
+    measurement = SubprocessMeasure([sys.executable, script], max_output_bytes=200).measure(make_claim("x", "f"))
+
+    assert measurement.deviation == 0.0
+
+
 def test_subprocess_measure_rejects_invalid_json_shape(tmp_path):
     script = _script(tmp_path, "print('not json')")
 

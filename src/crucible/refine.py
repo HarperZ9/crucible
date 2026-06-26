@@ -127,6 +127,20 @@ class RefineOutcome:
     short_axis: str | None    # the weakest axis, or a "<callback>-failed: ..." reason, when "short"
 
 
+def _validate_refine_inputs(graders, target_margin: float, cohesion_bar: float, max_iter: int) -> None:
+    if not graders:
+        raise ValueError("refine requires at least one grader")
+    if max_iter is None or max_iter < 1:
+        raise ValueError("refine requires max_iter >= 1")
+    # A negative target_margin or cohesion_bar would let a FAILING axis (margin < 0) read as
+    # "correct"; validate them, closing that false-correct escape. >= 0 keeps the documented
+    # degenerate-to-reconcile mode (target=0, bar=0).
+    for label, val in (("target_margin", target_margin), ("cohesion_bar", cohesion_bar)):
+        if (not isinstance(val, (int, float)) or isinstance(val, bool)
+                or not math.isfinite(val) or val < 0):
+            raise ValueError(f"refine requires {label} >= 0 (finite), got {val!r}")
+
+
 def refine(generate, graders, adjust, *, guard=None, target_margin: float, cohesion_bar: float,
            max_iter: int, perceive=lambda c: c) -> RefineOutcome:
     """Refine until CORRECT, or until an honest budget is spent.
@@ -137,17 +151,7 @@ def refine(generate, graders, adjust, *, guard=None, target_margin: float, cohes
     returns the best guard-passing candidate (highest cohesion) with status "short" plus the weakest
     axis. A generate/adjust callback that RAISES degrades to an honest "short" (never a crash).
     """
-    if not graders:
-        raise ValueError("refine requires at least one grader")
-    if max_iter is None or max_iter < 1:
-        raise ValueError("refine requires max_iter >= 1")
-    # A negative target_margin or cohesion_bar would let a FAILING axis (margin < 0) read as "correct";
-    # validate them, closing that false-correct escape. >= 0 (not > 0) keeps the documented
-    # degenerate-to-reconcile mode (target=0, bar=0).
-    for _label, _val in (("target_margin", target_margin), ("cohesion_bar", cohesion_bar)):
-        if (not isinstance(_val, (int, float)) or isinstance(_val, bool)
-                or not math.isfinite(_val) or _val < 0):
-            raise ValueError(f"refine requires {_label} >= 0 (finite), got {_val!r}")
+    _validate_refine_inputs(graders, target_margin, cohesion_bar, max_iter)
     state = None
     trajectory: list = []
     best = None            # (RefineStep, candidate) with the highest cohesion among guard-passing

@@ -28,7 +28,7 @@ def cmd_report(args) -> int:
             checks=recheck_assessment(thesis, assessment),
         )
         if args.out:
-            with open(args.out, "w", encoding="utf-8") as f:
+            with open(args.out, "x", encoding="utf-8") as f:
                 f.write(report)
             print(f"wrote report to {args.out}")
             return 0

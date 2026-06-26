@@ -32,7 +32,7 @@ from crucible.verdict import (
     verdict_for,
 )
 
-_VSEAL_FIELDS = ("claim_id", "claim_sha256", "status", "deviation", "tolerance", "method")
+_VSEAL_FIELDS = ("claim_id", "claim_sha256", "status", "deviation", "tolerance", "margin", "method", "grounds")
 _MSEAL_FIELDS = ("claim_id", "claim_sha256", "deviation", "tolerance", "method", "evidence")
 _MSEAL_RECHECK_FIELDS = _MSEAL_FIELDS + ("recheck",)
 
@@ -75,8 +75,7 @@ def _measurement_seal(rows: Iterable[Mapping]) -> str:
 
 
 def verdict_seal(verdicts: Iterable[Verdict]) -> str:
-    """The seal over a set of verdicts: each verdict's claim binding, status, and measurement inputs.
-    Changing a status or a measurement input breaks it. Order independent."""
+    """The seal over a set of verdicts, including the rendered margin and grounds. Order independent."""
     return _seal_rows([_verdict_row(v) for v in verdicts], _VSEAL_FIELDS)
 
 
@@ -198,10 +197,12 @@ def recheck_assessment(
     means the assessment is intact AND its verdicts genuinely follow from the measurements."""
     by_id = {m.claim_id: m for m in (_measurement_from_row(r) for r in a.measurements)}
     rederived = [verdict_for(c, by_id.get(c.id)) for c in thesis.claims]
+    rederived_seal = verdict_seal(rederived)
+    stored_rederived = _seal_rows(a.verdicts, _VSEAL_FIELDS) == rederived_seal
     result = {
         "seals_ok": verify_assessment(a),
         "thesis_ok": verify_thesis(thesis) and thesis.seal == a.thesis_seal,
-        "verdicts_rederive": verdict_seal(rederived) == a.verdict_seal,
+        "verdicts_rederive": stored_rederived and a.verdict_seal == rederived_seal,
     }
     if measurement_replayers is not None:
         result["measurements_rerun"] = recheck_measurements(a, measurement_replayers)["ok"]

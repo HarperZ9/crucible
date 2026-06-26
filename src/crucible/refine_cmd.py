@@ -12,6 +12,7 @@ specific round).
 from __future__ import annotations
 
 import json
+import math
 import sys
 import time
 
@@ -35,9 +36,12 @@ def _rounds(data: dict) -> list[dict]:
 
 def _threshold(data: dict, key: str) -> float:
     try:
-        return float(data.get(key, 0.0))
+        value = float(data.get(key, 0.0))
     except (TypeError, ValueError) as exc:
         raise ValueError(f"{key} must be a number") from exc
+    if not math.isfinite(value) or value < 0:
+        raise ValueError(f"{key} must be a finite number >= 0")
+    return value
 
 
 def cmd_refine(args) -> int:

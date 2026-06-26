@@ -4,6 +4,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Iterable, Mapping
 
+from crucible.assess import Assessment, recheck_assessment
 from crucible.registry import Registry, _check_sha
 from crucible.thesis import FENCED, PUBLISHABLE
 from crucible.verdict import DRIFT, MATCH, UNVERIFIABLE
@@ -16,7 +17,7 @@ def registry_stats(reg: Registry) -> dict:
     """Summarize the registry's current thesis catalog and latest witnessed verdict posture."""
     rows = list(reg.theses())
     records = list(reg.assessments())
-    latest = _latest_by_thesis(records)
+    latest, invalid_latest = _verified_latest_by_thesis(reg, records)
     claim_shas = [_claim_sha(cr) for row in rows for cr in row.get("claims", [])]
     dispositions = {status: 0 for status in sorted(STATUSES)}
     for row in rows:
@@ -34,6 +35,7 @@ def registry_stats(reg: Registry) -> dict:
         "unique_claims": len(set(claim_shas)),
         "assessments": len(records),
         "latest_assessments": sum(1 for thesis_id in latest if thesis_id in thesis_ids),
+        "invalid_latest_assessments": invalid_latest,
         "dispositions": _nonzero(dispositions),
         "verdicts": verdicts,
     }
@@ -52,7 +54,7 @@ def search_theses(
     if verdict is not None and verdict not in VERDICTS:
         raise ValueError(f"verdict must be one of {', '.join(VERDICTS)}")
     needle = (scope or "").casefold().strip()
-    latest = _latest_by_thesis(list(reg.assessments()))
+    latest, _invalid_latest = _verified_latest_by_thesis(reg, list(reg.assessments()))
     out: list[dict] = []
     for row in reg.theses():
         if status is not None and row.get("disposition") != status:
@@ -101,6 +103,24 @@ def _latest_by_thesis(records: Iterable[Mapping]) -> dict[str, Mapping]:
         if isinstance(thesis_id, str):
             latest[thesis_id] = record
     return latest
+
+
+def _verified_latest_by_thesis(reg: Registry, records: Iterable[Mapping]) -> tuple[dict[str, Mapping], int]:
+    latest = _latest_by_thesis(records)
+    verified: dict[str, Mapping] = {}
+    invalid = 0
+    for thesis_id, record in latest.items():
+        try:
+            assessment = Assessment.from_dict(record)
+            thesis = reg.get_thesis(thesis_id)
+            if thesis is None or not all(recheck_assessment(thesis, assessment).values()):
+                invalid += 1
+                continue
+        except (OSError, ValueError, KeyError, TypeError):
+            invalid += 1
+            continue
+        verified[thesis_id] = record
+    return verified, invalid
 
 
 def _record_statuses(record: Mapping | None) -> list[str]:

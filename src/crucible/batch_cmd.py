@@ -71,6 +71,7 @@ def _run_job(
     if has_measurements == has_substrate:
         raise ValueError(f"batch job {job_id!r} needs exactly one of measurements or substrate")
     thesis = _resolve_batch_thesis(base, thesis_ref, registry_dir)
+    report_path = _report_path(reports_dir, index, job_id) if reports_dir else None
     if has_measurements:
         measurements = _load_measurements(thesis, _required_manifest_path(base, str(job["measurements"]), job_id))
     else:
@@ -85,11 +86,9 @@ def _run_job(
         "drift": assessment.drift,
         "unverifiable": assessment.unverifiable,
     }
-    if reports_dir:
-        os.makedirs(reports_dir, exist_ok=True)
-        report_path = os.path.join(reports_dir, f"{index:04d}-{_slug(job_id)}.md")
+    if report_path:
         report = render_assessment_report(thesis, assessment, checks=recheck_assessment(thesis, assessment))
-        with open(report_path, "w", encoding="utf-8") as f:
+        with open(report_path, "x", encoding="utf-8") as f:
             f.write(report)
         row["report"] = report_path
     return row
@@ -97,12 +96,12 @@ def _run_job(
 
 def _resolve_batch_thesis(base: str, value: str, registry_dir: str) -> Thesis:
     if os.path.isabs(value):
-        if not os.path.isfile(value):
-            raise ValueError(f"batch thesis file is missing: {value}")
-        return _resolve_thesis(value, registry_dir)
-    candidate = os.path.join(base, value)
+        return _resolve_thesis(_required_manifest_path(base, value, "thesis"), registry_dir)
+    candidate = _manifest_path(base, value)
     if os.path.isfile(candidate):
         return _resolve_thesis(candidate, registry_dir)
+    if _looks_like_path(value):
+        raise ValueError(f"batch thesis file is missing: {value}")
     thesis = Registry(registry_dir).get_thesis(value)
     if thesis is None:
         raise ValueError(f"no thesis {value!r} in registry {registry_dir}")
@@ -110,10 +109,32 @@ def _resolve_batch_thesis(base: str, value: str, registry_dir: str) -> Thesis:
 
 
 def _required_manifest_path(base: str, value: str, job_id: str) -> str:
-    path = value if os.path.isabs(value) else os.path.join(base, value)
+    path = _manifest_path(base, value)
     if not os.path.isfile(path):
         raise ValueError(f"batch job {job_id!r} references a missing file: {value}")
     return path
+
+
+def _manifest_path(base: str, value: str) -> str:
+    root = os.path.realpath(base)
+    path = os.path.realpath(value if os.path.isabs(value) else os.path.join(base, value))
+    if os.path.commonpath([root, path]) != root:
+        raise ValueError(f"batch path is outside manifest bundle: {value}")
+    return path
+
+
+def _report_path(reports_dir: str | None, index: int, job_id: str) -> str:
+    if reports_dir is None:
+        raise ValueError("reports directory is required")
+    os.makedirs(reports_dir, exist_ok=True)
+    path = os.path.join(reports_dir, f"{index:04d}-{_slug(job_id)}.md")
+    if os.path.exists(path):
+        raise FileExistsError(f"report already exists: {path}")
+    return path
+
+
+def _looks_like_path(value: str) -> bool:
+    return value.endswith(".json") or any(part in value for part in ("/", "\\", ".", os.sep))
 
 
 def _slug(value: str) -> str:

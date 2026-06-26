@@ -7,7 +7,9 @@ producer label are stamped locally rather than trusted from the child process.
 from __future__ import annotations
 
 import json
+import os
 import subprocess
+import tempfile
 import time
 from collections.abc import Mapping, Sequence
 from typing import Callable
@@ -18,6 +20,7 @@ from crucible.verdict import Measurement
 
 DEFAULT_MAX_BYTES = 65_536
 DEFAULT_TIMEOUT = 10.0
+_ENV_ALLOWLIST = {"COMSPEC", "PATH", "PATHEXT", "SYSTEMROOT", "TEMP", "TMP", "WINDIR"}
 
 
 class SubprocessSteelman:
@@ -32,6 +35,7 @@ class SubprocessSteelman:
         max_input_bytes: int = DEFAULT_MAX_BYTES,
         max_output_bytes: int = DEFAULT_MAX_BYTES,
         cwd: str | None = None,
+        env: Mapping[str, str] | None = None,
     ) -> None:
         self.command = _command(command)
         self.name = _name(name)
@@ -39,11 +43,12 @@ class SubprocessSteelman:
         self.max_input_bytes = _positive_int(max_input_bytes, "max_input_bytes")
         self.max_output_bytes = _positive_int(max_output_bytes, "max_output_bytes")
         self.cwd = cwd
+        self.env = _env(env)
 
     def refute(self, claim: Claim) -> tuple[Refutation, ...]:
         data = _run_json(self.command, _request("crucible.steelman/v1", claim), timeout=self.timeout,
                          max_input_bytes=self.max_input_bytes, max_output_bytes=self.max_output_bytes,
-                         cwd=self.cwd)
+                         cwd=self.cwd, env=self.env)
         rows = data.get("refutations", [])
         if not isinstance(rows, list):
             raise ValueError("subprocess steelman JSON field 'refutations' must be a list")
@@ -70,6 +75,7 @@ class SubprocessMeasure:
         max_output_bytes: int = DEFAULT_MAX_BYTES,
         clock: Callable[[], float] = time.time,
         cwd: str | None = None,
+        env: Mapping[str, str] | None = None,
     ) -> None:
         self.command = _command(command)
         self.name = _name(name)
@@ -78,11 +84,12 @@ class SubprocessMeasure:
         self.max_output_bytes = _positive_int(max_output_bytes, "max_output_bytes")
         self.clock = clock
         self.cwd = cwd
+        self.env = _env(env)
 
     def measure(self, claim: Claim) -> Measurement:
         data = _run_json(self.command, _request("crucible.measure/v1", claim), timeout=self.timeout,
                          max_input_bytes=self.max_input_bytes, max_output_bytes=self.max_output_bytes,
-                         cwd=self.cwd)
+                         cwd=self.cwd, env=self.env)
         row = data.get("measurement", data)
         if not isinstance(row, Mapping):
             raise ValueError("subprocess measure JSON response must be an object")
@@ -105,30 +112,34 @@ def _run_json(
     max_input_bytes: int,
     max_output_bytes: int,
     cwd: str | None,
+    env: Mapping[str, str],
 ) -> dict:
-    body = json.dumps(payload, ensure_ascii=False, sort_keys=True)
-    if len(body.encode("utf-8")) > max_input_bytes:
+    body = json.dumps(payload, ensure_ascii=False, sort_keys=True).encode("utf-8")
+    if len(body) > max_input_bytes:
         raise ValueError("subprocess input exceeds configured byte limit")
     try:
-        completed = subprocess.run(
-            command,
-            input=body,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            encoding="utf-8",
-            timeout=timeout,
-            cwd=cwd,
-            check=False,
-        )
+        with tempfile.TemporaryFile() as stdout:
+            completed = subprocess.run(
+                command,
+                input=body,
+                stdout=stdout,
+                stderr=subprocess.DEVNULL,
+                timeout=timeout,
+                cwd=cwd,
+                env=dict(env),
+                check=False,
+            )
+            size = stdout.tell()
+            if size > max_output_bytes:
+                raise ValueError("subprocess output exceeds configured byte limit")
+            stdout.seek(0)
+            output = stdout.read().decode("utf-8")
     except subprocess.TimeoutExpired as exc:
         raise ValueError("subprocess timed out") from exc
     if completed.returncode != 0:
         raise ValueError(f"subprocess exited with code {completed.returncode}")
-    if len(completed.stdout.encode("utf-8")) > max_output_bytes:
-        raise ValueError("subprocess output exceeds configured byte limit")
     try:
-        data = json.loads(completed.stdout)
+        data = json.loads(output)
     except json.JSONDecodeError as exc:
         raise ValueError("subprocess did not return valid JSON") from exc
     if not isinstance(data, dict):
@@ -155,6 +166,12 @@ def _command(command: Sequence[str]) -> tuple[str, ...]:
     if not parts or any(not isinstance(part, str) or not part for part in parts):
         raise ValueError("command must be a non-empty sequence of non-empty strings")
     return parts
+
+
+def _env(env: Mapping[str, str] | None) -> dict[str, str]:
+    if env is not None:
+        return {str(k): str(v) for k, v in env.items()}
+    return {k: v for k, v in os.environ.items() if k.upper() in _ENV_ALLOWLIST}
 
 
 def _name(name: str) -> str:

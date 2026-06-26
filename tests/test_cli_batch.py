@@ -184,3 +184,51 @@ def test_batch_cli_rejects_missing_manifest_relative_thesis_even_if_cwd_has_file
 
     assert main(["batch", manifest, "--registry", str(tmp_path / "reg")]) == 1
     assert "batch failed" in capsys.readouterr().err
+
+
+def test_batch_cli_treats_path_like_thesis_refs_as_files_not_registry_ids(tmp_path, capsys):
+    reg = str(tmp_path / "reg")
+    registered = _write(tmp_path / "registered.json", {
+        "id": "alpha.json",
+        "title": "registered",
+        "claims": [{"text": "x", "falsification": "not x"}],
+    })
+    assert main(["register", registered, "--registry", reg]) == 0
+    capsys.readouterr()
+    manifest = _write(tmp_path / "batch.json", {
+        "jobs": [{"id": "bad-path", "thesis": "alpha.json",
+                  "measurements": _measurements_file(tmp_path, "alpha")}],
+    })
+
+    assert main(["batch", manifest, "--registry", reg]) == 1
+    assert "batch failed" in capsys.readouterr().err
+
+
+def test_batch_cli_rejects_measurement_paths_outside_manifest_bundle(tmp_path, capsys):
+    bundle = tmp_path / "bundle"
+    bundle.mkdir()
+    thesis = _thesis_file(bundle, "alpha")
+    outside = tmp_path / "alpha-measurements.json"
+    _measurements_file(tmp_path, "alpha")
+    manifest = _write(bundle / "batch.json", {
+        "jobs": [{"id": "escape", "thesis": thesis, "measurements": f"..\\{outside.name}"}],
+    })
+
+    assert main(["batch", manifest, "--registry", str(tmp_path / "reg")]) == 1
+    assert "outside manifest" in capsys.readouterr().err
+
+
+def test_batch_cli_refuses_to_overwrite_existing_report(tmp_path, capsys):
+    manifest = _manifest(tmp_path, [
+        {"id": "alpha", "thesis": _thesis_file(tmp_path, "alpha"),
+         "measurements": _measurements_file(tmp_path, "alpha")},
+    ])
+    reports = tmp_path / "reports"
+    reports.mkdir()
+    existing = reports / "0001-alpha.md"
+    existing.write_text("keep me", encoding="utf-8")
+
+    assert main(["batch", manifest, "--registry", str(tmp_path / "reg"), "--reports", str(reports)]) == 1
+
+    assert existing.read_text(encoding="utf-8") == "keep me"
+    assert "exists" in capsys.readouterr().err

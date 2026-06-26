@@ -3,6 +3,26 @@
 All notable changes to crucible. Versions follow semantic versioning; each minor release is built
 behind a feature branch and reviewed before merge.
 
+## 1.0.0
+
+Stable flagship floor.
+
+- Assessment integrity now seals verdict margin and grounds, and `recheck_assessment` rejects stored
+  verdict rows that do not re-derive from the thesis and measurements.
+- Drift and registry status/search now use verified latest assessments instead of trusting the newest
+  row blindly.
+- The registry rejects duplicate thesis ids with different seals, refuses symlinked storage paths,
+  and keeps object writes on unique temp files inside the registry root.
+- Batch manifests keep thesis, measurement, and substrate paths inside the manifest bundle; path-like
+  missing refs fail closed; report writes use index-prefixed filenames and exclusive creation.
+- Subprocess-backed edges use a clean default environment, discard unbounded stderr, write stdout to a
+  temporary file before enforcing the response cap, and still reject shell strings.
+- CLI JSON loaders reject non-object top-level payloads with clean errors, ambiguous claim text refs
+  are rejected, and refine thresholds reject negative or non-finite values cleanly.
+- Release workflows remove manual PyPI dispatch and pin external GitHub Actions by commit SHA.
+- README and readiness docs record the clean verifier rule: verifier receives only the original spec
+  and artifact, never the worker context or reasoning trace.
+
 ## 0.14.1
 
 Batch hardening patch.
@@ -169,8 +189,8 @@ judgment.
 - `crucible.steelman`: a `Steelman` protocol and a `Refutation` (the proposed attack plus the
   measurable test that would settle it). Adversaries propose what to test; they do not decide.
 - `NullSteelman`: the standing default. Deterministic and invents nothing: it surfaces the claim's own
-  stated falsification as the test, or flags a claim that states no falsification as unrefutable. A
-  model edge (a real independent refuter) plugs in through the same protocol later.
+  stated falsification as the test, or flags a claim that states no falsification as unrefutable.
+  Custom refuters plug in through the same protocol.
 - `steelman_thesis` runs a steelman over every claim in a thesis, returning the proposed tests in
   claim order, ready to feed the measurement step.
 - CLI: `crucible steelman <thesis>` prints each claim's challenge and the test it proposes.

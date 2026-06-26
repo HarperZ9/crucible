@@ -76,7 +76,7 @@ from crucible.verdict import (
     verdict_for,
 )
 
-__version__ = "0.14.1"
+__version__ = "1.0.0"
 
 __all__ = [
     "Assessment", "Claim", "DriftReport", "DriftRow", "GatherDigestMeasure", "GradedCriterion",

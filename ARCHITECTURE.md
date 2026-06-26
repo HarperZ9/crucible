@@ -81,7 +81,7 @@ default, exactly as Gather isolates its synthesizer.
 
 - **Steelman** (`Steelman` protocol): independent adversaries propose refutations. The default
   `NullSteelman` surfaces the claim's own stated falsification as the standing test and invents
-  nothing; a model edge plugs in to generate independent refutations. Adversaries propose what to
+  nothing; custom edges plug in to generate independent refutations. Adversaries propose what to
   measure; the measurement decides. `steelman_thesis` stamps each refutation's source from the
   producing steelman's name, so the label is the producer's.
 - **Measure** (`Measure` protocol): the sound-oracle edge that decides a claim against a substrate.
@@ -101,9 +101,11 @@ The core imports neither the Null nor any model, so the package keeps zero third
 
 `SubprocessSteelman` and `SubprocessMeasure` are optional stdlib adapters for configured commands.
 They exchange one bounded JSON request/response over stdin/stdout, enforce a timeout, and reject shell
-strings so arguments are not re-parsed by a shell. A child process may propose a challenge or report a
-deviation, but crucible stamps the claim identity, claim hash, and producer name locally. The verdict
-still follows from `verdict_for`; a subprocess cannot assert MATCH.
+strings so arguments are not re-parsed by a shell. By default they pass only a minimal environment,
+discard stderr, and write stdout to a temporary file before enforcing the response cap. A child
+process may propose a challenge or report a deviation, but crucible stamps the claim identity, claim
+hash, and producer name locally. The verdict still follows from `verdict_for`; a subprocess cannot
+assert MATCH.
 
 ## Telos artifact interop
 
@@ -143,7 +145,8 @@ Assessment and export are deliberately separate. A fenced thesis may be register
 locally, but the public export edge applies `gate_check` and refuses anything with a fenced
 disposition or an explicit fenced/restricted marker in the title, claim text, or falsification. The
 exported contract omits runtime metadata and carries only the title, disposition, thesis seal, and
-content-hashed claims needed for public re-checking.
+content-hashed claims needed for public re-checking. This gate is a mechanical disposition and marker
+guard, not a semantic content classifier.
 
 ## The registry
 
@@ -153,28 +156,37 @@ catalog, and an `assessments.jsonl` history. `verify()` re-hashes every stored b
 MATCH / MISSING / CORRUPT, so the verdict's proof stays durable over a growing registry.
 
 `registry_ops` reads across that store without changing the storage contract. `registry_stats`
-summarizes thesis counts, claim bodies, dispositions, assessment history, and the latest verdict
-posture per thesis. `search_theses` recalls theses by scope text, thesis status, and latest verdict
-status. `prune_objects` identifies orphaned claim bodies and is dry-run by default; deletion requires
-an explicit apply path and validates each object path before unlinking it.
+summarizes thesis counts, claim bodies, dispositions, assessment history, invalid latest assessment
+counts, and the latest verified verdict posture per thesis. `search_theses` recalls theses by scope
+text, thesis status, and latest verified verdict status. `prune_objects` identifies orphaned claim
+bodies and is dry-run by default; deletion requires an explicit apply path and validates each object
+path before unlinking it. The registry rejects duplicate thesis ids with different seals and refuses
+symlinked storage paths, so content-addressed writes stay inside the registry root.
+
+## Verifier separation
+
+The review loop is intentionally clean. A verifier receives the original spec/readiness docs and the
+artifact under review. It does not receive the worker's context, reasoning trace, or intermediate
+steps. If success cannot be evaluated from that minimal state, the spec is not checkable yet and the
+readiness artifact needs work before release.
 
 ## Determinism and the zero-dependency core
 
 Clocks are injected everywhere time is recorded; iteration is sorted; JSON is canonical
 (`sort_keys`, `ensure_ascii=False`). So an assessment replays and a seal recomputes. The core is pure
-standard library. A model edge may pull in whatever it needs, but only behind a seam, and only at the
-impure edge.
+standard library. A custom edge may pull in whatever it needs, but only behind a seam, and only at
+the impure edge.
 
 ## Protocol interoperability (the dual mandate)
 
-crucible stands alone and serves the constellation at once. What ships today is the standing-alone
-half and the published contract: a sealed assessment and its verdicts, re-checkable from disk, that a
-downstream organ reads to learn a thesis's standing. It also includes first protocol adapters for
-Telos witnessed artifacts, Gather witnessed digests, and index verification records. These adapters
-consume documented JSON contracts without importing sibling internals. Shared primitives, such as the
-`refine` loop, are integrated natively rather than taken as third-party dependencies, so reuse never
-costs standing alone. Seams default to Null, so the absence of a peer is a quieter capability, never a
-failure.
+crucible stands alone and serves the constellation at once. At the 1.0 flagship floor, the
+standing-alone half and the published contract are shipped: a sealed assessment and its verdicts,
+re-checkable from disk, that a downstream organ reads to learn a thesis's standing. It also includes
+protocol adapters for Telos witnessed artifacts, Gather witnessed digests, and index verification
+records. These adapters consume documented JSON contracts without importing sibling internals. Shared
+primitives, such as the `refine` loop, are integrated natively rather than taken as third-party
+dependencies, so reuse never costs standing alone. Seams default to Null, so the absence of a peer is
+a quieter capability, never a failure.
 
 ## Peer composition
 

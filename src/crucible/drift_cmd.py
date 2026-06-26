@@ -4,7 +4,7 @@ from __future__ import annotations
 import json
 import sys
 
-from crucible.assess import Assessment
+from crucible.assess import Assessment, recheck_assessment
 from crucible.drift import drift_track
 from crucible.registry import Registry
 
@@ -24,6 +24,8 @@ def cmd_drift(args) -> int:
     previous = Assessment.from_dict(records[-2])
     current = Assessment.from_dict(records[-1])
     try:
+        _require_integrity(reg, previous)
+        _require_integrity(reg, current)
         report = drift_track(previous, current)
     except ValueError as exc:
         print(f"drift failed: {exc}", file=sys.stderr)
@@ -39,3 +41,12 @@ def cmd_drift(args) -> int:
         delta = "" if row.margin_delta is None else f"  delta {row.margin_delta:g}"
         print(f"  {row.claim_id:<16} {row.status:<9} {before} -> {after}{delta}")
     return 0
+
+
+def _require_integrity(reg: Registry, assessment: Assessment) -> None:
+    thesis = reg.get_thesis(assessment.thesis_id)
+    if thesis is None:
+        raise ValueError(f"assessment integrity failed: missing thesis {assessment.thesis_id!r}")
+    checks = recheck_assessment(thesis, assessment)
+    if not all(checks.values()):
+        raise ValueError(f"assessment integrity failed for {assessment.seal}: {checks}")
