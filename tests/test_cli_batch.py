@@ -228,7 +228,7 @@ def test_batch_cli_rejects_measurement_paths_outside_manifest_bundle(tmp_path, c
     outside = tmp_path / "alpha-measurements.json"
     _measurements_file(tmp_path, "alpha")
     manifest = _write(bundle / "batch.json", {
-        "jobs": [{"id": "escape", "thesis": thesis, "measurements": f"..\\{outside.name}"}],
+        "jobs": [{"id": "escape", "thesis": thesis, "measurements": f"../{outside.name}"}],
     })
 
     assert main(["batch", manifest, "--registry", str(tmp_path / "reg")]) == 1
