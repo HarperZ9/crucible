@@ -68,6 +68,12 @@ does not change the verdict contract or decide anything new; it gives an operato
 over the counts, seals, integrity checks, verdicts, evidence, and recheck descriptors. The CLI exposes
 this as `crucible report REGISTRY`, defaulting to the latest assessment.
 
+`crucible batch` is a runner over the same primitives, not a second judgment path. A manifest lists
+thesis jobs and chooses either explicit measurements or a substrate oracle per job; the command
+records each assessment into one registry and can write one Markdown report per job. The batch layer
+coordinates throughput while leaving claim receipts, measurements, verdicts, assessment seals, and
+report rendering unchanged.
+
 ## The seams (the impure and the optional)
 
 crucible's core is pure standard library. Optional edges live behind a Protocol seam with a Null

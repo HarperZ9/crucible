@@ -31,18 +31,20 @@ from the record, so a confident assertion cannot fake it.
 The continuous part is the loop: substrates, measurements, and theses all improve across rounds,
 and the witnessed verdicts track which moved.
 
-Shipped today (0.13.0): the full first loop plus drift tracking, Markdown assessment reports,
+Shipped today (0.14.0): the full first loop plus drift tracking, Markdown assessment reports,
 publication-gated export, registry
 operations, optional subprocess-backed seam adapters, Telos witnessed-artifact interop,
-Gather/index protocol interop, measurement recheck descriptors, and 1.0-readiness coverage. You
+Gather/index protocol interop, measurement recheck descriptors, batch assessment/report bundles,
+and 1.0-readiness coverage. You
 register a thesis, steelman it (adversaries propose the test), measure each claim against a substrate
 oracle, refine across substrate rounds toward a cohesively verified thesis, witness a re-derivable
 verdict per claim, compare assessment rounds to see what held, moved, improved, or regressed, inspect
 a growing registry by status, scope, and latest verdict, plug configured model/oracle commands into
 the steelman and measure seams, consume `telos.witnessed-artifact/v1` envelopes by re-running their
 named verifiers, use sealed Gather digests as evidence, replay index verification records against
-supplied graph packs, persist optional measurement replay descriptors for oracle-level checks, and
-render the witnessed assessment as a readable Markdown report. A
+supplied graph packs, persist optional measurement replay descriptors for oracle-level checks, run a
+manifest of thesis jobs into one registry, and render witnessed assessments as readable Markdown
+reports. A
 fenced thesis can be assessed locally, but the export edge refuses it by default.
 
 ## The differentiator (do not lose this)
@@ -82,6 +84,33 @@ The distribution is `crucible-bench`; it installs the `crucible` command and the
 pip install -e ".[dev]"
 ```
 
+## Batch manifests
+
+From a clone, run several thesis assessments into one registry, with optional report files:
+
+```bash
+crucible batch examples/batch-binary-search.json --registry .crucible-registry --reports reports
+```
+
+A job names a thesis plus exactly one measurement source:
+
+```json
+{
+  "jobs": [
+    {
+      "id": "binary-search-manual",
+      "thesis": "thesis-binary-search.json",
+      "measurements": "measurements-binary-search.json"
+    },
+    {
+      "id": "binary-search-substrate",
+      "thesis": "thesis-binary-search.json",
+      "substrate": "substrate-binary-search.json"
+    }
+  ]
+}
+```
+
 ## Status
 
 crucible is in active construction, built the way Gather and Forum were: one reviewed release per
@@ -119,6 +148,9 @@ Shipped:
 - Assessment reports: `render_assessment_report` and `crucible report REGISTRY` render a deterministic
   Markdown artifact with counts, seals, integrity checks, verdicts, measurement evidence, and recheck
   descriptors.
+- Batch assessment: `crucible batch MANIFEST --registry DIR [--reports DIR]` consumes a manifest of
+  thesis jobs, records each assessment into one registry, and optionally writes one Markdown report
+  per job.
 - Publication-gated export: `gate_check`, `export_guard`, `export_thesis`, and
   `crucible export THESIS` refuse fenced material and explicit restricted markers before emitting a
   public thesis contract.
@@ -138,7 +170,7 @@ Shipped:
 - Readiness coverage: the bundled examples run through the public CLI under test, help output covers
   the shipped command surface, and `docs/RELEASE-READINESS.md` records the 1.0 gate checklist.
 - The `crucible` CLI: `register`, `assess`, `steelman`, `measure`,
-  `registry list|verify|stats|search|prune`, `refine`, `drift`, `report`, `export`,
+  `registry list|verify|stats|search|prune`, `refine`, `drift`, `report`, `batch`, `export`,
   `verdicts [--verify]`.
 
 ## License
