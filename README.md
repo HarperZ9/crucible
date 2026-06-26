@@ -144,8 +144,15 @@ Descriptor-bearing measurements can be inspected from the registry:
 crucible recheck .crucible-registry --json
 ```
 
-A verifier or oracle wrapper can then return a replay pack with the original `recheck` descriptor and
-the reproduced measurement row:
+To hand the work to a verifier or oracle wrapper, write a replay pack template:
+
+```bash
+crucible recheck .crucible-registry --template replay-template.json
+```
+
+The template contains claim context, the original `recheck` descriptor, the sealed measurement row to
+reproduce, and blank measurement fields for the verifier to fill. A verifier or oracle wrapper can
+then return a replay pack with the original descriptor and the reproduced measurement row:
 
 ```json
 {
@@ -207,9 +214,10 @@ Shipped:
 - Measurement rechecks: assessment rows persist and seal `measured_at`, evidence, and optional
   `recheck` descriptors. `recheck_measurements` lets a caller provide oracle replayers that reproduce
   stored measurement inputs from those descriptors.
-- Oracle replay CLI: `crucible recheck REGISTRY [--pack FILE]` lists descriptor-bearing measurement
-  rows for a clean verifier and can validate an oracle replay pack against the sealed measurement
-  rows without creating a second verdict path.
+- Oracle replay CLI: `crucible recheck REGISTRY [--template FILE] [--pack FILE]` lists
+  descriptor-bearing measurement rows, writes replay pack templates for clean verifier handoff, and
+  validates finished oracle replay packs against the sealed measurement rows without creating a second
+  verdict path.
 - The refine loop: grade each claim's measured margin, compute harmonic-mean cohesion, reflect the
   weakest claim, and re-measure across substrate rounds until the thesis is cohesively verified or the
   budget is spent honestly. The loop reports the weakest claim instead of pretending a short thesis held.

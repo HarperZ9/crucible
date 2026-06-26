@@ -136,6 +136,8 @@ def _add_recheck_command(sub) -> None:
                     help="assessment index to inspect, default -1 for the latest")
     rc.add_argument("--pack", default=None, metavar="FILE",
                     help="JSON replay pack with reproduced measurements for descriptor-bearing rows")
+    rc.add_argument("--template", default=None, metavar="FILE",
+                    help="write a replay pack template for descriptor-bearing rows")
     rc.add_argument("--json", action="store_true", help="emit JSON instead of human text")
     rc.set_defaults(func=cmd_recheck)
 

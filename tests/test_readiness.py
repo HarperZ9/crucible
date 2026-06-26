@@ -159,3 +159,4 @@ def test_release_docs_define_cleanroom_checkability_rules():
     assert "not artifact-only acceptance criteria" in normalized_readiness
     assert "spec.json" in readiness and "review.md" in readiness
     assert "oracle replay pack" in normalized_readiness
+    assert "replay pack template" in normalized_readiness

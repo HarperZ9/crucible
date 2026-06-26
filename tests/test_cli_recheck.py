@@ -58,6 +58,28 @@ def test_recheck_json_lists_oracle_replay_plan(tmp_path, capsys):
     assert payload["descriptors"][0]["recheck"]["expr"] == "energy"
 
 
+def test_recheck_template_writes_replay_pack_skeleton(tmp_path, capsys):
+    reg, thesis, measurement = _seed_registry(tmp_path)
+    template = tmp_path / "replay-template.json"
+
+    assert main(["recheck", reg, "--template", str(template)]) == 0
+    out = capsys.readouterr().out
+    payload = json.loads(template.read_text(encoding="utf-8"))
+
+    assert "wrote replay template" in out
+    assert payload["assessment"]["thesis_id"] == thesis.id
+    assert "Fill each measurement" in payload["instructions"]
+    assert payload["replays"][0]["claim"]["text"] == "energy is conserved"
+    assert payload["replays"][0]["recheck"] == measurement.recheck
+    assert payload["replays"][0]["expected_measurement"]["deviation"] == 0.0
+    assert payload["replays"][0]["expected_measurement"]["measured_at"] == 42.0
+    assert payload["replays"][0]["measurement"]["claim_id"] == measurement.claim_id
+    assert payload["replays"][0]["measurement"]["claim_sha256"] == measurement.claim_sha256
+    assert payload["replays"][0]["measurement"]["deviation"] is None
+    assert payload["replays"][0]["measurement"]["measured_at"] is None
+    assert payload["replays"][0]["measurement"]["evidence"] == []
+
+
 def test_recheck_pack_replays_descriptor_bearing_measurements(tmp_path, capsys):
     reg, _thesis, measurement = _seed_registry(tmp_path)
     pack = _replay_pack(tmp_path / "replay.json", measurement)
@@ -81,3 +103,12 @@ def test_recheck_pack_reports_replayed_measurement_drift(tmp_path, capsys):
     assert payload["ok"] is False
     assert payload["checks"]["measurements_rerun"] is False
     assert payload["replay"]["mismatched"] == 1
+
+
+def test_recheck_rejects_template_and_pack_together(tmp_path, capsys):
+    reg, _thesis, measurement = _seed_registry(tmp_path)
+    pack = _replay_pack(tmp_path / "replay.json", measurement)
+
+    assert main(["recheck", reg, "--pack", pack, "--template", str(tmp_path / "template.json")]) == 1
+
+    assert "cannot be combined" in capsys.readouterr().err

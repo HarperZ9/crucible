@@ -19,6 +19,12 @@ def cmd_recheck(args) -> int:
         if thesis is None:
             raise ValueError(f"no thesis {assessment.thesis_id!r} in registry {args.dir}")
         plan = recheck_plan(thesis, assessment)
+        if args.pack and args.template:
+            raise ValueError("--template cannot be combined with --pack")
+        if args.template:
+            _write_template(args.template, plan)
+            print(f"wrote replay template to {args.template}")
+            return 0
         if args.pack:
             return _emit_replay(args, thesis, assessment, plan)
         _emit_plan(plan, args.json)
@@ -47,6 +53,7 @@ def recheck_plan(thesis, assessment: Assessment) -> dict:
             "method": row.get("method", ""),
             "oracle": recheck.get("oracle", ""),
             "recheck": dict(recheck),
+            "expected_measurement": _measurement_fields(row),
         })
     return {
         "assessment": {
@@ -65,6 +72,64 @@ def _assessment_at(reg: Registry, index: int) -> Assessment:
         raise ValueError("no assessments in registry")
     return Assessment.from_dict(records[index])
 
+
+def _write_template(path: str, plan: dict) -> None:
+    payload = {
+        "assessment": plan["assessment"],
+        "instructions": (
+            "Fill each measurement object with the reproduced measurement row for its recheck "
+            "descriptor, then pass this file to crucible recheck --pack."
+        ),
+        "replays": [_template_row(row) for row in plan["descriptors"]],
+    }
+    with open(path, "x", encoding="utf-8") as f:
+        json.dump(payload, f, indent=2, ensure_ascii=False)
+        f.write("\n")
+
+
+def _template_row(row: dict) -> dict:
+    expected = row["expected_measurement"]
+    return {
+        "claim": {
+            "id": row["claim_id"],
+            "sha256": row["claim_sha256"],
+            "text": row["claim_text"],
+            "status": row["status"],
+        },
+        "recheck": row["recheck"],
+        "expected_measurement": expected,
+        "measurement": _blank_measurement(expected),
+    }
+
+
+def _measurement_fields(row: Mapping[str, object]) -> dict:
+    return {
+        "claim_id": row.get("claim_id", ""),
+        "claim_sha256": row.get("claim_sha256", ""),
+        "deviation": row.get("deviation"),
+        "tolerance": row.get("tolerance"),
+        "method": row.get("method", ""),
+        "measured_at": row.get("measured_at"),
+        "evidence": _evidence(row.get("evidence")),
+    }
+
+
+def _blank_measurement(expected: Mapping[str, object]) -> dict:
+    return {
+        "claim_id": expected.get("claim_id", ""),
+        "claim_sha256": expected.get("claim_sha256", ""),
+        "deviation": None,
+        "tolerance": expected.get("tolerance"),
+        "method": expected.get("method", ""),
+        "measured_at": None,
+        "evidence": [],
+    }
+
+
+def _evidence(value: object) -> list:
+    if isinstance(value, list | tuple):
+        return list(value)
+    return [] if value in (None, "") else [value]
 
 def _emit_replay(args, thesis, assessment: Assessment, plan: dict) -> int:
     replayers = _load_replay_pack(args.pack)
