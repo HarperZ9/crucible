@@ -72,7 +72,7 @@ def _index_verification(pack: dict, claim: dict, verdict: str):
 
 
 def test_canonical_sha_uses_unescaped_unicode_canonical_json():
-    pack = {"roles": {"π": []}, "relations": [{"from": "π", "to": "core"}]}
+    pack = {"roles": {"\u03c0": []}, "relations": [{"from": "\u03c0", "to": "core"}]}
     canon = json.dumps(pack, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
 
     assert canonical_sha(pack) == hashlib.sha256(canon.encode("utf-8")).hexdigest()

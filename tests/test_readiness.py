@@ -13,6 +13,23 @@ ROOT = Path(__file__).resolve().parents[1]
 EXAMPLES = ROOT / "examples"
 
 
+def test_flagship_brand_assets_exist_and_are_referenced():
+    root = Path(__file__).resolve().parents[1]
+    readme = (root / "README.md").read_text(encoding="utf-8")
+    for rel in [
+        "docs/brand/crucible-mark.svg",
+        "docs/brand/crucible-hero.svg",
+        "examples/crucible-demo.html",
+    ]:
+        assert (root / rel).exists(), rel
+        assert rel in readme
+    assert "## Why it matters" in readme
+    assert "## Work with it" in readme
+    demo = (root / "examples/crucible-demo.html").read_text(encoding="utf-8")
+    assert "original spec and artifact only" in demo
+    assert "UNVERIFIABLE" in demo
+
+
 def _example(name: str) -> str:
     return str(EXAMPLES / name)
 

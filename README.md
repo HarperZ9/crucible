@@ -1,8 +1,36 @@
+<p align="center">
+  <img src="docs/brand/crucible-hero.svg" alt="crucible, a Project Telos flagship for measurement-backed claim evaluation">
+</p>
+<!-- Project mark: docs/brand/crucible-mark.svg -->
+
 # crucible
+
+> Turn claims into verdicts grounded in measurement.
+
+[Project Telos](https://harperz9.github.io) | [gather](https://github.com/HarperZ9/gather) | [index](https://github.com/HarperZ9/index) | [forum](https://github.com/HarperZ9/forum) | [crucible](https://github.com/HarperZ9/crucible) | [telos](https://github.com/HarperZ9/telos)
 
 ![python: 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)
 ![deps: none (core)](https://img.shields.io/badge/core%20deps-none-success.svg)
 ![license: fair-source](https://img.shields.io/badge/license-fair--source-blue.svg)
+
+## Try it
+
+```bash
+pip install crucible-bench
+python examples/demo.py
+```
+
+Open the visual cleanroom verdict surface at [`examples/crucible-demo.html`](examples/crucible-demo.html).
+
+## Why it matters
+
+Claims are cheap until a decision depends on them. crucible makes a thesis stand next to the measurement that could break it, and turns uncertainty into a verdict you can re-check.
+
+## Work with it
+
+Use it on a claim that needs to survive review, sponsor a domain oracle, or fund the cleanroom review path for harder evaluations.
+
+## What it does
 
 Ideas are cheap to assert and expensive to check. A claim gets repeated until it sounds true.
 A correction arrives quietly and never catches up. A theory's standing becomes a vibe rather

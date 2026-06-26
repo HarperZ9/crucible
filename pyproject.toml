@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "crucible-bench"
 version = "1.1.0"
-description = "An accountable judgment organ: register a thesis and emit a re-checkable verdict per claim (MATCH / DRIFT / UNVERIFIABLE), grounded in a measurement rather than asserted"
+description = "Measurement-backed thesis evaluation with clean verifier packets and re-checkable verdicts."
 readme = "README.md"
 requires-python = ">=3.11"
 license = "LicenseRef-Fair-Source"

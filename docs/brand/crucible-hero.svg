@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 520" role="img" aria-label="crucible README hero for Project Telos. Turn claims into verdicts grounded in measurement.">
+  <title>crucible Project Telos hero</title>
+  <desc>crucible README hero for Project Telos. Turn claims into verdicts grounded in measurement.</desc>
+  <rect width="1280" height="520" rx="34" fill="#f4f3ef"/>
+  <path d="M80 96 H1200 M80 424 H1200" stroke="#0b0c0e" stroke-opacity=".14"/>
+  <text x="80" y="86" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="20" letter-spacing="6" fill="#585c64">PROJECT TELOS / MEASUREMENT-BACKED CLAIM EVALUATION</text>
+  <text x="76" y="334" font-family="Arial Black, Impact, system-ui, sans-serif" font-size="182" letter-spacing="0" fill="#0b0c0e" fill-opacity=".08">CRUCIBLE</text>
+  <text font-family="Arial, Helvetica, sans-serif" font-size="40" font-weight="700" fill="#0b0c0e">
+    <tspan x="84" y="188">Turn claims into verdicts grounded</tspan>
+    <tspan x="84" dy="48">in measurement.</tspan>
+  </text>
+  <text x="86" y="290" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="22" fill="#2f3238">THESIS / MEASURE / MATCH / UNVERIFIABLE</text>
+  <g transform="translate(878 78) scale(.70)"><path d="M94 350 H386 M150 350 L214 98 H306 L370 350" fill="none" stroke="#0b0c0e" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/><path d="M164 232 H356" stroke="#4636e8" stroke-width="14" stroke-linecap="round"/><circle cx="260" cy="232" r="42" fill="none" stroke="#0b0c0e" stroke-width="12"/></g>
+</svg>
