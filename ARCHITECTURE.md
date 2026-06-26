@@ -63,6 +63,11 @@ provides replay functions keyed by descriptor `oracle`, and crucible compares th
 inputs to the stored row. The shipped CLI still re-derives verdicts from stored measurements; external
 callers can now also re-run descriptor-bearing measurements.
 
+`render_assessment_report` turns the same sealed record into a deterministic Markdown artifact. It
+does not change the verdict contract or decide anything new; it gives an operator a readable surface
+over the counts, seals, integrity checks, verdicts, evidence, and recheck descriptors. The CLI exposes
+this as `crucible report REGISTRY`, defaulting to the latest assessment.
+
 ## The seams (the impure and the optional)
 
 crucible's core is pure standard library. Optional edges live behind a Protocol seam with a Null

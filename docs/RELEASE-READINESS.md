@@ -6,10 +6,10 @@ from release-candidate shape to stable flagship floor.
 ## Verified surface
 
 - The public CLI commands are covered: `register`, `assess`, `steelman`, `measure`, `registry`,
-  `verdicts`, `drift`, `export`, and `refine`.
+  `verdicts`, `drift`, `report`, `export`, and `refine`.
 - Registry actions are covered: `list`, `verify`, `stats`, `search`, and `prune`.
 - Bundled examples run through the public CLI, including manual measurements, table measurements,
-  refinement, registry stats/search, and publication-gated export.
+  refinement, registry stats/search, report rendering, and publication-gated export.
 - The offline `examples/demo.py` runs as a script and demonstrates MATCH, DRIFT, UNVERIFIABLE, and
   seal tamper detection.
 

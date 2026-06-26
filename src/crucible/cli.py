@@ -21,6 +21,7 @@ from crucible.commands import (
 from crucible.drift_cmd import cmd_drift
 from crucible.refine_cmd import cmd_refine
 from crucible.registry_cmd import cmd_registry, cmd_verdicts
+from crucible.report_cmd import cmd_report
 
 
 def _add_common(p: argparse.ArgumentParser) -> None:
@@ -94,6 +95,14 @@ def build_parser() -> argparse.ArgumentParser:
                     help="re-derive each assessment's verdicts from the thesis and measurements on disk")
     vd.add_argument("--json", action="store_true", help="emit JSON instead of human text")
     vd.set_defaults(func=cmd_verdicts)
+
+    rpt = sub.add_parser("report", help="render a Markdown report for a witnessed assessment")
+    rpt.add_argument("dir", help="the registry directory")
+    rpt.add_argument("--index", default="-1",
+                     help="assessment index to render, default -1 for the latest")
+    rpt.add_argument("--out", default=None, metavar="FILE",
+                     help="write the Markdown report to FILE instead of stdout")
+    rpt.set_defaults(func=cmd_report)
 
     dr = sub.add_parser("drift", help="compare the latest two witnessed assessments in a registry")
     dr.add_argument("dir", help="the registry directory")

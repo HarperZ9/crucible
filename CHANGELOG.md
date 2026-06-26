@@ -3,6 +3,18 @@
 All notable changes to crucible. Versions follow semantic versioning; each minor release is built
 behind a feature branch and reviewed before merge.
 
+## 0.13.0
+
+Markdown assessment reports.
+
+- `crucible.report`: adds `render_assessment_report`, a deterministic Markdown renderer for one
+  witnessed assessment and its thesis.
+- Reports include assessment/thesis seals, outcome counts, integrity checks, per-claim verdicts,
+  measurement evidence, optional recheck descriptors, and unmeasured claims.
+- CLI: `crucible report REGISTRY [--index N] [--out FILE]` renders the latest assessment by default
+  and can write the Markdown body to disk.
+- Public API: exports `render_assessment_report`.
+
 ## 0.12.0
 
 Measurement recheck descriptors.

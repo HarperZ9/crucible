@@ -50,6 +50,7 @@ from crucible.refine import (
 )
 from crucible.registry import Registry
 from crucible.registry_ops import prune_objects, registry_stats, search_theses
+from crucible.report import render_assessment_report
 from crucible.steelman import NullSteelman, Refutation, Steelman, steelman_thesis
 from crucible.subprocess_edges import SubprocessMeasure, SubprocessSteelman
 from crucible.telos_measure import (
@@ -75,7 +76,7 @@ from crucible.verdict import (
     verdict_for,
 )
 
-__version__ = "0.12.0"
+__version__ = "0.13.0"
 
 __all__ = [
     "Assessment", "Claim", "DriftReport", "DriftRow", "GatherDigestMeasure", "GradedCriterion",
@@ -87,7 +88,8 @@ __all__ = [
     "assess", "claim_body", "claim_hash", "cohesion", "content_hash", "make_claim", "make_thesis",
     "canonical_sha", "check_content", "drift_track", "export_guard", "export_thesis", "gate_check",
     "is_telos_artifact", "measure_thesis", "receipt_matches",
-    "recheck_assessment", "recheck_measurements", "refine", "refine_thesis", "steelman_thesis",
+    "recheck_assessment", "recheck_measurements", "refine", "refine_thesis", "render_assessment_report",
+    "steelman_thesis",
     "prune_objects", "registry_stats", "search_theses", "thesis_seal", "verdict_for", "verdict_seal",
     "verify_assessment", "verify_gather_digest", "verify_index_verification", "verify_telos_artifact",
     "verify_thesis", "__version__",
