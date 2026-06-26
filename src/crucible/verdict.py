@@ -12,6 +12,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 
 from crucible.claim import Claim
+from crucible.thesis import FENCED, PUBLISHABLE
 
 MATCH = "MATCH"
 DRIFT = "DRIFT"
@@ -48,6 +49,7 @@ class Verdict:
     margin: float | None
     method: str
     grounds: str
+    disposition: str = PUBLISHABLE
 
 
 def _trusted(x: float | None) -> float | None:
@@ -59,12 +61,25 @@ def _trusted(x: float | None) -> float | None:
     return xf if math.isfinite(xf) and xf >= 0 else None
 
 
-def _unverifiable(cid: str, csha: str, deviation: float | None, tolerance: float, method: str,
-                  grounds: str) -> Verdict:
-    return Verdict(cid, csha, UNVERIFIABLE, deviation, tolerance, None, method, grounds)
+def _disposition(value: str) -> str:
+    if value not in (PUBLISHABLE, FENCED):
+        raise ValueError(f"disposition must be {PUBLISHABLE!r} or {FENCED!r}, got {value!r}")
+    return value
 
 
-def verdict_for(claim: Claim, measurement: Measurement | None) -> Verdict:
+def _unverifiable(
+    cid: str,
+    csha: str,
+    deviation: float | None,
+    tolerance: float,
+    method: str,
+    grounds: str,
+    disposition: str,
+) -> Verdict:
+    return Verdict(cid, csha, UNVERIFIABLE, deviation, tolerance, None, method, grounds, disposition)
+
+
+def verdict_for(claim: Claim, measurement: Measurement | None, *, disposition: str = PUBLISHABLE) -> Verdict:
     """Compute a claim's verdict from its measurement. PURE: no model, recomputable from the record.
 
     The order of the checks is the honesty ladder:
@@ -75,21 +90,22 @@ def verdict_for(claim: Claim, measurement: Measurement | None) -> Verdict:
     4. Otherwise margin = (tolerance - deviation) / tolerance: MATCH if within (margin >= 0), else DRIFT.
     """
     cid, csha = claim.id, claim.sha256
+    disp = _disposition(disposition)
     if not claim.falsification:
-        return _unverifiable(cid, csha, None, 0.0, "none", "claim states no falsification condition")
+        return _unverifiable(cid, csha, None, 0.0, "none", "claim states no falsification condition", disp)
     if measurement is None:
-        return _unverifiable(cid, csha, None, 0.0, "none", "no measurement")
+        return _unverifiable(cid, csha, None, 0.0, "none", "no measurement", disp)
     if measurement.claim_sha256 != csha:
         return _unverifiable(cid, csha, None, measurement.tolerance, measurement.method,
-                             "measurement does not bind to this claim")
+                             "measurement does not bind to this claim", disp)
     dev = _trusted(measurement.deviation)
     tol = _trusted(measurement.tolerance)
     if dev is None or tol is None or tol <= 0:
         return _unverifiable(cid, csha, dev, tol if tol is not None else 0.0, measurement.method,
-                             "deviation or tolerance not measurable")
+                             "deviation or tolerance not measurable", disp)
     margin = (tol - dev) / tol
     if margin >= 0.0:
         return Verdict(cid, csha, MATCH, dev, tol, margin, measurement.method,
-                       f"deviation {dev:g} within tolerance {tol:g}")
+                       f"deviation {dev:g} within tolerance {tol:g}", disp)
     return Verdict(cid, csha, DRIFT, dev, tol, margin, measurement.method,
-                   f"deviation {dev:g} exceeds tolerance {tol:g}")
+                   f"deviation {dev:g} exceeds tolerance {tol:g}", disp)

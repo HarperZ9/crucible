@@ -128,8 +128,7 @@ def _run_json(
         output = _read_output(stdout_path, max_output_bytes)
     finally:
         for path in (stdin_path, stdout_path):
-            if path and os.path.exists(path):
-                os.unlink(path)
+            _unlink_temp(path)
     try:
         data = json.loads(output)
     except json.JSONDecodeError as exc:
@@ -165,9 +164,24 @@ def _wait_bounded(proc: subprocess.Popen, stdout_path: str, timeout: float, max_
 def _terminate(proc: subprocess.Popen) -> None:
     proc.kill()
     try:
-        proc.wait(timeout=1)
+        proc.wait(timeout=5)
     except subprocess.TimeoutExpired:
         pass
+
+
+def _unlink_temp(path: str | None) -> None:
+    if not path:
+        return
+    for _attempt in range(20):
+        if not os.path.exists(path):
+            return
+        try:
+            os.unlink(path)
+            return
+        except PermissionError:
+            time.sleep(0.05)
+    if os.path.exists(path):
+        os.unlink(path)
 
 
 def _read_output(path: str, max_output_bytes: int) -> str:

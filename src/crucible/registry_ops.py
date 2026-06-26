@@ -158,13 +158,16 @@ def _search_row(row: Mapping, latest_verdicts: list[str]) -> dict:
 
 def _object_shas(reg: Registry) -> set[str]:
     root = Path(getattr(reg, "_objects"))
+    reg._guard_path(str(root))  # noqa: SLF001 - same-package registry path guard.
     if not root.exists():
         return set()
     shas: set[str] = set()
     for shard in root.iterdir():
+        reg._guard_path(str(shard))  # noqa: SLF001
         if not shard.is_dir() or len(shard.name) != 2:
             continue
         for body in shard.iterdir():
+            reg._guard_path(str(body))  # noqa: SLF001
             if body.is_file() and not body.name.endswith(".tmp"):
                 sha = shard.name + body.name
                 try:
@@ -177,6 +180,8 @@ def _object_shas(reg: Registry) -> set[str]:
 def _safe_object_path(reg: Registry, sha: str) -> Path:
     root = Path(getattr(reg, "_objects")).resolve()
     path = Path(reg._object_path(sha)).resolve()  # noqa: SLF001 - same-package object-store helper.
+    reg._guard_path(str(root))  # noqa: SLF001
+    reg._guard_path(str(path))  # noqa: SLF001
     try:
         path.relative_to(root)
     except ValueError as exc:

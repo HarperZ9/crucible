@@ -111,3 +111,22 @@ def test_prune_objects_dry_runs_then_deletes_orphaned_bodies(tmp_path):
     assert applied["dry_run"] is False
     assert applied["deleted"] == [orphan]
     assert not os.path.exists(orphan_path)
+
+
+def test_prune_objects_refuses_escaped_objects_root(tmp_path):
+    reg, _engine, _finance = _seed_registry(tmp_path / "reg")
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    orphan = "f" * 64
+    shard = outside / orphan[:2]
+    shard.mkdir()
+    victim = shard / orphan[2:]
+    victim.write_text("outside body", encoding="utf-8")
+    reg._objects = str(outside)  # noqa: SLF001 - simulate a junctioned/escaped objects root.
+
+    try:
+        assert prune_objects(reg, apply=True)["deleted"] == []
+    except ValueError:
+        pass
+
+    assert victim.exists()

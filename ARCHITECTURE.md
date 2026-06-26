@@ -56,6 +56,8 @@ exposed even when its seals are internally consistent. The CLI surfaces this as 
 --verify`. The seal proves integrity, not authorship: a fully consistent re-forge (every field and
 seal rewritten together) is out of scope without a signature, and the docs say so where a user meets it.
 Summary counts are not trusted as labels; verification re-derives them from the verdict rows.
+Assessment and verdict rows also carry the thesis disposition, and the disposition participates in
+the assessment and verdict seals so publication posture is visible in witnessed outputs.
 
 Measurement rows persist and seal claim binding, deviation, tolerance, method, `measured_at`,
 evidence, and optional `recheck` descriptors. When a descriptor is present, it is included in the
@@ -163,9 +165,10 @@ summarizes thesis counts, claim bodies, dispositions, assessment history, skippe
 rows, and the latest verified verdict posture per thesis. `search_theses` recalls theses by scope
 text, thesis status, and latest verified verdict status, falling back past invalid tail rows instead
 of trusting or hiding history. `prune_objects` identifies orphaned claim bodies and is dry-run by
-default; deletion requires an explicit apply path and validates each object path before unlinking it.
-The registry rejects duplicate thesis ids with different seals and refuses symlinked storage paths, so
-content-addressed writes stay inside the registry root.
+default; deletion requires an explicit apply path and validates the object root plus each object path
+with the registry realpath guard before unlinking it. The registry rejects duplicate thesis ids with
+different seals and refuses symlinked storage paths, so content-addressed writes stay inside the
+registry root.
 
 ## Verifier separation
 

@@ -13,7 +13,7 @@ from crucible.assess import (
 )
 from crucible.claim import make_claim
 from crucible.registry import Registry
-from crucible.thesis import make_thesis
+from crucible.thesis import FENCED, make_thesis
 from crucible.verdict import DRIFT, MATCH, UNVERIFIABLE, Measurement
 
 CLOCK = lambda: 1000.0  # noqa: E731
@@ -56,6 +56,23 @@ def test_assessment_seal_verifies_and_tamper_is_caught():
     # flipping a count without resealing must be caught
     tampered = dataclasses.replace(a, match=3, drift=0)
     assert not verify_assessment(tampered)
+
+
+def test_assessment_and_verdict_rows_carry_disposition():
+    t = make_thesis("fenced", [make_claim("hold", "break")], clock=CLOCK, disposition=FENCED)
+    measured = Measurement(t.claims[0].id, t.claims[0].sha256, 0.0, 0.1, "oracle", 0.0)
+    a, verdicts = assess(t, [measured], clock=CLOCK)
+
+    assert verdicts[0].disposition == FENCED
+    assert a.disposition == FENCED
+    assert a.verdicts[0]["disposition"] == FENCED
+    assert a.to_dict()["disposition"] == FENCED
+    assert verify_assessment(a)
+
+    bad = [dict(v) for v in a.verdicts]
+    bad[0]["disposition"] = "publishable"
+    assert not verify_assessment(dataclasses.replace(a, verdicts=tuple(bad)))
+    assert not verify_assessment(dataclasses.replace(a, disposition="publishable"))
 
 
 def test_to_dict_from_dict_roundtrip_recheckable():
@@ -189,7 +206,7 @@ def test_recheck_exposes_a_forged_but_internally_consistent_verdict():
         forged_verdicts.append(vr)
     new_vseal = _seal_rows(forged_verdicts, _VSEAL_FIELDS)
     fields = _record_fields(a.started_at, a.thesis_id, a.thesis_seal, a.claims, 2, 0, 1,
-                            new_vseal, a.measurement_seal, a.stored)
+                            new_vseal, a.measurement_seal, a.disposition, a.stored)
     forged = dataclasses.replace(a, verdicts=tuple(forged_verdicts), match=2, drift=0,
                                  verdict_seal=new_vseal, seal=_seal_record(fields))
     assert verify_assessment(forged)  # the forgery is internally consistent: every seal matches
@@ -216,7 +233,7 @@ def test_forged_summary_counts_break_verify_and_recheck_even_when_resealed():
     t = _thesis()
     a, _ = assess(t, _measurements(t), clock=CLOCK)
     fields = _record_fields(a.started_at, a.thesis_id, a.thesis_seal, a.claims, 0, 3, 0,
-                            a.verdict_seal, a.measurement_seal, a.stored)
+                            a.verdict_seal, a.measurement_seal, a.disposition, a.stored)
     forged = dataclasses.replace(a, match=0, drift=3, unverifiable=0, seal=_seal_record(fields))
 
     assert not verify_assessment(forged)

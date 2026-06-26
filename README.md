@@ -130,7 +130,8 @@ Shipped:
 - A witnessed assessment that persists its verdicts and measurements, so `verify_assessment`
   recomputes the seals from the stored data and `recheck_assessment` re-derives each verdict from the
   thesis and the measurements: a verdict, margin, and grounds cannot be asserted, they must follow
-  from the record. Summary counts are re-derived from verdict rows as part of verification.
+  from the record. Summary counts are re-derived from verdict rows as part of verification, and the
+  thesis disposition is carried in the assessment and verdict rows.
 - A content-addressed registry that re-verifies stored claims (MATCH / MISSING / CORRUPT), checks
   thesis seals (catching a swapped claim a body check would miss), rejects duplicate thesis ids with
   different seals, refuses symlinked storage paths, and refuses to load a tampered thesis.
@@ -162,7 +163,7 @@ Shipped:
   public thesis contract.
 - Registry operations: `registry_stats`, `search_theses`, `prune_objects`, and
   `crucible registry stats|search|prune` summarize the corpus, recall theses by scope/status/latest
-  verdict, and prune orphan claim bodies only when explicitly applied.
+  verdict, and prune orphan claim bodies only when explicitly applied after registry path guards pass.
 - Optional subprocess edges: `SubprocessSteelman` and `SubprocessMeasure` run configured commands
   through bounded JSON stdin/stdout, reject shell strings, enforce timeouts, and stamp claim identity
   locally. By default they pass only a minimal environment, discard stderr, and actively terminate

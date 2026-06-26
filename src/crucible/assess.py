@@ -1,18 +1,8 @@
-"""The witnessed assessment: fold a thesis's per-claim verdicts into a re-checkable record.
+"""The witnessed assessment: fold per-claim verdicts into a re-checkable record.
 
-``assess`` computes a verdict per claim (pure, from each claim's measurement) and seals the verdicts,
-the measurements, and the record. The verdicts and the measurements are persisted with the record, so
-the guarantee is real, not a fingerprint of discarded data:
-
-- ``verify_assessment`` recomputes every seal from the stored arrays (the verdict seal from the stored
-  verdicts, the measurement seal from the stored measurements, the record seal from the fields that
-  bind both). It is not a tautology: editing a verdict, a measurement, or a count is caught.
-- ``recheck_assessment`` goes further, re-deriving each verdict from the thesis and the stored
-  measurements via ``verdict_for`` and confirming the stored verdicts are exactly what the pure
-  function yields. A verdict that was asserted rather than computed is exposed even if its seals are
-  internally consistent. This is the differentiator, made checkable from disk.
-
-The clock is injected, so the record replays.
+``verify_assessment`` recomputes seals from stored verdict and measurement rows. ``recheck_assessment``
+then re-derives verdicts from thesis plus measurements, exposing asserted verdicts even when their
+stored seals are internally consistent. The clock is injected, so the record replays.
 """
 from __future__ import annotations
 
@@ -22,7 +12,7 @@ import time
 from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass
 
-from crucible.thesis import Thesis, verify_thesis
+from crucible.thesis import PUBLISHABLE, Thesis, verify_thesis
 from crucible.verdict import (
     DRIFT,
     MATCH,
@@ -32,7 +22,10 @@ from crucible.verdict import (
     verdict_for,
 )
 
-_VSEAL_FIELDS = ("claim_id", "claim_sha256", "status", "deviation", "tolerance", "margin", "method", "grounds")
+_VSEAL_FIELDS = (
+    "claim_id", "claim_sha256", "status", "deviation", "tolerance", "margin", "method", "grounds",
+    "disposition",
+)
 _MSEAL_FIELDS = ("claim_id", "claim_sha256", "deviation", "tolerance", "method", "measured_at", "evidence")
 _MSEAL_RECHECK_FIELDS = _MSEAL_FIELDS + ("recheck",)
 
@@ -42,7 +35,7 @@ MeasurementReplayer = Callable[[Mapping[str, object]], Measurement | Mapping[str
 def _verdict_row(v: Verdict) -> dict:
     return {"claim_id": v.claim_id, "claim_sha256": v.claim_sha256, "status": v.status,
             "deviation": v.deviation, "tolerance": v.tolerance, "margin": v.margin,
-            "method": v.method, "grounds": v.grounds}
+            "method": v.method, "grounds": v.grounds, "disposition": v.disposition}
 
 
 def _measurement_row(m: Measurement) -> dict:
@@ -81,11 +74,12 @@ def verdict_seal(verdicts: Iterable[Verdict]) -> str:
 
 
 def _record_fields(started_at: float, thesis_id: str, thesis_seal: str, claims: int, match: int,
-                   drift: int, unverifiable: int, vseal: str, mseal: str, stored: dict | None) -> dict:
+                   drift: int, unverifiable: int, vseal: str, mseal: str, disposition: str,
+                   stored: dict | None) -> dict:
     return {
         "started_at": started_at, "thesis_id": thesis_id, "thesis_seal": thesis_seal,
         "claims": claims, "match": match, "drift": drift, "unverifiable": unverifiable,
-        "verdict_seal": vseal, "measurement_seal": mseal, "stored": stored,
+        "verdict_seal": vseal, "measurement_seal": mseal, "disposition": disposition, "stored": stored,
     }
 
 
@@ -112,13 +106,14 @@ class Assessment:
     measurement_seal: str
     verdicts: tuple[dict, ...]
     measurements: tuple[dict, ...]
+    disposition: str
     stored: dict | None
     seal: str
 
     def to_dict(self) -> dict:
         fields = _record_fields(self.started_at, self.thesis_id, self.thesis_seal, self.claims,
                                 self.match, self.drift, self.unverifiable, self.verdict_seal,
-                                self.measurement_seal, self.stored)
+                                self.measurement_seal, self.disposition, self.stored)
         return {**fields, "verdicts": list(self.verdicts),
                 "measurements": list(self.measurements), "seal": self.seal}
 
@@ -128,7 +123,7 @@ class Assessment:
             d["started_at"], d["thesis_id"], d["thesis_seal"], d["claims"], d["match"], d["drift"],
             d["unverifiable"], d["verdict_seal"], d["measurement_seal"],
             _rows(d.get("verdicts", ()), "verdicts"), _rows(d.get("measurements", ()), "measurements"),
-            d.get("stored"), d["seal"],
+            str(d.get("disposition", PUBLISHABLE)), d.get("stored"), d["seal"],
         )
 
 
@@ -143,7 +138,8 @@ def verify_assessment(a: Assessment) -> bool:
     if _measurement_seal(a.measurements) != a.measurement_seal:
         return False
     fields = _record_fields(a.started_at, a.thesis_id, a.thesis_seal, a.claims, a.match, a.drift,
-                            a.unverifiable, a.verdict_seal, a.measurement_seal, a.stored)
+                            a.unverifiable, a.verdict_seal, a.measurement_seal, a.disposition,
+                            a.stored)
     return _seal_record(fields) == a.seal
 
 
@@ -228,13 +224,14 @@ def recheck_assessment(
     yields, so a stored verdict cannot have been asserted. Returns the three sub-checks; all True
     means the assessment is intact AND its verdicts genuinely follow from the measurements."""
     by_id = {m.claim_id: m for m in (_measurement_from_row(r) for r in a.measurements)}
-    rederived = [verdict_for(c, by_id.get(c.id)) for c in thesis.claims]
+    rederived = [verdict_for(c, by_id.get(c.id), disposition=thesis.disposition) for c in thesis.claims]
     rederived_rows = [_verdict_row(v) for v in rederived]
     rederived_seal = verdict_seal(rederived)
     stored_rederived = _seal_rows(a.verdicts, _VSEAL_FIELDS) == rederived_seal
     result = {
         "seals_ok": verify_assessment(a),
-        "thesis_ok": verify_thesis(thesis) and thesis.seal == a.thesis_seal,
+        "thesis_ok": verify_thesis(thesis) and thesis.seal == a.thesis_seal
+        and thesis.disposition == a.disposition,
         "verdicts_rederive": (
             stored_rederived
             and a.verdict_seal == rederived_seal
@@ -279,16 +276,18 @@ def assess(
     """
     by_id = _index_measurements(measurements)
     started = float(clock())
-    verdicts = [verdict_for(c, by_id.get(c.id)) for c in thesis.claims]
+    verdicts = [verdict_for(c, by_id.get(c.id), disposition=thesis.disposition) for c in thesis.claims]
     counts = _count(verdicts)
     vrows = tuple(_verdict_row(v) for v in verdicts)
     mrows = tuple(_measurement_row(m) for m in by_id.values())
     vseal = _seal_rows(vrows, _VSEAL_FIELDS)
     mseal = _measurement_seal(mrows)
     fields = _record_fields(started, thesis.id, thesis.seal, len(thesis.claims),
-                            counts[MATCH], counts[DRIFT], counts[UNVERIFIABLE], vseal, mseal, None)
+                            counts[MATCH], counts[DRIFT], counts[UNVERIFIABLE], vseal, mseal,
+                            thesis.disposition, None)
     record = Assessment(started, thesis.id, thesis.seal, len(thesis.claims), counts[MATCH],
-                        counts[DRIFT], counts[UNVERIFIABLE], vseal, mseal, vrows, mrows, None,
+                        counts[DRIFT], counts[UNVERIFIABLE], vseal, mseal, vrows, mrows,
+                        thesis.disposition, None,
                         _seal_record(fields))
     if registry is not None:
         registry.register(thesis)  # idempotent; ensures the thesis is on disk so the verdicts re-derive
