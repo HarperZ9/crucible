@@ -24,6 +24,8 @@ Operator run surface.
   creating a second verdict path.
 - Replay packs that return the template assessment block are checked against the selected thesis id,
   assessment seal, and measurement seal before oracle replay starts.
+- Cleanroom review now recomputes the expected `report.md` artifact from `spec.json` plus `run.json`
+  and fails closed when the human report is tampered or stale.
 
 ## 1.0.0
 

@@ -6,6 +6,11 @@ import os
 import sys
 from collections.abc import Mapping
 
+from crucible.assess import Assessment
+from crucible.claim import Claim
+from crucible.report import render_assessment_report
+from crucible.thesis import Thesis, verify_thesis
+
 REQUIRED_FILES = ("spec.json", "run.json", "report.md", "review.md")
 ALLOWED_INPUTS = ["spec.json", "run.json", "report.md"]
 EXCLUDED_CONTEXT = ["worker context", "reasoning trace", "intermediate steps"]
@@ -30,12 +35,14 @@ def review_bundle(bundle: str) -> dict:
         "no_extra_context": _no_extra_context(base, findings),
         "verifier_boundary": False,
         "spec_matches_run": False,
+        "report_matches_run": False,
     }
     if checks["required_files"]:
         spec = _load_json(os.path.join(base, "spec.json"), "spec.json", findings)
         run = _load_json(os.path.join(base, "run.json"), "run.json", findings)
         checks["verifier_boundary"] = _verifier_boundary(run, findings)
         checks["spec_matches_run"] = _spec_matches_run(spec, run, findings)
+        checks["report_matches_run"] = _report_matches_run(base, spec, run, findings)
     return {
         "ok": all(checks.values()),
         "bundle": base,
@@ -134,6 +141,97 @@ def _spec_matches_run(spec: Mapping | None, run: Mapping | None, findings: list[
         findings.append("run thesis claim references do not match spec.json claims")
         ok = False
     return ok
+
+
+def _report_matches_run(
+    base: str,
+    spec: Mapping | None,
+    run: Mapping | None,
+    findings: list[str],
+) -> bool:
+    if spec is None or run is None:
+        return False
+    thesis = _thesis_from_spec(spec, findings)
+    assessment = _assessment_from_run(run, findings)
+    checks = run.get("checks")
+    if not isinstance(checks, Mapping):
+        findings.append("run.json checks must be an object")
+        return False
+    if thesis is None or assessment is None:
+        return False
+    report_path = os.path.join(base, "report.md")
+    try:
+        with open(report_path, encoding="utf-8") as f:
+            actual = f.read()
+    except OSError as exc:
+        findings.append(f"report.md is not readable: {exc}")
+        return False
+    expected = render_assessment_report(thesis, assessment, checks=checks)
+    if actual != expected:
+        findings.append("report.md does not match run.json assessment artifact")
+        return False
+    return True
+
+
+def _thesis_from_spec(spec: Mapping, findings: list[str]) -> Thesis | None:
+    claims_value = spec.get("claims")
+    if not isinstance(claims_value, list):
+        findings.append("spec.json claims must be a list")
+        return None
+    claims: list[Claim] = []
+    for index, row in enumerate(claims_value, 1):
+        if not isinstance(row, Mapping):
+            findings.append(f"spec.json claim {index} must be an object")
+            return None
+        claim = _claim_from_spec(row, index, findings)
+        if claim is None:
+            return None
+        claims.append(claim)
+    thesis = Thesis(
+        id=_string(spec, "id", "spec thesis id", findings),
+        title=_string(spec, "title", "spec thesis title", findings),
+        claims=tuple(claims),
+        registered_at=0.0,
+        disposition=_string(spec, "disposition", "spec thesis disposition", findings),
+        seal=_string(spec, "seal", "spec thesis seal", findings),
+    )
+    if not verify_thesis(thesis):
+        findings.append("spec.json thesis seal or claim receipts do not verify")
+        return None
+    return thesis
+
+
+def _claim_from_spec(row: Mapping, index: int, findings: list[str]) -> Claim | None:
+    claim = Claim(
+        id=_string(row, "id", f"spec claim {index} id", findings),
+        text=_string(row, "text", f"spec claim {index} text", findings),
+        falsification=_string(row, "falsification", f"spec claim {index} falsification", findings),
+        sha256=_string(row, "sha256", f"spec claim {index} sha256", findings),
+    )
+    if claim.verify():
+        return claim
+    findings.append(f"spec claim {index} receipt does not verify")
+    return None
+
+
+def _assessment_from_run(run: Mapping, findings: list[str]) -> Assessment | None:
+    value = run.get("assessment")
+    if not isinstance(value, Mapping):
+        findings.append("run.json assessment must be an object")
+        return None
+    try:
+        return Assessment.from_dict(value)
+    except (KeyError, TypeError, ValueError) as exc:
+        findings.append(f"run.json assessment is invalid: {exc}")
+        return None
+
+
+def _string(row: Mapping, key: str, label: str, findings: list[str]) -> str:
+    value = row.get(key)
+    if isinstance(value, str):
+        return value
+    findings.append(f"{label} must be a string")
+    return ""
 
 
 def _same(left: Mapping, right: Mapping, key: str, findings: list[str], label: str) -> bool:

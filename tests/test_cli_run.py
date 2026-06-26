@@ -109,6 +109,7 @@ def test_review_validates_cleanroom_bundle_contract(tmp_path, capsys):
         "no_extra_context": True,
         "verifier_boundary": True,
         "spec_matches_run": True,
+        "report_matches_run": True,
     }
     assert payload["allowed_inputs"] == ["spec.json", "run.json", "report.md"]
     assert payload["excluded"] == ["worker context", "reasoning trace", "intermediate steps"]
@@ -130,6 +131,26 @@ def test_review_fails_closed_on_extra_context_files(tmp_path, capsys):
     assert payload["ok"] is False
     assert payload["checks"]["no_extra_context"] is False
     assert any("notes.md" in finding for finding in payload["findings"])
+
+
+def test_review_fails_closed_on_tampered_report_artifact(tmp_path, capsys):
+    bundle = tmp_path / "packet"
+    reg = str(tmp_path / "reg")
+
+    assert main(["run", _thesis_file(tmp_path), "--measurements", _measurements_file(tmp_path),
+                 "--registry", reg, "--bundle", str(bundle), "--json"]) == 0
+    capsys.readouterr()
+    (bundle / "report.md").write_text(
+        "# crucible report: Run thesis\n\n## Summary\n\n- forged: all claims MATCH\n",
+        encoding="utf-8",
+    )
+
+    assert main(["review", str(bundle), "--json"]) == 1
+    payload = json.loads(capsys.readouterr().out)
+
+    assert payload["ok"] is False
+    assert payload["checks"]["report_matches_run"] is False
+    assert any("report.md does not match run.json" in finding for finding in payload["findings"])
 
 
 def test_run_human_output_with_substrate_is_scannable(tmp_path, capsys):

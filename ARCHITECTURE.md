@@ -188,7 +188,8 @@ The review loop is intentionally clean. A verifier receives the original spec/re
 artifact under review. It does not receive the worker's context, reasoning trace, or intermediate
 steps. If success cannot be evaluated from that minimal state, the spec is not checkable yet and the
 readiness artifact needs work before release. For run packets, `crucible review BUNDLE` makes that
-rule executable: extra context files fail the packet before any verifier judgment begins.
+rule executable: extra context files fail the packet before any verifier judgment begins, and
+`report.md` must match the assessment artifact rendered from `run.json`.
 
 ## Determinism and the zero-dependency core
 

@@ -76,6 +76,10 @@ def test_example_assess_registry_search_and_report(tmp_path, capsys):
     assert json.loads((run_bundle / "run.json").read_text(encoding="utf-8"))["assessment"]["match"] == 1
     assert "original spec and the artifact" in (run_bundle / "review.md").read_text(encoding="utf-8")
 
+    assert main(["review", str(run_bundle), "--json"]) == 0
+    reviewed = _json_out(capsys)
+    assert reviewed["checks"]["report_matches_run"] is True
+
 
 def test_example_measure_and_refine_through_public_cli(capsys):
     thesis = _example("thesis-binary-search.json")
@@ -161,4 +165,5 @@ def test_release_docs_define_cleanroom_checkability_rules():
     assert "oracle replay pack" in normalized_readiness
     assert "replay pack template" in normalized_readiness
     assert "assessment block" in normalized_readiness
+    assert "report content that does not render from `run.json`" in normalized_readiness
     assert "crucible review" in normalized_readiness
