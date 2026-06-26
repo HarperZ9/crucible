@@ -46,10 +46,10 @@ def test_render_assessment_report_is_readable_deterministic_markdown():
     assert f"- assessment_seal: `{assessment.seal}`" in report
     assert "- counts: MATCH 1 / DRIFT 1 / UNVERIFIABLE 1" in report
     assert "- integrity: seals_ok=True, thesis_ok=True, verdicts_rederive=True" in report
-    assert "| Claim | Status | Margin | Method | Grounds |" in report
-    assert "| latency stays under budget | MATCH | 1 | bench | deviation 0 within tolerance 0.1 |" in report
-    assert "| quality stays above floor | DRIFT | -9 | bench | deviation 1 exceeds tolerance 0.1 |" in report
-    assert "| operator can inspect the outcome | UNVERIFIABLE |  | none | no measurement |" in report
+    assert "| Claim | Status | Disposition | Margin | Method | Grounds |" in report
+    assert "| latency stays under budget | MATCH | publishable | 1 | bench | deviation 0 within tolerance 0.1 |" in report
+    assert "| quality stays above floor | DRIFT | publishable | -9 | bench | deviation 1 exceeds tolerance 0.1 |" in report
+    assert "| operator can inspect the outcome | UNVERIFIABLE | publishable |  | none | no measurement |" in report
     assert report == render_assessment_report(thesis, assessment, checks=checks)
 
 

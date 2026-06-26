@@ -40,7 +40,8 @@ now that crucible has reached its stable flagship floor.
   publishing, pins external GitHub Actions by commit SHA, and installs pinned build tooling plus the
   pinned build backend from `requirements-release.txt`. The artifact can verify the workflow
   declaration; PyPI trusted-publisher registration and GitHub environment protection settings are
-  external provider configuration checked at release-operations time.
+  external provider configuration checked at release-operations time, not artifact-only acceptance
+  criteria.
 
 ## Cleanroom acceptance
 
@@ -50,7 +51,9 @@ acceptance evidence unless their facts are visible in the artifact itself.
 
 Secret hygiene is mechanical at the release gate: no committed credentials, `.env` stays ignored,
 runtime dependencies are empty, and subprocess-backed edges run with explicit clean environment
-allowlists instead of inheriting the parent process environment. caller-supplied measurement evidence is treated as user data and is persisted only when the caller provides it; crucible does not claim to classify arbitrary evidence text as secret or non-secret.
+allowlists instead of inheriting the parent process environment. Caller-supplied measurement evidence
+is treated as user data and is persisted only when the caller provides it; crucible does not claim to
+classify arbitrary evidence text as secret or non-secret.
 
 Run this stale-language scan before release:
 

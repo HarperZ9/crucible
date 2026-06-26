@@ -137,8 +137,8 @@ def _resolve_thesis(thesis_arg: str, registry: str | None) -> Thesis:
 
 def _verdict_dict(v: Verdict) -> dict:
     return {"claim_id": v.claim_id, "claim_sha256": v.claim_sha256, "status": v.status,
-            "deviation": v.deviation, "tolerance": v.tolerance, "margin": v.margin,
-            "method": v.method, "grounds": v.grounds}
+            "disposition": v.disposition, "deviation": v.deviation, "tolerance": v.tolerance,
+            "margin": v.margin, "method": v.method, "grounds": v.grounds}
 
 
 def _recheck_last(registry_dir: str) -> dict | None:

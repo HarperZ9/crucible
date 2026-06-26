@@ -152,8 +152,8 @@ Shipped:
   `crucible drift REGISTRY` compare the latest two rounds and classify each claim as held, moved,
   improved, or regressed from the recorded margins.
 - Assessment reports: `render_assessment_report` and `crucible report REGISTRY` render a deterministic
-  Markdown artifact with counts, seals, integrity checks, verdicts, measurement evidence, and recheck
-  descriptors.
+  Markdown artifact with counts, seals, integrity checks, verdict dispositions, measurement evidence,
+  and recheck descriptors.
 - Batch assessment: `crucible batch MANIFEST --registry DIR [--reports DIR]` consumes a manifest of
   thesis jobs, records each assessment into one registry, and optionally writes one Markdown report
   per job. Manifest paths stay inside the manifest bundle, path-like missing refs fail closed, and

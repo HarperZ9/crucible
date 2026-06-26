@@ -134,6 +134,7 @@ def test_release_workflow_uses_pinned_build_tool_requirements():
 
 def test_release_docs_define_cleanroom_checkability_rules():
     readiness = (ROOT / "docs" / "RELEASE-READINESS.md").read_text(encoding="utf-8")
+    normalized_readiness = " ".join(readiness.lower().split())
     license_text = (ROOT / "LICENSE").read_text(encoding="utf-8")
 
     assert "crucible Fair-Source License" in license_text
@@ -141,4 +142,5 @@ def test_release_docs_define_cleanroom_checkability_rules():
     assert "Cleanroom acceptance" in readiness
     assert "api[_-]?key|" + "to" + "ken|se" + "cret|pass" + "word" in readiness
     assert "before 1\\.0|" + "release-" + "candidate" in readiness
-    assert "caller-supplied measurement evidence is treated as user data" in readiness
+    assert "caller-supplied measurement evidence is treated as user data" in normalized_readiness
+    assert "not artifact-only acceptance criteria" in normalized_readiness

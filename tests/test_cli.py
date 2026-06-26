@@ -53,6 +53,7 @@ def test_assess_json_mode(tmp_path, capsys):
     payload = json.loads(capsys.readouterr().out)
     assert payload["assessment"]["match"] == 1
     assert len(payload["verdicts"]) == 3
+    assert {row["disposition"] for row in payload["verdicts"]} == {"publishable"}
 
 
 def test_assess_by_id_from_registry(tmp_path, capsys):

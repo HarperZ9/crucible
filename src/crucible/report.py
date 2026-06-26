@@ -45,13 +45,14 @@ def render_assessment_report(
 
 
 def _append_verdicts(lines: list[str], verdicts: tuple[dict, ...], claim_text: Mapping[str, str]) -> None:
-    lines.extend(["", "## Verdicts", "", "| Claim | Status | Margin | Method | Grounds |",
-                  "| --- | --- | ---: | --- | --- |"])
+    lines.extend(["", "## Verdicts", "", "| Claim | Status | Disposition | Margin | Method | Grounds |",
+                  "| --- | --- | --- | ---: | --- | --- |"])
     for row in verdicts:
         cid = str(row.get("claim_id", ""))
         lines.append("| " + " | ".join([
             _md(claim_text.get(cid, cid)),
             _md(row.get("status", "")),
+            _md(row.get("disposition", "")),
             _number(row.get("margin")),
             _md(row.get("method", "")),
             _md(row.get("grounds", "")),

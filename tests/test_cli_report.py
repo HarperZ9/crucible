@@ -40,7 +40,7 @@ def test_report_cli_renders_latest_assessment_from_registry(tmp_path, capsys):
 
     assert out.startswith("# crucible report: Report thesis")
     assert "- counts: MATCH 1 / DRIFT 1 / UNVERIFIABLE 0" in out
-    assert "| latency stays under budget | MATCH | 1 | bench | deviation 0 within tolerance 0.1 |" in out
+    assert "| latency stays under budget | MATCH | publishable | 1 | bench | deviation 0 within tolerance 0.1 |" in out
     assert "## Measurement Evidence" in out
 
 

@@ -17,8 +17,8 @@ Stable flagship floor.
   raising, and registration rejects pre-existing non-file object paths.
 - Registry prune now applies the registry realpath guard before scanning or deleting object paths, so
   escaped, symlinked, or junctioned object roots are refused before unlink.
-- Assessment and verdict records now carry the sealed thesis disposition, keeping publication posture
-  visible in witnessed outputs.
+- Assessment and verdict records, CLI JSON, and Markdown reports now carry the sealed thesis
+  disposition, keeping publication posture visible in witnessed outputs.
 - `refine.margin()` is public and reused by grading, matching the documented normalized-margin
   contract.
 - Index/Gather interop canonical hashing now uses unescaped sorted JSON (`ensure_ascii=False`) for
