@@ -56,6 +56,13 @@ exposed even when its seals are internally consistent. The CLI surfaces this as 
 --verify`. The seal proves integrity, not authorship: a fully consistent re-forge (every field and
 seal rewritten together) is out of scope without a signature, and the docs say so where a user meets it.
 
+Measurements may carry an optional `recheck` descriptor. When present, it is persisted with the
+measurement row and included in the measurement seal; when absent, legacy rows keep the original seal
+shape, so older assessments still verify. `recheck_measurements` is the oracle-level hook: a caller
+provides replay functions keyed by descriptor `oracle`, and crucible compares the replayed measurement
+inputs to the stored row. The shipped CLI still re-derives verdicts from stored measurements; external
+callers can now also re-run descriptor-bearing measurements.
+
 ## The seams (the impure and the optional)
 
 crucible's core is pure standard library. Optional edges live behind a Protocol seam with a Null

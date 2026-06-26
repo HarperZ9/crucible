@@ -8,6 +8,7 @@ fail-closed: an axis that cannot be measured is never read as holding.
 from __future__ import annotations
 
 import math
+from collections.abc import Mapping
 from dataclasses import dataclass
 
 from crucible.claim import Claim
@@ -30,6 +31,7 @@ class Measurement:
     method: str
     measured_at: float
     evidence: tuple[str, ...] = ()
+    recheck: Mapping[str, object] | None = None
 
 
 @dataclass(frozen=True, slots=True)
