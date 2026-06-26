@@ -63,6 +63,7 @@ def _run_once(args) -> dict:
     checks = _recheck_last(args.registry)
     if checks is None:
         raise ValueError(f"no assessment was recorded in registry {args.registry}")
+    refs = _record_paths(paths)
     record = {
         "ok": all(checks.values()),
         "thesis": Registry._thesis_row(thesis),
@@ -70,11 +71,11 @@ def _run_once(args) -> dict:
         "assessment": assessment.to_dict(),
         "verdicts": [_verdict_dict(v) for v in verdicts],
         "checks": checks,
-        "report": paths["report"],
-        "record": paths["record"],
-        "bundle": paths["bundle"],
-        "spec": paths["spec"],
-        "review": paths["review"],
+        "report": refs["report"],
+        "record": refs["record"],
+        "bundle": refs["bundle"],
+        "spec": refs["spec"],
+        "review": refs["review"],
         "verifier": _verifier_contract(paths["bundle"]),
     }
     _write_outputs(paths, thesis, assessment, checks, record)
@@ -95,6 +96,14 @@ def _output_paths(args) -> dict[str, str | None]:
         "spec": os.path.join(args.bundle, "spec.json"),
         "review": os.path.join(args.bundle, "review.md"),
     }
+
+
+def _record_paths(paths: dict[str, str | None]) -> dict[str, str | None]:
+    if paths["bundle"]:
+        return {"report": "report.md", "record": "run.json", "bundle": ".",
+                "spec": "spec.json", "review": "review.md"}
+    return {"report": paths["report"], "record": paths["record"], "bundle": None,
+            "spec": None, "review": None}
 
 
 def _write_outputs(paths: dict[str, str | None], thesis, assessment, checks: dict, record: dict) -> None:

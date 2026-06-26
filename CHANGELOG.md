@@ -28,6 +28,8 @@ Operator run surface.
   and fails closed when the human report is tampered or stale.
 - Cleanroom review now also checks that `review.md` is the canonical verifier instruction sheet, so
   packet-local instructions cannot widen the verifier's context.
+- Bundle run records now use packet-relative artifact names, avoiding local workspace paths inside
+  cleanroom verifier packets.
 
 ## 1.0.0
 

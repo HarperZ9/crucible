@@ -133,9 +133,11 @@ crucible run examples/thesis-binary-search.json \
 ```
 
 The JSON run record includes thesis metadata, steelman refutations, the witnessed assessment, the
-derived verdict rows, disk recheck status, and verifier packet paths. `--bundle DIR` creates
-`DIR/spec.json`, `DIR/run.json`, `DIR/report.md`, and `DIR/review.md` with exclusive writes. The
-packet gives a verifier only the original spec and artifact. Use `--substrate` instead of
+derived verdict rows, disk recheck status, and verifier packet artifact names. `--bundle DIR` creates
+`DIR/spec.json`, `DIR/run.json`, `DIR/report.md`, and `DIR/review.md` with exclusive writes. Inside
+the packet, artifact references stay packet-relative (`.` plus file names), so the verifier artifact
+does not depend on the operator's local workspace path. The packet gives a verifier only the
+original spec and artifact. Use `--substrate` instead of
 `--measurements` to run through the table oracle in the same session shape.
 
 Before handing the packet to a verifier, validate the cleanroom boundary:
@@ -249,7 +251,8 @@ Shipped:
 - Operator runs: `crucible run THESIS --registry DIR (--measurements FILE | --substrate FILE)` runs
   the null steelman, measurement, witnessed assessment, disk recheck, and optional Markdown/JSON
   artifact writes as one scannable session. `--bundle DIR` writes `spec.json`, `run.json`,
-  `report.md`, and `review.md` as a self-contained cleanroom review packet.
+  `report.md`, and `review.md` as a self-contained cleanroom review packet with packet-relative
+  artifact references.
 - Cleanroom bundle review: `crucible review BUNDLE` validates that a review packet contains only
   the allowed spec/artifact files, carries the verifier boundary, has matching `spec.json` and
   run-record thesis metadata, has a `report.md` artifact that re-renders from `run.json`, and keeps

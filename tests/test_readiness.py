@@ -69,9 +69,9 @@ def test_example_assess_registry_search_and_report(tmp_path, capsys):
                  "--bundle", str(run_bundle), "--json"]) == 0
     run = _json_out(capsys)
     assert run["ok"] is True
-    assert run["report"] == str(run_bundle / "report.md")
-    assert run["spec"] == str(run_bundle / "spec.json")
-    assert run["review"] == str(run_bundle / "review.md")
+    assert run["report"] == "report.md"
+    assert run["spec"] == "spec.json"
+    assert run["review"] == "review.md"
     assert run["verifier"]["mode"] == "cleanroom"
     assert json.loads((run_bundle / "run.json").read_text(encoding="utf-8"))["assessment"]["match"] == 1
     assert "original spec and the artifact" in (run_bundle / "review.md").read_text(encoding="utf-8")
@@ -168,4 +168,5 @@ def test_release_docs_define_cleanroom_checkability_rules():
     assert "assessment block" in normalized_readiness
     assert "report content that does not render from `run.json`" in normalized_readiness
     assert "review instructions that diverge from the cleanroom boundary" in normalized_readiness
+    assert "references those artifacts relative to the packet root" in normalized_readiness
     assert "crucible review" in normalized_readiness

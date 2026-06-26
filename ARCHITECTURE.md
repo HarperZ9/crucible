@@ -86,7 +86,8 @@ report rendering unchanged.
 loads either explicit measurements or a table substrate, records the witnessed assessment, reloads the
 latest registry record for a disk recheck, and can write both the Markdown report and a JSON run
 record. With `--bundle DIR`, it writes `DIR/spec.json`, `DIR/run.json`, `DIR/report.md`, and
-`DIR/review.md` as a cleanroom review packet. It does not introduce a second source of truth: the
+`DIR/review.md` as a cleanroom review packet. The run record names packet artifacts relative to the
+packet root, not by local workstation path. It does not introduce a second source of truth: the
 assessment and verdict rows remain the authority, and the run record is the session envelope around
 them.
 

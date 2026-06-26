@@ -74,11 +74,11 @@ def test_run_bundle_writes_self_contained_review_packet(tmp_path, capsys):
                  "--registry", reg, "--bundle", str(bundle), "--json"]) == 0
     payload = json.loads(capsys.readouterr().out)
 
-    assert payload["bundle"] == str(bundle)
-    assert payload["report"] == str(bundle / "report.md")
-    assert payload["record"] == str(bundle / "run.json")
-    assert payload["spec"] == str(bundle / "spec.json")
-    assert payload["review"] == str(bundle / "review.md")
+    assert payload["bundle"] == "."
+    assert payload["report"] == "report.md"
+    assert payload["record"] == "run.json"
+    assert payload["spec"] == "spec.json"
+    assert payload["review"] == "review.md"
     assert payload["verifier"]["mode"] == "cleanroom"
     assert payload["verifier"]["inputs"] == ["spec.json", "run.json", "report.md"]
     assert "worker context" in payload["verifier"]["excluded"]
@@ -89,7 +89,26 @@ def test_run_bundle_writes_self_contained_review_packet(tmp_path, capsys):
     review = (bundle / "review.md").read_text(encoding="utf-8")
     assert "original spec and the artifact" in review
     assert "reasoning trace" in review
-    assert json.loads((bundle / "run.json").read_text(encoding="utf-8"))["bundle"] == str(bundle)
+    assert json.loads((bundle / "run.json").read_text(encoding="utf-8"))["bundle"] == "."
+
+
+def test_run_bundle_record_uses_packet_relative_artifact_paths(tmp_path, capsys):
+    bundle = tmp_path / "packet"
+    reg = str(tmp_path / "reg")
+
+    assert main(["run", _thesis_file(tmp_path), "--measurements", _measurements_file(tmp_path),
+                 "--registry", reg, "--bundle", str(bundle), "--json"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+    record = json.loads((bundle / "run.json").read_text(encoding="utf-8"))
+
+    for row in (payload, record):
+        assert row["bundle"] == "."
+        assert row["report"] == "report.md"
+        assert row["record"] == "run.json"
+        assert row["spec"] == "spec.json"
+        assert row["review"] == "review.md"
+
+    assert str(tmp_path) not in (bundle / "run.json").read_text(encoding="utf-8")
 
 
 def test_review_validates_cleanroom_bundle_contract(tmp_path, capsys):
