@@ -13,6 +13,10 @@ Operator run surface.
   verdicts, disk recheck status, and optional report path.
 - `crucible run --report FILE` writes the deterministic Markdown assessment report for the same
   witnessed assessment, while `--out FILE` writes the JSON run record with exclusive creation.
+- `crucible run --bundle DIR` creates a self-contained cleanroom review packet containing
+  `spec.json`, `run.json`, `report.md`, and `review.md`, refusing pre-existing packet directories.
+- Bundle run records carry a machine-readable verifier boundary: cleanroom mode, allowed packet
+  inputs, excluded worker context, and the checkability rule for underspecified specs.
 
 ## 1.0.0
 

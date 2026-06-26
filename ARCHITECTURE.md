@@ -81,8 +81,10 @@ report rendering unchanged.
 `crucible run` is the single-thesis operator surface over the same path. It runs the null steelman,
 loads either explicit measurements or a table substrate, records the witnessed assessment, reloads the
 latest registry record for a disk recheck, and can write both the Markdown report and a JSON run
-record. It does not introduce a second source of truth: the assessment and verdict rows remain the
-authority, and the run record is the session envelope around them.
+record. With `--bundle DIR`, it writes `DIR/spec.json`, `DIR/run.json`, `DIR/report.md`, and
+`DIR/review.md` as a cleanroom review packet. It does not introduce a second source of truth: the
+assessment and verdict rows remain the authority, and the run record is the session envelope around
+them.
 
 ## The seams (the impure and the optional)
 

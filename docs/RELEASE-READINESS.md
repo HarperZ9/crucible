@@ -9,8 +9,8 @@ now that crucible has reached its stable flagship floor.
   `verdicts`, `drift`, `report`, `batch`, `export`, and `refine`.
 - Registry actions are covered: `list`, `verify`, `stats`, `search`, and `prune`.
 - Bundled examples run through the public CLI, including manual measurements, table measurements,
-  refinement, one-command runs, registry stats/search, report rendering, the batch manifest example, and
-  publication-gated export.
+  refinement, one-command runs with cleanroom review packets, registry stats/search, report rendering,
+  the batch manifest example, and publication-gated export.
 - The offline `examples/demo.py` runs as a script and demonstrates MATCH, DRIFT, UNVERIFIABLE, and
   seal tamper detection.
 
@@ -47,7 +47,8 @@ now that crucible has reached its stable flagship floor.
 
 The release verifier receives only this readiness file, the original spec, and the artifact checkout.
 Lineage notes, prior review history, older CI runs, and external sibling repositories are context, not
-acceptance evidence unless their facts are visible in the artifact itself.
+acceptance evidence unless their facts are visible in the artifact itself. A `crucible run --bundle`
+packet follows the same rule with `spec.json`, `run.json`, `report.md`, and `review.md` only.
 
 Secret hygiene is mechanical at the release gate: no committed credentials, `.env` stays ignored,
 runtime dependencies are empty, and subprocess-backed edges run with explicit clean environment

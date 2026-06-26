@@ -38,8 +38,7 @@ def test_example_assess_registry_search_and_report(tmp_path, capsys):
     measurements = _example("measurements-binary-search.json")
     reg = str(tmp_path / "reg")
     run_reg = str(tmp_path / "run-reg")
-    run_report = str(tmp_path / "run-report.md")
-    run_record = tmp_path / "run.json"
+    run_bundle = tmp_path / "run-packet"
 
     assert main(["register", thesis, "--registry", reg, "--json"]) == 0
     registered = _json_out(capsys)
@@ -67,11 +66,15 @@ def test_example_assess_registry_search_and_report(tmp_path, capsys):
     assert "## Verdicts" in report
 
     assert main(["run", thesis, "--measurements", measurements, "--registry", run_reg,
-                 "--report", run_report, "--out", str(run_record), "--json"]) == 0
+                 "--bundle", str(run_bundle), "--json"]) == 0
     run = _json_out(capsys)
     assert run["ok"] is True
-    assert run["report"] == run_report
-    assert json.loads(run_record.read_text(encoding="utf-8"))["assessment"]["match"] == 1
+    assert run["report"] == str(run_bundle / "report.md")
+    assert run["spec"] == str(run_bundle / "spec.json")
+    assert run["review"] == str(run_bundle / "review.md")
+    assert run["verifier"]["mode"] == "cleanroom"
+    assert json.loads((run_bundle / "run.json").read_text(encoding="utf-8"))["assessment"]["match"] == 1
+    assert "original spec and the artifact" in (run_bundle / "review.md").read_text(encoding="utf-8")
 
 
 def test_example_measure_and_refine_through_public_cli(capsys):
@@ -154,3 +157,4 @@ def test_release_docs_define_cleanroom_checkability_rules():
     assert "before 1\\.0|" + "release-" + "candidate" in readiness
     assert "caller-supplied measurement evidence is treated as user data" in normalized_readiness
     assert "not artifact-only acceptance criteria" in normalized_readiness
+    assert "spec.json" in readiness and "review.md" in readiness

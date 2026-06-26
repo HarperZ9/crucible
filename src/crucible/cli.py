@@ -89,6 +89,8 @@ def _add_core_commands(sub) -> None:
                      help="write a Markdown report for this run")
     run.add_argument("--out", default=None, metavar="FILE",
                      help="write the JSON run record to FILE")
+    run.add_argument("--bundle", default=None, metavar="DIR",
+                     help="create DIR with spec.json, run.json, report.md, and review.md")
     run.add_argument("--json", action="store_true", help="emit JSON instead of human text")
     run.set_defaults(func=cmd_run)
 

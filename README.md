@@ -45,8 +45,8 @@ measure seams, consume `telos.witnessed-artifact/v1` envelopes by re-running the
 use sealed Gather digests as evidence, replay index verification records against supplied graph
 packs, persist optional measurement replay descriptors for oracle-level checks, run a manifest of
 thesis jobs into one registry, render witnessed assessments as readable Markdown reports, or run the
-whole steelman -> measure -> assess -> recheck path as one session artifact. A fenced thesis can be
-assessed locally, but the export edge refuses it by default.
+whole steelman -> measure -> assess -> recheck path as one cleanroom review packet. A fenced thesis
+can be assessed locally, but the export edge refuses it by default.
 
 ## The differentiator (do not lose this)
 
@@ -66,7 +66,8 @@ that cannot be measured is never read as holding.
   downstream organ consumes.
 - **A clean verifier boundary.** A verifier gets the original spec and the artifact. It does not need
   the worker's context, reasoning trace, or intermediate steps. If success cannot be evaluated from
-  that minimal state, the spec is not checkable yet.
+  that minimal state, the spec is not checkable yet. `crucible run --bundle` makes that boundary
+  concrete with a packet-level review note.
 - **Stands alone, serves the constellation.** crucible runs on its own with zero third-party
   dependencies and Null seams, and it composes with the other Telos organs (Gather's evidence,
   index's maps) as a peer through clean protocol contracts. Compose, do not absorb.
@@ -125,14 +126,15 @@ registry before reporting the disk recheck:
 crucible run examples/thesis-binary-search.json \
   --measurements examples/measurements-binary-search.json \
   --registry .crucible-registry \
-  --report reports/binary-search.md \
-  --out reports/binary-search-run.json \
+  --bundle reports/binary-search-run \
   --json
 ```
 
 The JSON run record includes thesis metadata, steelman refutations, the witnessed assessment, the
-derived verdict rows, disk recheck status, and the optional Markdown report path. Use `--substrate`
-instead of `--measurements` to run through the table oracle in the same session shape.
+derived verdict rows, disk recheck status, and verifier packet paths. `--bundle DIR` creates
+`DIR/spec.json`, `DIR/run.json`, `DIR/report.md`, and `DIR/review.md` with exclusive writes. The
+packet gives a verifier only the original spec and artifact. Use `--substrate` instead of
+`--measurements` to run through the table oracle in the same session shape.
 
 ## Status
 
@@ -180,7 +182,8 @@ Shipped:
   reports use unique index-prefixed names with exclusive writes.
 - Operator runs: `crucible run THESIS --registry DIR (--measurements FILE | --substrate FILE)` runs
   the null steelman, measurement, witnessed assessment, disk recheck, and optional Markdown/JSON
-  artifact writes as one scannable session.
+  artifact writes as one scannable session. `--bundle DIR` writes `spec.json`, `run.json`,
+  `report.md`, and `review.md` as a self-contained cleanroom review packet.
 - Publication-gated export: `gate_check`, `export_guard`, `export_thesis`, and
   `crucible export THESIS` refuse fenced material and explicit restricted markers before emitting a
   public thesis contract.
