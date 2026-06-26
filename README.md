@@ -31,14 +31,15 @@ from the record, so a confident assertion cannot fake it.
 The continuous part is the loop: substrates, measurements, and theses all improve across rounds,
 and the witnessed verdicts track which moved.
 
-Shipped today (0.9.0): the full first loop plus drift tracking, publication-gated export, registry
-operations, optional subprocess-backed seam adapters, and 1.0-readiness coverage. You register a thesis, steelman it
-(adversaries propose the test), measure each claim against a substrate oracle, refine across
-substrate rounds toward a cohesively verified thesis, witness a re-derivable verdict per claim,
-compare assessment rounds to see what held, moved, improved, or regressed, inspect a growing
-registry by status, scope, and latest verdict, and plug configured model/oracle commands into the
-steelman and measure seams. A fenced thesis can be assessed locally, but the export edge refuses it
-by default.
+Shipped today (0.10.0): the full first loop plus drift tracking, publication-gated export, registry
+operations, optional subprocess-backed seam adapters, Telos witnessed-artifact interop, and
+1.0-readiness coverage. You register a thesis, steelman it (adversaries propose the test), measure
+each claim against a substrate oracle, refine across substrate rounds toward a cohesively verified
+thesis, witness a re-derivable verdict per claim, compare assessment rounds to see what held, moved,
+improved, or regressed, inspect a growing registry by status, scope, and latest verdict, plug
+configured model/oracle commands into the steelman and measure seams, and consume
+`telos.witnessed-artifact/v1` envelopes by re-running their named verifiers. A fenced thesis can be
+assessed locally, but the export edge refuses it by default.
 
 ## The differentiator (do not lose this)
 
@@ -117,6 +118,9 @@ Shipped:
 - Optional subprocess edges: `SubprocessSteelman` and `SubprocessMeasure` run configured commands
   through bounded JSON stdin/stdout, reject shell strings, enforce timeouts, and stamp claim identity
   locally. The default seams remain Null and the verdict step still has no model in it.
+- Telos artifact interop: `TelosMeasure` consumes `telos.witnessed-artifact/v1` envelopes through a
+  caller-provided verifier registry. The carried certificate is not trusted; the named verifier is
+  re-run and mapped into the normal `Measurement` -> `verdict_for` spine.
 - Readiness coverage: the bundled examples run through the public CLI under test, help output covers
   the shipped command surface, and `docs/RELEASE-READINESS.md` records the 1.0 gate checklist.
 - The `crucible` CLI: `register`, `assess`, `steelman`, `measure`,

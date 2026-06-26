@@ -3,6 +3,17 @@
 All notable changes to crucible. Versions follow semantic versioning; each minor release is built
 behind a feature branch and reviewed before merge.
 
+## 0.10.0
+
+Telos witnessed-artifact interop preview.
+
+- `crucible.telos_measure`: adds `verify_telos_artifact`, `is_telos_artifact`, `check_content`, and
+  `TelosMeasure` for consuming `telos.witnessed-artifact/v1` envelopes through the Measure seam.
+- `TelosMeasure` maps a re-run Telos verifier result into a crucible `Measurement`: verified -> MATCH
+  input, refuted or drifted -> DRIFT input, absent or unregistered proof -> UNVERIFIABLE input.
+- Public API: exports `TelosMeasure`, `verify_telos_artifact`, `is_telos_artifact`, and
+  `check_content`.
+
 ## 0.9.0
 
 1.0-readiness hardening.
