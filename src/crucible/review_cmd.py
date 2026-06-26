@@ -6,15 +6,17 @@ import os
 import sys
 from collections.abc import Mapping
 
-from crucible.assess import Assessment
-from crucible.claim import Claim
-from crucible.report import render_assessment_report
-from crucible.run_cmd import REVIEW_INSTRUCTIONS
-from crucible.thesis import Thesis, verify_thesis
-
-REQUIRED_FILES = ("spec.json", "run.json", "report.md", "review.md")
-ALLOWED_INPUTS = ["spec.json", "run.json", "report.md"]
-EXCLUDED_CONTEXT = ["worker context", "reasoning trace", "intermediate steps"]
+from crucible.review_contract import (
+    ALLOWED_INPUTS,
+    EXCLUDED_CONTEXT,
+    REQUIRED_FILES,
+    REVIEW_INSTRUCTIONS,
+    artifact_paths,
+    claim_refs,
+    expected_report,
+    same,
+    same_cross,
+)
 
 
 def cmd_review(args) -> int:
@@ -35,6 +37,7 @@ def review_bundle(bundle: str) -> dict:
         "required_files": _required_files(base, findings),
         "no_extra_context": _no_extra_context(base, findings),
         "verifier_boundary": False,
+        "artifact_paths": False,
         "spec_matches_run": False,
         "report_matches_run": False,
         "review_instructions": False,
@@ -44,6 +47,7 @@ def review_bundle(bundle: str) -> dict:
         spec = _load_json(os.path.join(base, "spec.json"), "spec.json", findings)
         run = _load_json(os.path.join(base, "run.json"), "run.json", findings)
         checks["verifier_boundary"] = _verifier_boundary(run, findings)
+        checks["artifact_paths"] = artifact_paths(run, findings)
         checks["spec_matches_run"] = _spec_matches_run(spec, run, findings)
         checks["report_matches_run"] = _report_matches_run(base, spec, run, findings)
         checks["review_instructions"] = _review_instructions(base, findings)
@@ -143,8 +147,7 @@ def _verifier_boundary(run: Mapping | None, findings: list[str]) -> bool:
     if verifier.get("inputs") != ALLOWED_INPUTS:
         findings.append("verifier inputs must be spec.json, run.json, and report.md only")
         ok = False
-    excluded = verifier.get("excluded")
-    if excluded != EXCLUDED_CONTEXT:
+    if verifier.get("excluded") != EXCLUDED_CONTEXT:
         findings.append(
             "verifier excluded context must name worker context, reasoning trace, and intermediate steps"
         )
@@ -164,16 +167,17 @@ def _spec_matches_run(spec: Mapping | None, run: Mapping | None, findings: list[
     if not isinstance(thesis, Mapping) or not isinstance(assessment, Mapping):
         findings.append("run.json must carry thesis and assessment objects")
         return False
-    ok = _same(spec, thesis, "id", findings, "spec thesis id")
-    ok = _same(spec, thesis, "title", findings, "spec thesis title") and ok
-    ok = _same(spec, thesis, "seal", findings, "spec thesis seal") and ok
-    ok = _same(spec, thesis, "disposition", findings, "spec thesis disposition") and ok
-    ok = _same_cross(spec, "id", assessment, "thesis_id", findings, "assessment thesis id") and ok
-    ok = _same_cross(spec, "seal", assessment, "thesis_seal", findings, "assessment thesis seal") and ok
+    ok = same(spec, thesis, "id", findings, "spec thesis id")
+    ok = same(spec, thesis, "title", findings, "spec thesis title") and ok
+    ok = same(spec, thesis, "seal", findings, "spec thesis seal") and ok
+    ok = same(spec, thesis, "disposition", findings, "spec thesis disposition") and ok
+    ok = same_cross(spec, "id", assessment, "thesis_id", findings, "assessment thesis id") and ok
+    ok = same_cross(spec, "seal", assessment, "thesis_seal", findings,
+                    "assessment thesis seal") and ok
     if assessment.get("claims") != len(spec.get("claims", [])):
         findings.append("assessment claim count does not match spec.json claims")
         ok = False
-    if _claim_refs(spec.get("claims")) != _claim_refs(thesis.get("claims")):
+    if claim_refs(spec.get("claims")) != claim_refs(thesis.get("claims")):
         findings.append("run thesis claim references do not match spec.json claims")
         ok = False
     return ok
@@ -182,15 +186,8 @@ def _spec_matches_run(spec: Mapping | None, run: Mapping | None, findings: list[
 def _report_matches_run(
     base: str, spec: Mapping | None, run: Mapping | None, findings: list[str],
 ) -> bool:
-    if spec is None or run is None:
-        return False
-    thesis = _thesis_from_spec(spec, findings)
-    assessment = _assessment_from_run(run, findings)
-    checks = run.get("checks")
-    if not isinstance(checks, Mapping):
-        findings.append("run.json checks must be an object")
-        return False
-    if thesis is None or assessment is None:
+    rendered = expected_report(spec, run, findings)
+    if rendered is None:
         return False
     report_path = os.path.join(base, "report.md")
     try:
@@ -199,95 +196,10 @@ def _report_matches_run(
     except OSError as exc:
         findings.append(f"report.md is not readable: {exc}")
         return False
-    expected = render_assessment_report(thesis, assessment, checks=checks)
-    if actual != expected:
+    if actual != rendered:
         findings.append("report.md does not match run.json assessment artifact")
         return False
     return True
-
-
-def _thesis_from_spec(spec: Mapping, findings: list[str]) -> Thesis | None:
-    claims_value = spec.get("claims")
-    if not isinstance(claims_value, list):
-        findings.append("spec.json claims must be a list")
-        return None
-    claims: list[Claim] = []
-    for index, row in enumerate(claims_value, 1):
-        if not isinstance(row, Mapping):
-            findings.append(f"spec.json claim {index} must be an object")
-            return None
-        claim = _claim_from_spec(row, index, findings)
-        if claim is None:
-            return None
-        claims.append(claim)
-    thesis = Thesis(
-        id=_string(spec, "id", "spec thesis id", findings),
-        title=_string(spec, "title", "spec thesis title", findings),
-        claims=tuple(claims),
-        registered_at=0.0,
-        disposition=_string(spec, "disposition", "spec thesis disposition", findings),
-        seal=_string(spec, "seal", "spec thesis seal", findings),
-    )
-    if not verify_thesis(thesis):
-        findings.append("spec.json thesis seal or claim receipts do not verify")
-        return None
-    return thesis
-
-
-def _claim_from_spec(row: Mapping, index: int, findings: list[str]) -> Claim | None:
-    claim = Claim(
-        id=_string(row, "id", f"spec claim {index} id", findings),
-        text=_string(row, "text", f"spec claim {index} text", findings),
-        falsification=_string(row, "falsification", f"spec claim {index} falsification", findings),
-        sha256=_string(row, "sha256", f"spec claim {index} sha256", findings),
-    )
-    if claim.verify():
-        return claim
-    findings.append(f"spec claim {index} receipt does not verify")
-    return None
-
-
-def _assessment_from_run(run: Mapping, findings: list[str]) -> Assessment | None:
-    value = run.get("assessment")
-    if not isinstance(value, Mapping):
-        findings.append("run.json assessment must be an object")
-        return None
-    try:
-        return Assessment.from_dict(value)
-    except (KeyError, TypeError, ValueError) as exc:
-        findings.append(f"run.json assessment is invalid: {exc}")
-        return None
-
-
-def _string(row: Mapping, key: str, label: str, findings: list[str]) -> str:
-    value = row.get(key)
-    if isinstance(value, str):
-        return value
-    findings.append(f"{label} must be a string")
-    return ""
-
-
-def _same(left: Mapping, right: Mapping, key: str, findings: list[str], label: str) -> bool:
-    return _same_cross(left, key, right, key, findings, label)
-
-
-def _same_cross(
-    left: Mapping, lk: str, right: Mapping, rk: str, findings: list[str], label: str,
-) -> bool:
-    if left.get(lk) == right.get(rk):
-        return True
-    findings.append(f"{label} mismatch")
-    return False
-
-
-def _claim_refs(rows: object) -> list[tuple[object, object]]:
-    if not isinstance(rows, list):
-        return []
-    refs = []
-    for row in rows:
-        if isinstance(row, Mapping):
-            refs.append((row.get("id"), row.get("sha256")))
-    return refs
 
 
 def _print_human(result: dict) -> None:

@@ -30,6 +30,8 @@ Operator run surface.
   packet-local instructions cannot widen the verifier's context.
 - Bundle run records now use packet-relative artifact names, avoiding local workspace paths inside
   cleanroom verifier packets.
+- Cleanroom review now validates those `run.json` artifact path fields and fails closed if they are
+  absolute, local, or renamed away from the packet-relative contract.
 - Cleanroom review now requires `run.json` to declare passing embedded integrity checks before
   verifier handoff.
 

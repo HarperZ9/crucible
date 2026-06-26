@@ -127,6 +127,7 @@ def test_review_validates_cleanroom_bundle_contract(tmp_path, capsys):
         "required_files": True,
         "no_extra_context": True,
         "verifier_boundary": True,
+        "artifact_paths": True,
         "spec_matches_run": True,
         "report_matches_run": True,
         "review_instructions": True,
@@ -155,6 +156,26 @@ def test_review_fails_closed_on_failed_run_integrity_checks(tmp_path, capsys):
     assert reviewed["ok"] is False
     assert reviewed["checks"]["run_integrity"] is False
     assert any("run.json ok must equal all embedded checks" in finding for finding in reviewed["findings"])
+
+
+def test_review_fails_closed_on_tampered_artifact_paths(tmp_path, capsys):
+    bundle = tmp_path / "packet"
+    reg = str(tmp_path / "reg")
+
+    assert main(["run", _thesis_file(tmp_path), "--measurements", _measurements_file(tmp_path),
+                 "--registry", reg, "--bundle", str(bundle), "--json"]) == 0
+    capsys.readouterr()
+    run_path = bundle / "run.json"
+    payload = json.loads(run_path.read_text(encoding="utf-8"))
+    payload["report"] = str(tmp_path / "report.md")
+    run_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    assert main(["review", str(bundle), "--json"]) == 1
+    reviewed = json.loads(capsys.readouterr().out)
+
+    assert reviewed["ok"] is False
+    assert reviewed["checks"]["artifact_paths"] is False
+    assert any("artifact paths must be packet-relative" in finding for finding in reviewed["findings"])
 
 
 def test_review_fails_closed_on_extra_context_files(tmp_path, capsys):

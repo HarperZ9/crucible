@@ -87,7 +87,8 @@ loads either explicit measurements or a table substrate, records the witnessed a
 latest registry record for a disk recheck, and can write both the Markdown report and a JSON run
 record. With `--bundle DIR`, it writes `DIR/spec.json`, `DIR/run.json`, `DIR/report.md`, and
 `DIR/review.md` as a cleanroom review packet. The run record names packet artifacts relative to the
-packet root, not by local workstation path. It does not introduce a second source of truth: the
+packet root, not by local workstation path. Review verifies those path fields before verifier
+handoff. It does not introduce a second source of truth: the
 assessment and verdict rows remain the authority, and the run record is the session envelope around
 them.
 
@@ -191,7 +192,8 @@ steps. If success cannot be evaluated from that minimal state, the spec is not c
 readiness artifact needs work before release. For run packets, `crucible review BUNDLE` makes that
 rule executable: extra context files fail the packet before any verifier judgment begins, and
 `run.json` must declare passing embedded integrity checks, `report.md` must match the assessment
-artifact rendered from `run.json`, and `review.md` must match the canonical cleanroom instructions.
+artifact rendered from `run.json`, `run.json` artifact path fields must remain packet-relative,
+and `review.md` must match the canonical cleanroom instructions.
 
 ## Determinism and the zero-dependency core
 

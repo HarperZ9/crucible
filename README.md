@@ -135,7 +135,8 @@ crucible run examples/thesis-binary-search.json \
 The JSON run record includes thesis metadata, steelman refutations, the witnessed assessment, the
 derived verdict rows, disk recheck status, and verifier packet artifact names. `--bundle DIR` creates
 `DIR/spec.json`, `DIR/run.json`, `DIR/report.md`, and `DIR/review.md` with exclusive writes. Inside
-the packet, artifact references stay packet-relative (`.` plus file names), so the verifier artifact
+the packet, artifact references stay packet-relative (`.` plus file names), and review re-checks
+that path contract before handoff, so the verifier artifact
 does not depend on the operator's local workspace path. The packet gives a verifier only the
 original spec and artifact. Use `--substrate` instead of
 `--measurements` to run through the table oracle in the same session shape.
@@ -149,7 +150,8 @@ crucible review reports/binary-search-run --json
 The review check fails closed if the bundle is missing required files, carries extra context such as
 notes or chat logs, omits the cleanroom verifier boundary, has a `spec.json` that no longer
 matches the run record, has a `report.md` that does not render from `run.json`, has failed
-embedded run integrity checks, or has `review.md` instructions that diverge from the cleanroom
+embedded run integrity checks, rewrites `run.json` artifact paths away from packet-relative names,
+or has `review.md` instructions that diverge from the cleanroom
 verifier boundary.
 
 ## Oracle recheck packs
@@ -256,7 +258,8 @@ Shipped:
   artifact references.
 - Cleanroom bundle review: `crucible review BUNDLE` validates that a review packet contains only
   the allowed spec/artifact files, carries the verifier boundary, has matching `spec.json` and
-  run-record thesis metadata, has passing embedded run integrity checks, has a `report.md` artifact
+  run-record thesis metadata, has packet-relative `run.json` artifact paths, has passing embedded
+  run integrity checks, has a `report.md` artifact
   that re-renders from `run.json`, and keeps `review.md` pinned to the cleanroom verifier
   instructions before verifier handoff.
 - Publication-gated export: `gate_check`, `export_guard`, `export_thesis`, and
