@@ -13,6 +13,12 @@ Stable flagship floor.
   `telos:<verifier>` replay descriptor so oracle-level reassessment checks a real stored row.
 - Drift and registry status/search now use the latest verified assessments, falling back past invalid
   tail rows instead of trusting or hiding history.
+- Registry body verification now reports non-file or unreadable object paths as CORRUPT instead of
+  raising, and registration rejects pre-existing non-file object paths.
+- `refine.margin()` is public and reused by grading, matching the documented normalized-margin
+  contract.
+- Index/Gather interop canonical hashing now uses unescaped sorted JSON (`ensure_ascii=False`) for
+  non-ASCII graph-pack content.
 - The registry rejects duplicate thesis ids with different seals, refuses symlinked storage paths,
   and keeps object writes on unique temp files inside the registry root.
 - Batch manifests keep thesis, measurement, and substrate paths inside the manifest bundle; path-like

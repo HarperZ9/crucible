@@ -1,9 +1,9 @@
 """The verdict: a claim's standing, computed from a measurement, never asserted.
 
 ``verdict_for`` is the spine and the differentiator: a pure function with no model in it, so a
-verdict recomputes from the stored record and a confident assertion cannot fake it. A measurement
-within tolerance is MATCH, outside is DRIFT, absent or unmeasurable is UNVERIFIABLE. UNVERIFIABLE is
-fail-closed: an axis that cannot be measured is never read as holding.
+verdict recomputes from the stored record and a confident assertion has no effect on the rechecked
+result. A measurement within tolerance is MATCH, outside is DRIFT, absent or unmeasurable is
+UNVERIFIABLE. UNVERIFIABLE is fail-closed: an axis that cannot be measured is never read as holding.
 """
 from __future__ import annotations
 

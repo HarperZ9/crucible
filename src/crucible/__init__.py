@@ -2,10 +2,10 @@
 
 Register a thesis and emit a re-checkable verdict per claim (MATCH / DRIFT / UNVERIFIABLE), grounded
 in a measurement rather than asserted: the verdict recomputes from the record, so a confident
-assertion cannot fake it. A thesis is steelmanned (adversaries propose the test), measured against a
-sound oracle (the measurement decides), and refined toward a cohesively verified standing or an honest
-weakest axis. The core is pure standard library; impure and optional edges live behind Protocol seams
-with a Null default, so crucible stands alone and composes as a peer.
+assertion has no effect on the rechecked result. A thesis is steelmanned (adversaries propose the
+test), measured against a sound oracle (the measurement decides), and refined toward a cohesively
+verified standing or an honest weakest axis. The core is pure standard library; impure and optional
+edges live behind Protocol seams with a Null default, so crucible stands alone and composes as a peer.
 """
 from __future__ import annotations
 
@@ -45,6 +45,7 @@ from crucible.refine import (
     RefineReport,
     Reflection,
     cohesion,
+    margin,
     refine,
     refine_thesis,
 )
@@ -89,7 +90,7 @@ __all__ = [
     "canonical_sha", "check_content", "drift_track", "export_guard", "export_thesis", "gate_check",
     "is_telos_artifact", "measure_thesis", "receipt_matches",
     "recheck_assessment", "recheck_measurements", "refine", "refine_thesis", "render_assessment_report",
-    "steelman_thesis",
+    "steelman_thesis", "margin",
     "prune_objects", "registry_stats", "search_theses", "thesis_seal", "verdict_for", "verdict_seal",
     "verify_assessment", "verify_gather_digest", "verify_index_verification", "verify_telos_artifact",
     "verify_thesis", "__version__",

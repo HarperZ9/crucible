@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+from crucible import margin as exported_margin
 from crucible.claim import make_claim
 from crucible.measure import MetricSpec, TableMeasure
-from crucible.refine import GradedCriterion, cohesion, grade, refine_thesis
+from crucible.refine import GradedCriterion, cohesion, grade, margin, refine_thesis
 from crucible.thesis import make_thesis
 from crucible.verdict import DRIFT, MATCH
 
@@ -27,6 +28,15 @@ def test_cohesion_requires_every_axis_to_hold():
     assert cohesion([1.0, 0.5]) > 0
     assert cohesion([1.0, 0.0]) == 0.0
     assert cohesion([1.0, float("-inf")]) == 0.0
+
+
+def test_margin_is_public_and_fails_closed():
+    assert margin(0.0, 0.5) == 1.0
+    assert margin(0.25, 0.5) == 0.5
+    assert margin(1.0, 0.5) == -1.0
+    assert margin(None, 0.5) == float("-inf")
+    assert margin(0.0, 0.0) == float("-inf")
+    assert exported_margin is margin
 
 
 def test_grade_fails_closed_when_deviation_is_not_numeric():

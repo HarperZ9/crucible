@@ -14,7 +14,7 @@ can re-check (the efferent organ). You register a thesis as a set of claims, and
 observation that would refute it. crucible steelmans the claims (proposing the test that would settle
 each), measures them against a substrate oracle, and writes a verdict per claim: MATCH, DRIFT, or
 UNVERIFIABLE. The verdict is grounded in the measurement, not in a judge's opinion, and it recomputes
-from the record, so a confident assertion cannot fake it.
+from the record, so a confident assertion has no effect on the rechecked result.
 
 ## The loop
 

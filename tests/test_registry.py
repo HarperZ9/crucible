@@ -83,6 +83,31 @@ def test_verify_reports_corrupt_when_body_altered(tmp_path):
     assert statuses[sha] == CORRUPT
 
 
+def test_verify_reports_corrupt_when_object_path_is_not_a_file(tmp_path):
+    reg = Registry(str(tmp_path), fsync=False)
+    t = _thesis()
+    reg.register(t)
+    sha = t.claims[0].sha256
+    path = tmp_path / "objects" / sha[:2] / sha[2:]
+    path.unlink()
+    path.mkdir()
+
+    statuses = {r["sha256"]: r["status"] for r in reg.verify()}
+
+    assert statuses[sha] == CORRUPT
+
+
+def test_register_rejects_existing_non_file_object_path(tmp_path):
+    reg = Registry(str(tmp_path), fsync=False)
+    t = _thesis()
+    sha = t.claims[0].sha256
+    path = tmp_path / "objects" / sha[:2] / sha[2:]
+    path.mkdir(parents=True)
+
+    with pytest.raises(ValueError, match="not a file"):
+        reg.register(t)
+
+
 def test_load_thesis_reconstructs_and_reverifies(tmp_path):
     reg = Registry(str(tmp_path), fsync=False)
     t = _thesis()

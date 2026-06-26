@@ -55,6 +55,18 @@ class Grade:
     ok: bool
 
 
+def margin(deviation: float | None, tolerance: float) -> float:
+    """Normalize deviation against tolerance. Untrusted inputs fail closed to ``-inf``."""
+    if (deviation is None or isinstance(deviation, bool) or not isinstance(deviation, (int, float))
+            or isinstance(tolerance, bool) or not isinstance(tolerance, (int, float))):
+        return float("-inf")
+    dev = float(deviation)
+    tol = float(tolerance)
+    if not math.isfinite(dev) or not math.isfinite(tol) or dev < 0 or tol <= 0:
+        return float("-inf")
+    return (tol - dev) / tol
+
+
 def grade(criterion: GradedCriterion, form) -> Grade:
     """Measure one criterion. A deviation that raises, is non-numeric (incl. bool), non-finite, or
     negative becomes margin -inf, ok False (fail-closed: 'cannot trust the measure' is never 'within
@@ -66,11 +78,8 @@ def grade(criterion: GradedCriterion, form) -> Grade:
         d = float(raw)
     except Exception:
         d = float("inf")
-    if not math.isfinite(d) or d < 0:
-        margin = float("-inf")
-    else:
-        margin = (criterion.tolerance - d) / criterion.tolerance
-    return Grade(criterion.name, criterion.kind, d, criterion.tolerance, margin, margin >= 0.0)
+    m = margin(d, criterion.tolerance)
+    return Grade(criterion.name, criterion.kind, d, criterion.tolerance, m, m >= 0.0)
 
 
 def cohesion(margins) -> float:

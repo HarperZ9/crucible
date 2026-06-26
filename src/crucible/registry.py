@@ -65,6 +65,8 @@ class Registry:
         self._guard_path(path)
         if os.path.lexists(path):
             self._reject_link(path)
+            if not os.path.isfile(path):
+                raise ValueError(f"registry object path is not a file: {path}")
             return sha, False
         parent = os.path.dirname(path)
         os.makedirs(parent, exist_ok=True)
@@ -189,7 +191,13 @@ class Registry:
             return {**base, "status": CORRUPT}
         if not os.path.exists(path):
             return {**base, "status": MISSING}
-        return {**base, "status": MATCH if content_hash(self.read_body(sha)) == sha else CORRUPT}
+        if not os.path.isfile(path):
+            return {**base, "status": CORRUPT}
+        try:
+            body = self.read_body(sha)
+        except OSError:
+            return {**base, "status": CORRUPT}
+        return {**base, "status": MATCH if content_hash(body) == sha else CORRUPT}
 
     def verify_seals(self) -> list[dict]:
         """Re-check each thesis's seal: load its claims and confirm the seal binds them, the title, and
