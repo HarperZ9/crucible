@@ -3,6 +3,20 @@
 All notable changes to crucible. Versions follow semantic versioning; each minor release is built
 behind a feature branch and reviewed before merge.
 
+## 0.12.0
+
+Measurement recheck descriptors.
+
+- `Measurement` now accepts an optional `recheck` descriptor, preserved at the end of the dataclass so
+  existing positional construction stays compatible.
+- Assessments persist and seal `recheck` descriptors when present; legacy assessment rows without
+  descriptors keep their previous measurement-seal shape and still verify.
+- `recheck_measurements` replays descriptor-bearing measurement rows through a caller-supplied oracle
+  registry and reports checked, skipped, missing, mismatched, and failed replays.
+- `recheck_assessment(..., measurement_replayers=...)` can include an oracle-level measurement replay
+  result alongside the existing seal/thesis/verdict re-derivation checks.
+- Public API: exports `recheck_measurements`.
+
 ## 0.11.0
 
 Gather/index protocol interop preview.

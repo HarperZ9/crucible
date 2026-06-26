@@ -7,6 +7,7 @@ from crucible.assess import (
     Assessment,
     assess,
     recheck_assessment,
+    recheck_measurements,
     verdict_seal,
     verify_assessment,
 )
@@ -92,6 +93,64 @@ def test_recheck_rederives_verdicts_from_thesis_and_measurements():
     t = _thesis()
     a, _ = assess(t, _measurements(t), clock=CLOCK)
     assert recheck_assessment(t, a) == {"seals_ok": True, "thesis_ok": True, "verdicts_rederive": True}
+
+
+def test_measurement_recheck_descriptor_is_persisted_and_sealed():
+    t = _thesis()
+    desc = {"oracle": "table", "input": {"v": 10}}
+    measured = Measurement(t.claims[0].id, t.claims[0].sha256, 0.0, 0.1, "oracle", 0.0,
+                           ("observed v=10",), recheck=desc)
+    a, _ = assess(t, [measured], clock=CLOCK)
+
+    assert a.measurements[0]["recheck"] == desc
+    assert verify_assessment(a)
+
+    bad = [dict(m) for m in a.measurements]
+    bad[0]["recheck"] = {"oracle": "table", "input": {"v": 11}}
+    assert not verify_assessment(dataclasses.replace(a, measurements=tuple(bad)))
+
+
+def test_measurement_rechecks_replay_oracle_descriptors():
+    t = _thesis()
+    desc = {"oracle": "table", "input": {"v": 10}}
+    measured = Measurement(t.claims[0].id, t.claims[0].sha256, 0.0, 0.1, "oracle", 0.0,
+                           ("observed v=10",), recheck=desc)
+    a, _ = assess(t, [measured], clock=CLOCK)
+
+    def replay(recheck):
+        assert recheck == desc
+        return Measurement(t.claims[0].id, t.claims[0].sha256, 0.0, 0.1, "oracle", 0.0,
+                           ("observed v=10",), recheck=recheck)
+
+    result = recheck_measurements(a, {"table": replay})
+    assert result == {"ok": True, "checked": 1, "skipped": 0, "missing": 0, "mismatched": 0, "failed": 0}
+    assert recheck_assessment(t, a, measurement_replayers={"table": replay})["measurements_rerun"] is True
+
+
+def test_measurement_rechecks_detect_replayed_measurement_drift():
+    t = _thesis()
+    desc = {"oracle": "table", "input": {"v": 10}}
+    measured = Measurement(t.claims[0].id, t.claims[0].sha256, 0.0, 0.1, "oracle", 0.0,
+                           ("observed v=10",), recheck=desc)
+    a, _ = assess(t, [measured], clock=CLOCK)
+
+    def drifted(_recheck):
+        return Measurement(t.claims[0].id, t.claims[0].sha256, 2.0, 0.1, "oracle", 0.0,
+                           ("observed v=12",))
+
+    result = recheck_measurements(a, {"table": drifted})
+    assert result["ok"] is False
+    assert result["checked"] == 1
+    assert result["mismatched"] == 1
+
+
+def test_measurement_rechecks_skip_legacy_measurements_without_descriptors():
+    t = _thesis()
+    a, _ = assess(t, _measurements(t), clock=CLOCK)
+
+    assert recheck_measurements(a, {}) == {
+        "ok": True, "checked": 0, "skipped": 2, "missing": 0, "mismatched": 0, "failed": 0,
+    }
 
 
 def test_tampered_measurement_breaks_verify():

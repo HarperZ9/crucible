@@ -19,8 +19,8 @@ from __future__ import annotations
 import hashlib
 import json
 import time
+from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass
-from typing import Callable, Iterable, Mapping
 
 from crucible.thesis import Thesis, verify_thesis
 from crucible.verdict import (
@@ -34,6 +34,9 @@ from crucible.verdict import (
 
 _VSEAL_FIELDS = ("claim_id", "claim_sha256", "status", "deviation", "tolerance", "method")
 _MSEAL_FIELDS = ("claim_id", "claim_sha256", "deviation", "tolerance", "method", "evidence")
+_MSEAL_RECHECK_FIELDS = _MSEAL_FIELDS + ("recheck",)
+
+MeasurementReplayer = Callable[[Mapping[str, object]], Measurement | Mapping[str, object]]
 
 
 def _verdict_row(v: Verdict) -> dict:
@@ -43,8 +46,17 @@ def _verdict_row(v: Verdict) -> dict:
 
 
 def _measurement_row(m: Measurement) -> dict:
-    return {"claim_id": m.claim_id, "claim_sha256": m.claim_sha256, "deviation": m.deviation,
-            "tolerance": m.tolerance, "method": m.method, "evidence": list(m.evidence)}
+    row: dict[str, object] = {
+        "claim_id": m.claim_id, "claim_sha256": m.claim_sha256, "deviation": m.deviation,
+        "tolerance": m.tolerance, "method": m.method, "evidence": list(m.evidence),
+    }
+    if m.recheck is not None:
+        row["recheck"] = _jsonable(m.recheck)
+    return row
+
+
+def _jsonable(value: object) -> object:
+    return json.loads(json.dumps(value, sort_keys=True, ensure_ascii=False))
 
 
 def _seal_rows(rows: Iterable[Mapping], fields: tuple[str, ...]) -> str:
@@ -54,6 +66,12 @@ def _seal_rows(rows: Iterable[Mapping], fields: tuple[str, ...]) -> str:
     objs.sort(key=lambda d: json.dumps(d, sort_keys=True, ensure_ascii=False))
     canon = json.dumps(objs, sort_keys=True, ensure_ascii=False)
     return hashlib.sha256(canon.encode("utf-8")).hexdigest()
+
+
+def _measurement_seal(rows: Iterable[Mapping]) -> str:
+    rows = tuple(rows)
+    fields = _MSEAL_RECHECK_FIELDS if any("recheck" in r for r in rows) else _MSEAL_FIELDS
+    return _seal_rows(rows, fields)
 
 
 def verdict_seal(verdicts: Iterable[Verdict]) -> str:
@@ -119,7 +137,7 @@ def verify_assessment(a: Assessment) -> bool:
     To also confirm the verdicts FOLLOW from the measurements, use ``recheck_assessment``."""
     if _seal_rows(a.verdicts, _VSEAL_FIELDS) != a.verdict_seal:
         return False
-    if _seal_rows(a.measurements, _MSEAL_FIELDS) != a.measurement_seal:
+    if _measurement_seal(a.measurements) != a.measurement_seal:
         return False
     fields = _record_fields(a.started_at, a.thesis_id, a.thesis_seal, a.claims, a.match, a.drift,
                             a.unverifiable, a.verdict_seal, a.measurement_seal, a.stored)
@@ -128,21 +146,66 @@ def verify_assessment(a: Assessment) -> bool:
 
 def _measurement_from_row(r: Mapping) -> Measurement:
     return Measurement(r["claim_id"], r["claim_sha256"], r.get("deviation"), r.get("tolerance", 0.0),
-                       r.get("method", ""), 0.0, tuple(r.get("evidence", ())))
+                       r.get("method", ""), 0.0, tuple(r.get("evidence", ())),
+                       r.get("recheck") if isinstance(r.get("recheck"), Mapping) else None)
 
 
-def recheck_assessment(thesis: Thesis, a: Assessment) -> dict:
+def _replayed_row(value: Measurement | Mapping[str, object]) -> dict:
+    return _measurement_row(value) if isinstance(value, Measurement) else dict(value)
+
+
+def _measurement_inputs_match(stored: Mapping, replayed: Mapping) -> bool:
+    return _seal_rows((stored,), _MSEAL_FIELDS) == _seal_rows((replayed,), _MSEAL_FIELDS)
+
+
+def recheck_measurements(a: Assessment, replayers: Mapping[str, MeasurementReplayer]) -> dict:
+    """Re-run measurements that carry a ``recheck`` descriptor.
+
+    Rows without a descriptor are legacy/offline measurements and are skipped, preserving old
+    assessment compatibility. A descriptor names its replay function by ``oracle``; the replayed
+    measurement must reproduce the stored claim binding, deviation, tolerance, method, and evidence.
+    """
+    result = {"ok": True, "checked": 0, "skipped": 0, "missing": 0, "mismatched": 0, "failed": 0}
+    for row in a.measurements:
+        recheck = row.get("recheck")
+        if not isinstance(recheck, Mapping):
+            result["skipped"] += 1
+            continue
+        oracle = recheck.get("oracle")
+        replay = replayers.get(oracle) if isinstance(oracle, str) else None
+        if replay is None:
+            result["missing"] += 1
+            continue
+        result["checked"] += 1
+        try:
+            if not _measurement_inputs_match(row, _replayed_row(replay(recheck))):
+                result["mismatched"] += 1
+        except Exception:  # noqa: BLE001 - a replay edge is impure; failure is reported, not raised.
+            result["failed"] += 1
+    result["ok"] = result["missing"] == result["mismatched"] == result["failed"] == 0
+    return result
+
+
+def recheck_assessment(
+    thesis: Thesis,
+    a: Assessment,
+    *,
+    measurement_replayers: Mapping[str, MeasurementReplayer] | None = None,
+) -> dict:
     """The strong re-derivation check, from the thesis and the stored measurements. Re-runs
     ``verdict_for`` per claim and confirms the stored verdicts are exactly what the pure function
     yields, so a stored verdict cannot have been asserted. Returns the three sub-checks; all True
     means the assessment is intact AND its verdicts genuinely follow from the measurements."""
     by_id = {m.claim_id: m for m in (_measurement_from_row(r) for r in a.measurements)}
     rederived = [verdict_for(c, by_id.get(c.id)) for c in thesis.claims]
-    return {
+    result = {
         "seals_ok": verify_assessment(a),
         "thesis_ok": verify_thesis(thesis) and thesis.seal == a.thesis_seal,
         "verdicts_rederive": verdict_seal(rederived) == a.verdict_seal,
     }
+    if measurement_replayers is not None:
+        result["measurements_rerun"] = recheck_measurements(a, measurement_replayers)["ok"]
+    return result
 
 
 def _index_measurements(
@@ -183,7 +246,7 @@ def assess(
     vrows = tuple(_verdict_row(v) for v in verdicts)
     mrows = tuple(_measurement_row(m) for m in by_id.values())
     vseal = _seal_rows(vrows, _VSEAL_FIELDS)
-    mseal = _seal_rows(mrows, _MSEAL_FIELDS)
+    mseal = _measurement_seal(mrows)
     fields = _record_fields(started, thesis.id, thesis.seal, len(thesis.claims),
                             counts[MATCH], counts[DRIFT], counts[UNVERIFIABLE], vseal, mseal, None)
     record = Assessment(started, thesis.id, thesis.seal, len(thesis.claims), counts[MATCH],

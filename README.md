@@ -31,17 +31,17 @@ from the record, so a confident assertion cannot fake it.
 The continuous part is the loop: substrates, measurements, and theses all improve across rounds,
 and the witnessed verdicts track which moved.
 
-Shipped today (0.11.0): the full first loop plus drift tracking, publication-gated export, registry
+Shipped today (0.12.0): the full first loop plus drift tracking, publication-gated export, registry
 operations, optional subprocess-backed seam adapters, Telos witnessed-artifact interop,
-Gather/index protocol interop, and 1.0-readiness coverage. You register a thesis, steelman it
-(adversaries propose the test), measure each claim against a substrate oracle, refine across
-substrate rounds toward a cohesively verified thesis, witness a re-derivable verdict per claim,
-compare assessment rounds to see what held, moved, improved, or regressed, inspect a growing
-registry by status, scope, and latest verdict, plug configured model/oracle commands into the
-steelman and measure seams, consume `telos.witnessed-artifact/v1` envelopes by re-running their
-named verifiers, use sealed Gather digests as evidence, and replay index verification records
-against supplied graph packs. A fenced thesis can be assessed locally, but the export edge refuses
-it by default.
+Gather/index protocol interop, measurement recheck descriptors, and 1.0-readiness coverage. You
+register a thesis, steelman it (adversaries propose the test), measure each claim against a substrate
+oracle, refine across substrate rounds toward a cohesively verified thesis, witness a re-derivable
+verdict per claim, compare assessment rounds to see what held, moved, improved, or regressed, inspect
+a growing registry by status, scope, and latest verdict, plug configured model/oracle commands into
+the steelman and measure seams, consume `telos.witnessed-artifact/v1` envelopes by re-running their
+named verifiers, use sealed Gather digests as evidence, replay index verification records against
+supplied graph packs, and persist optional measurement replay descriptors for oracle-level checks. A
+fenced thesis can be assessed locally, but the export edge refuses it by default.
 
 ## The differentiator (do not lose this)
 
@@ -105,6 +105,9 @@ Shipped:
   computes each claim's deviation from a predicted value over a provided substrate (offline, no model);
   the `NullMeasure` default measures nothing (UNVERIFIABLE). The Telos verifier or a proof oracle for
   abstract math plugs in through the same shape, so the verdict stays grounded, never asserted.
+- Measurement rechecks: `Measurement` can carry an optional `recheck` descriptor, persisted and sealed
+  with the assessment when present. `recheck_measurements` lets a caller provide oracle replayers that
+  reproduce stored measurement inputs from those descriptors.
 - The refine loop: grade each claim's measured margin, compute harmonic-mean cohesion, reflect the
   weakest claim, and re-measure across substrate rounds until the thesis is cohesively verified or the
   budget is spent honestly. The loop reports the weakest claim instead of pretending a short thesis held.
