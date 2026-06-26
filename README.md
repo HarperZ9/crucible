@@ -31,7 +31,7 @@ from the record, so a confident assertion cannot fake it.
 The continuous part is the loop: substrates, measurements, and theses all improve across rounds,
 and the witnessed verdicts track which moved.
 
-Shipped today (0.14.0): the full first loop plus drift tracking, Markdown assessment reports,
+Shipped today (0.14.1): the full first loop plus drift tracking, Markdown assessment reports,
 publication-gated export, registry
 operations, optional subprocess-backed seam adapters, Telos witnessed-artifact interop,
 Gather/index protocol interop, measurement recheck descriptors, batch assessment/report bundles,

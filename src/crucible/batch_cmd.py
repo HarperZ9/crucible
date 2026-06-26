@@ -17,6 +17,7 @@ from crucible.commands import (
 from crucible.measure import TableMeasure, measure_thesis
 from crucible.registry import Registry
 from crucible.report import render_assessment_report
+from crucible.thesis import Thesis
 
 _INPUT_ERRORS = (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError)
 
@@ -69,11 +70,11 @@ def _run_job(
     has_substrate = "substrate" in job
     if has_measurements == has_substrate:
         raise ValueError(f"batch job {job_id!r} needs exactly one of measurements or substrate")
-    thesis = _resolve_thesis(_pathish(base, thesis_ref), registry_dir)
+    thesis = _resolve_batch_thesis(base, thesis_ref, registry_dir)
     if has_measurements:
-        measurements = _load_measurements(thesis, _pathish(base, str(job["measurements"])))
+        measurements = _load_measurements(thesis, _required_manifest_path(base, str(job["measurements"]), job_id))
     else:
-        specs, substrate = _load_substrate(thesis, _pathish(base, str(job["substrate"])))
+        specs, substrate = _load_substrate(thesis, _required_manifest_path(base, str(job["substrate"]), job_id))
         measurements = measure_thesis(TableMeasure(specs, substrate), thesis)
     assessment, _verdicts = assess(thesis, measurements, clock=time.time, registry=registry)
     row = {
@@ -86,7 +87,7 @@ def _run_job(
     }
     if reports_dir:
         os.makedirs(reports_dir, exist_ok=True)
-        report_path = os.path.join(reports_dir, f"{_slug(job_id)}.md")
+        report_path = os.path.join(reports_dir, f"{index:04d}-{_slug(job_id)}.md")
         report = render_assessment_report(thesis, assessment, checks=recheck_assessment(thesis, assessment))
         with open(report_path, "w", encoding="utf-8") as f:
             f.write(report)
@@ -94,11 +95,25 @@ def _run_job(
     return row
 
 
-def _pathish(base: str, value: str) -> str:
+def _resolve_batch_thesis(base: str, value: str, registry_dir: str) -> Thesis:
     if os.path.isabs(value):
-        return value
+        if not os.path.isfile(value):
+            raise ValueError(f"batch thesis file is missing: {value}")
+        return _resolve_thesis(value, registry_dir)
     candidate = os.path.join(base, value)
-    return candidate if os.path.exists(candidate) else value
+    if os.path.isfile(candidate):
+        return _resolve_thesis(candidate, registry_dir)
+    thesis = Registry(registry_dir).get_thesis(value)
+    if thesis is None:
+        raise ValueError(f"no thesis {value!r} in registry {registry_dir}")
+    return thesis
+
+
+def _required_manifest_path(base: str, value: str, job_id: str) -> str:
+    path = value if os.path.isabs(value) else os.path.join(base, value)
+    if not os.path.isfile(path):
+        raise ValueError(f"batch job {job_id!r} references a missing file: {value}")
+    return path
 
 
 def _slug(value: str) -> str:

@@ -3,6 +3,15 @@
 All notable changes to crucible. Versions follow semantic versioning; each minor release is built
 behind a feature branch and reviewed before merge.
 
+## 0.14.1
+
+Batch hardening patch.
+
+- Batch report filenames now include the manifest job index, so duplicate or colliding job IDs do not
+  overwrite earlier reports.
+- Batch thesis, measurement, and substrate references now fail closed when a manifest-relative or
+  absolute file is missing instead of falling back to the caller's current working directory.
+
 ## 0.14.0
 
 Batch assessment workflow.
