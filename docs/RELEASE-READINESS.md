@@ -10,8 +10,8 @@ now that crucible has reached its stable flagship floor.
 - Registry actions are covered: `list`, `verify`, `stats`, `search`, and `prune`.
 - Bundled examples run through the public CLI, including manual measurements, table measurements,
   refinement, one-command runs with cleanroom review packets, oracle replay pack template generation,
-  cleanroom bundle validation and report/run matching checks, registry stats/search, report rendering,
-  the batch manifest example, and
+  cleanroom bundle validation, report/run matching checks, and pinned review instructions,
+  registry stats/search, report rendering, the batch manifest example, and
   publication-gated export.
 - The offline `examples/demo.py` runs as a script and demonstrates MATCH, DRIFT, UNVERIFIABLE, and
   seal tamper detection.
@@ -52,7 +52,8 @@ Lineage notes, prior review history, older CI runs, and external sibling reposit
 acceptance evidence unless their facts are visible in the artifact itself. A `crucible run --bundle`
 packet follows the same rule with `spec.json`, `run.json`, `report.md`, and `review.md` only.
 `crucible review BUNDLE` validates that boundary before verifier handoff and fails on extra
-context files or report content that does not render from `run.json`.
+context files, report content that does not render from `run.json`, or review instructions that
+diverge from the cleanroom boundary.
 
 Secret hygiene is mechanical at the release gate: no committed credentials, `.env` stays ignored,
 runtime dependencies are empty, and subprocess-backed edges run with explicit clean environment

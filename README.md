@@ -146,7 +146,8 @@ crucible review reports/binary-search-run --json
 
 The review check fails closed if the bundle is missing required files, carries extra context such as
 notes or chat logs, omits the cleanroom verifier boundary, has a `spec.json` that no longer
-matches the run record, or has a `report.md` that does not render from `run.json`.
+matches the run record, has a `report.md` that does not render from `run.json`, or has
+`review.md` instructions that diverge from the cleanroom verifier boundary.
 
 ## Oracle recheck packs
 
@@ -251,8 +252,8 @@ Shipped:
   `report.md`, and `review.md` as a self-contained cleanroom review packet.
 - Cleanroom bundle review: `crucible review BUNDLE` validates that a review packet contains only
   the allowed spec/artifact files, carries the verifier boundary, has matching `spec.json` and
-  run-record thesis metadata, and has a `report.md` artifact that re-renders from `run.json` before
-  verifier handoff.
+  run-record thesis metadata, has a `report.md` artifact that re-renders from `run.json`, and keeps
+  `review.md` pinned to the cleanroom verifier instructions before verifier handoff.
 - Publication-gated export: `gate_check`, `export_guard`, `export_thesis`, and
   `crucible export THESIS` refuse fenced material and explicit restricted markers before emitting a
   public thesis contract.

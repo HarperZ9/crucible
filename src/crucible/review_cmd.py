@@ -9,6 +9,7 @@ from collections.abc import Mapping
 from crucible.assess import Assessment
 from crucible.claim import Claim
 from crucible.report import render_assessment_report
+from crucible.run_cmd import REVIEW_INSTRUCTIONS
 from crucible.thesis import Thesis, verify_thesis
 
 REQUIRED_FILES = ("spec.json", "run.json", "report.md", "review.md")
@@ -36,6 +37,7 @@ def review_bundle(bundle: str) -> dict:
         "verifier_boundary": False,
         "spec_matches_run": False,
         "report_matches_run": False,
+        "review_instructions": False,
     }
     if checks["required_files"]:
         spec = _load_json(os.path.join(base, "spec.json"), "spec.json", findings)
@@ -43,6 +45,7 @@ def review_bundle(bundle: str) -> dict:
         checks["verifier_boundary"] = _verifier_boundary(run, findings)
         checks["spec_matches_run"] = _spec_matches_run(spec, run, findings)
         checks["report_matches_run"] = _report_matches_run(base, spec, run, findings)
+        checks["review_instructions"] = _review_instructions(base, findings)
     return {
         "ok": all(checks.values()),
         "bundle": base,
@@ -78,6 +81,20 @@ def _no_extra_context(base: str, findings: list[str]) -> bool:
     for name in extras:
         findings.append(f"unexpected context file in cleanroom bundle: {name}")
     return not extras
+
+
+def _review_instructions(base: str, findings: list[str]) -> bool:
+    path = os.path.join(base, "review.md")
+    try:
+        with open(path, encoding="utf-8") as f:
+            actual = f.read()
+    except OSError as exc:
+        findings.append(f"review.md is not readable: {exc}")
+        return False
+    if actual != REVIEW_INSTRUCTIONS:
+        findings.append("review.md does not match cleanroom instructions")
+        return False
+    return True
 
 
 def _load_json(path: str, label: str, findings: list[str]) -> Mapping | None:

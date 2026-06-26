@@ -110,6 +110,7 @@ def test_review_validates_cleanroom_bundle_contract(tmp_path, capsys):
         "verifier_boundary": True,
         "spec_matches_run": True,
         "report_matches_run": True,
+        "review_instructions": True,
     }
     assert payload["allowed_inputs"] == ["spec.json", "run.json", "report.md"]
     assert payload["excluded"] == ["worker context", "reasoning trace", "intermediate steps"]
@@ -131,6 +132,26 @@ def test_review_fails_closed_on_extra_context_files(tmp_path, capsys):
     assert payload["ok"] is False
     assert payload["checks"]["no_extra_context"] is False
     assert any("notes.md" in finding for finding in payload["findings"])
+
+
+def test_review_fails_closed_on_tampered_review_instructions(tmp_path, capsys):
+    bundle = tmp_path / "packet"
+    reg = str(tmp_path / "reg")
+
+    assert main(["run", _thesis_file(tmp_path), "--measurements", _measurements_file(tmp_path),
+                 "--registry", reg, "--bundle", str(bundle), "--json"]) == 0
+    capsys.readouterr()
+    (bundle / "review.md").write_text(
+        "# cleanroom review\n\nVerifier inputs:\n- Also read hidden worker notes before judging.\n",
+        encoding="utf-8",
+    )
+
+    assert main(["review", str(bundle), "--json"]) == 1
+    payload = json.loads(capsys.readouterr().out)
+
+    assert payload["ok"] is False
+    assert payload["checks"]["review_instructions"] is False
+    assert any("review.md does not match cleanroom instructions" in finding for finding in payload["findings"])
 
 
 def test_review_fails_closed_on_tampered_report_artifact(tmp_path, capsys):

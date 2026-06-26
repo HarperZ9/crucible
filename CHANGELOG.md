@@ -26,6 +26,8 @@ Operator run surface.
   assessment seal, and measurement seal before oracle replay starts.
 - Cleanroom review now recomputes the expected `report.md` artifact from `spec.json` plus `run.json`
   and fails closed when the human report is tampered or stale.
+- Cleanroom review now also checks that `review.md` is the canonical verifier instruction sheet, so
+  packet-local instructions cannot widen the verifier's context.
 
 ## 1.0.0
 

@@ -79,6 +79,7 @@ def test_example_assess_registry_search_and_report(tmp_path, capsys):
     assert main(["review", str(run_bundle), "--json"]) == 0
     reviewed = _json_out(capsys)
     assert reviewed["checks"]["report_matches_run"] is True
+    assert reviewed["checks"]["review_instructions"] is True
 
 
 def test_example_measure_and_refine_through_public_cli(capsys):
@@ -166,4 +167,5 @@ def test_release_docs_define_cleanroom_checkability_rules():
     assert "replay pack template" in normalized_readiness
     assert "assessment block" in normalized_readiness
     assert "report content that does not render from `run.json`" in normalized_readiness
+    assert "review instructions that diverge from the cleanroom boundary" in normalized_readiness
     assert "crucible review" in normalized_readiness
