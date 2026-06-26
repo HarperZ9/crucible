@@ -162,3 +162,19 @@ def test_malformed_catalog_line_raises_located_error(tmp_path):
         f.write("{ not valid json\n")
     with pytest.raises(ValueError, match="theses line"):
         list(reg.theses())
+
+
+def test_jsonl_rows_must_be_objects(tmp_path):
+    reg = Registry(str(tmp_path), fsync=False)
+    reg.register(_thesis())
+    with open(tmp_path / "theses.jsonl", "a", encoding="utf-8") as f:
+        f.write("[]\n")
+    with pytest.raises(ValueError, match="theses line .* object"):
+        list(reg.theses())
+
+    reg2 = Registry(str(tmp_path / "history"), fsync=False)
+    reg2.add_assessment({"thesis_id": "ok", "seal": "x"})
+    with open(tmp_path / "history" / "assessments.jsonl", "a", encoding="utf-8") as f:
+        f.write("[]\n")
+    with pytest.raises(ValueError, match="assessments line .* object"):
+        list(reg2.assessments())

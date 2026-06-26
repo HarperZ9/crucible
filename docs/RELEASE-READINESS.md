@@ -1,7 +1,7 @@
 # Release readiness
 
-This checklist is the standing gate before 1.0. It records what must stay true as crucible moves
-from release-candidate shape to stable flagship floor.
+This checklist is the standing gate for 1.0 and later release work. It records what must stay true
+now that crucible has reached its stable flagship floor.
 
 ## Verified surface
 
@@ -36,4 +36,5 @@ from release-candidate shape to stable flagship floor.
   verifier cannot evaluate success from that minimal state, the spec or readiness artifact must be
   tightened before release.
 - Release workflow: PyPI publishing is tied to GitHub release publication on `v*` tags, uses trusted
-  publishing, and pins external GitHub Actions by commit SHA.
+  publishing, pins external GitHub Actions by commit SHA, and installs build tooling from
+  `requirements-release.txt`.

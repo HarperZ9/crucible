@@ -239,9 +239,12 @@ class Registry:
                 if not line:
                     continue
                 try:
-                    yield json.loads(line)
+                    row = json.loads(line)
                 except json.JSONDecodeError as exc:
                     raise ValueError(f"registry {what} line {n} is not valid JSON: {exc}") from exc
+                if not isinstance(row, dict):
+                    raise ValueError(f"registry {what} line {n} is not a JSON object")
+                yield row
 
     def _guard_path(self, path: str) -> None:
         self._reject_links_in_path(path)

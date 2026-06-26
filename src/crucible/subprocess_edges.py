@@ -117,27 +117,19 @@ def _run_json(
     body = json.dumps(payload, ensure_ascii=False, sort_keys=True).encode("utf-8")
     if len(body) > max_input_bytes:
         raise ValueError("subprocess input exceeds configured byte limit")
+    stdout_path = stdin_path = None
     try:
-        with tempfile.TemporaryFile() as stdout:
-            completed = subprocess.run(
-                command,
-                input=body,
-                stdout=stdout,
-                stderr=subprocess.DEVNULL,
-                timeout=timeout,
-                cwd=cwd,
-                env=dict(env),
-                check=False,
-            )
-            size = stdout.tell()
-            if size > max_output_bytes:
-                raise ValueError("subprocess output exceeds configured byte limit")
-            stdout.seek(0)
-            output = stdout.read().decode("utf-8")
-    except subprocess.TimeoutExpired as exc:
-        raise ValueError("subprocess timed out") from exc
-    if completed.returncode != 0:
-        raise ValueError(f"subprocess exited with code {completed.returncode}")
+        stdin_path = _write_temp_input(body)
+        stdout_path = tempfile.NamedTemporaryFile(delete=False).name
+        with open(stdin_path, "rb") as stdin, open(stdout_path, "wb") as stdout:
+            proc = subprocess.Popen(command, stdin=stdin, stdout=stdout, stderr=subprocess.DEVNULL,
+                                    cwd=cwd, env=dict(env))
+            _wait_bounded(proc, stdout_path, timeout, max_output_bytes)
+        output = _read_output(stdout_path, max_output_bytes)
+    finally:
+        for path in (stdin_path, stdout_path):
+            if path and os.path.exists(path):
+                os.unlink(path)
     try:
         data = json.loads(output)
     except json.JSONDecodeError as exc:
@@ -145,6 +137,47 @@ def _run_json(
     if not isinstance(data, dict):
         raise ValueError("subprocess JSON response must be an object")
     return data
+
+
+def _write_temp_input(body: bytes) -> str:
+    with tempfile.NamedTemporaryFile(delete=False) as f:
+        f.write(body)
+        return f.name
+
+
+def _wait_bounded(proc: subprocess.Popen, stdout_path: str, timeout: float, max_output_bytes: int) -> None:
+    deadline = time.monotonic() + timeout
+    while True:
+        if os.path.getsize(stdout_path) > max_output_bytes:
+            _terminate(proc)
+            raise ValueError("subprocess output exceeds configured byte limit")
+        code = proc.poll()
+        if code is not None:
+            if code != 0:
+                raise ValueError(f"subprocess exited with code {code}")
+            return
+        if time.monotonic() >= deadline:
+            _terminate(proc)
+            raise ValueError("subprocess timed out")
+        time.sleep(min(0.02, max(0.001, deadline - time.monotonic())))
+
+
+def _terminate(proc: subprocess.Popen) -> None:
+    proc.kill()
+    try:
+        proc.wait(timeout=1)
+    except subprocess.TimeoutExpired:
+        pass
+
+
+def _read_output(path: str, max_output_bytes: int) -> str:
+    if os.path.getsize(path) > max_output_bytes:
+        raise ValueError("subprocess output exceeds configured byte limit")
+    with open(path, "rb") as f:
+        try:
+            return f.read().decode("utf-8")
+        except UnicodeDecodeError as exc:
+            raise ValueError("subprocess did not return utf-8 JSON") from exc
 
 
 def _request(kind: str, claim: Claim) -> dict:

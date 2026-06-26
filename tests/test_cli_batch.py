@@ -107,6 +107,23 @@ def test_batch_cli_resolves_thesis_ids_from_registry(tmp_path, capsys):
     assert payload["jobs"][0]["drift"] == 1
 
 
+def test_batch_cli_resolves_dotted_thesis_ids_from_registry(tmp_path, capsys):
+    thesis = _thesis_file(tmp_path, "alpha.v1")
+    reg = str(tmp_path / "reg")
+    assert main(["register", thesis, "--registry", reg]) == 0
+    capsys.readouterr()
+    manifest = _manifest(tmp_path, [
+        {"id": "alpha-dot-id", "thesis": "alpha.v1", "measurements": _measurements_file(tmp_path, "alpha.v1")},
+    ])
+
+    assert main(["batch", manifest, "--registry", reg, "--json"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+
+    assert payload["jobs"][0]["thesis_id"] == "alpha.v1"
+    assert payload["jobs"][0]["match"] == 1
+    assert payload["jobs"][0]["drift"] == 1
+
+
 def test_batch_cli_rejects_jobs_without_a_measurement_source(tmp_path, capsys):
     manifest = _manifest(tmp_path, [{"id": "bad", "thesis": _thesis_file(tmp_path, "alpha")}])
 

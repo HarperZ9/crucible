@@ -134,6 +134,8 @@ def verify_assessment(a: Assessment) -> bool:
     """Recompute every seal from the stored data and confirm they match. Not a tautology: it folds the
     actual stored verdicts and measurements, so editing a verdict, a measurement, or a count is caught.
     To also confirm the verdicts FOLLOW from the measurements, use ``recheck_assessment``."""
+    if not _counts_match(a, a.verdicts):
+        return False
     if _seal_rows(a.verdicts, _VSEAL_FIELDS) != a.verdict_seal:
         return False
     if _measurement_seal(a.measurements) != a.measurement_seal:
@@ -141,6 +143,23 @@ def verify_assessment(a: Assessment) -> bool:
     fields = _record_fields(a.started_at, a.thesis_id, a.thesis_seal, a.claims, a.match, a.drift,
                             a.unverifiable, a.verdict_seal, a.measurement_seal, a.stored)
     return _seal_record(fields) == a.seal
+
+
+def _counts_match(a: Assessment, rows: Iterable[Mapping]) -> bool:
+    counts = {MATCH: 0, DRIFT: 0, UNVERIFIABLE: 0}
+    total = 0
+    for row in rows:
+        total += 1
+        status = row.get("status")
+        if status not in counts:
+            return False
+        counts[status] += 1
+    return (
+        a.claims == total
+        and a.match == counts[MATCH]
+        and a.drift == counts[DRIFT]
+        and a.unverifiable == counts[UNVERIFIABLE]
+    )
 
 
 def _measurement_from_row(r: Mapping) -> Measurement:
@@ -197,12 +216,17 @@ def recheck_assessment(
     means the assessment is intact AND its verdicts genuinely follow from the measurements."""
     by_id = {m.claim_id: m for m in (_measurement_from_row(r) for r in a.measurements)}
     rederived = [verdict_for(c, by_id.get(c.id)) for c in thesis.claims]
+    rederived_rows = [_verdict_row(v) for v in rederived]
     rederived_seal = verdict_seal(rederived)
     stored_rederived = _seal_rows(a.verdicts, _VSEAL_FIELDS) == rederived_seal
     result = {
         "seals_ok": verify_assessment(a),
         "thesis_ok": verify_thesis(thesis) and thesis.seal == a.thesis_seal,
-        "verdicts_rederive": stored_rederived and a.verdict_seal == rederived_seal,
+        "verdicts_rederive": (
+            stored_rederived
+            and a.verdict_seal == rederived_seal
+            and _counts_match(a, rederived_rows)
+        ),
     }
     if measurement_replayers is not None:
         result["measurements_rerun"] = recheck_measurements(a, measurement_replayers)["ok"]

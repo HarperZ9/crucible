@@ -55,6 +55,7 @@ are exactly what the pure function yields, so a verdict that was asserted rather
 exposed even when its seals are internally consistent. The CLI surfaces this as `crucible verdicts
 --verify`. The seal proves integrity, not authorship: a fully consistent re-forge (every field and
 seal rewritten together) is out of scope without a signature, and the docs say so where a user meets it.
+Summary counts are not trusted as labels; verification re-derives them from the verdict rows.
 
 Measurements may carry an optional `recheck` descriptor. When present, it is persisted with the
 measurement row and included in the measurement seal; when absent, legacy rows keep the original seal
@@ -102,10 +103,9 @@ The core imports neither the Null nor any model, so the package keeps zero third
 `SubprocessSteelman` and `SubprocessMeasure` are optional stdlib adapters for configured commands.
 They exchange one bounded JSON request/response over stdin/stdout, enforce a timeout, and reject shell
 strings so arguments are not re-parsed by a shell. By default they pass only a minimal environment,
-discard stderr, and write stdout to a temporary file before enforcing the response cap. A child
-process may propose a challenge or report a deviation, but crucible stamps the claim identity, claim
-hash, and producer name locally. The verdict still follows from `verdict_for`; a subprocess cannot
-assert MATCH.
+discard stderr, and terminate children whose stdout grows past the response cap. A child process may
+propose a challenge or report a deviation, but crucible stamps the claim identity, claim hash, and
+producer name locally. The verdict still follows from `verdict_for`; a subprocess cannot assert MATCH.
 
 ## Telos artifact interop
 

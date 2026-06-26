@@ -110,6 +110,24 @@ print(json.dumps({"measurement": {"deviation": 0.0, "tolerance": 0.1}}))
     assert measurement.deviation == 0.0
 
 
+def test_subprocess_edges_terminate_when_stdout_exceeds_bound(tmp_path):
+    marker = tmp_path / "finished.txt"
+    script = _script(tmp_path, f"""
+import sys, time
+for _ in range(100):
+    sys.stdout.write("x" * 512)
+    sys.stdout.flush()
+    time.sleep(0.005)
+open({str(marker)!r}, "w", encoding="utf-8").write("finished")
+time.sleep(0.2)
+""")
+
+    with pytest.raises(ValueError, match="output"):
+        SubprocessMeasure([sys.executable, script], max_output_bytes=1024, timeout=5).measure(make_claim("x", "f"))
+
+    assert not marker.exists()
+
+
 def test_subprocess_measure_rejects_invalid_json_shape(tmp_path):
     script = _script(tmp_path, "print('not json')")
 

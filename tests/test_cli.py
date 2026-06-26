@@ -146,6 +146,13 @@ def test_assess_measurement_with_unknown_claim_is_an_error(tmp_path, capsys):
     assert "unknown claim" in capsys.readouterr().err
 
 
+def test_assess_measurements_must_be_a_list_of_objects(tmp_path, capsys):
+    bad = _write(tmp_path / "bad-m.json", {"measurements": "not-a-list"})
+
+    assert main(["assess", _thesis_file(tmp_path), "--measurements", bad]) == 1
+    assert "measurements" in capsys.readouterr().err
+
+
 def test_assess_measurement_with_ambiguous_claim_text_is_an_error(tmp_path, capsys):
     thesis = _write(tmp_path / "ambiguous.json", {
         "title": "Ambiguous",
@@ -295,6 +302,16 @@ def test_measure_spec_for_unknown_claim_is_an_error(tmp_path, capsys):
                                          "substrate": {"v": 1}})
     assert main(["measure", _thesis_file(tmp_path), "--substrate", sub]) == 1
     assert "unknown claim" in capsys.readouterr().err
+
+
+def test_measure_substrate_shapes_are_clean_errors(tmp_path, capsys):
+    bad_specs = _write(tmp_path / "bad-specs.json", {"specs": [], "substrate": {"v": 1}})
+    assert main(["measure", _thesis_file(tmp_path), "--substrate", bad_specs]) == 1
+    assert "specs" in capsys.readouterr().err
+
+    bad_substrate = _write(tmp_path / "bad-substrate.json", {"specs": {}, "substrate": []})
+    assert main(["measure", _thesis_file(tmp_path), "--substrate", bad_substrate]) == 1
+    assert "substrate" in capsys.readouterr().err
 
 
 def test_measure_spec_with_ambiguous_claim_text_is_an_error(tmp_path, capsys):

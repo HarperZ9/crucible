@@ -8,18 +8,21 @@ behind a feature branch and reviewed before merge.
 Stable flagship floor.
 
 - Assessment integrity now seals verdict margin and grounds, and `recheck_assessment` rejects stored
-  verdict rows that do not re-derive from the thesis and measurements.
+  verdict rows or summary counts that do not re-derive from the thesis and measurements.
 - Drift and registry status/search now use verified latest assessments instead of trusting the newest
   row blindly.
 - The registry rejects duplicate thesis ids with different seals, refuses symlinked storage paths,
   and keeps object writes on unique temp files inside the registry root.
 - Batch manifests keep thesis, measurement, and substrate paths inside the manifest bundle; path-like
-  missing refs fail closed; report writes use index-prefixed filenames and exclusive creation.
+  missing refs fail closed without rejecting dotted registry ids; report writes use index-prefixed
+  filenames and exclusive creation.
 - Subprocess-backed edges use a clean default environment, discard unbounded stderr, write stdout to a
-  temporary file before enforcing the response cap, and still reject shell strings.
+  temporary file, actively terminate children that exceed the response cap, and still reject shell
+  strings.
 - CLI JSON loaders reject non-object top-level payloads with clean errors, ambiguous claim text refs
   are rejected, and refine thresholds reject negative or non-finite values cleanly.
-- Release workflows remove manual PyPI dispatch and pin external GitHub Actions by commit SHA.
+- Release workflows remove manual PyPI dispatch, pin external GitHub Actions by commit SHA, and
+  install build tooling from `requirements-release.txt`.
 - README and readiness docs record the clean verifier rule: verifier receives only the original spec
   and artifact, never the worker context or reasoning trace.
 

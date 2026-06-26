@@ -134,7 +134,7 @@ def _report_path(reports_dir: str | None, index: int, job_id: str) -> str:
 
 
 def _looks_like_path(value: str) -> bool:
-    return value.endswith(".json") or any(part in value for part in ("/", "\\", ".", os.sep))
+    return value.lower().endswith(".json") or any(part in value for part in ("/", "\\", os.sep))
 
 
 def _slug(value: str) -> str:

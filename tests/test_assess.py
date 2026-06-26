@@ -195,3 +195,18 @@ def test_tampered_verdict_margin_breaks_verify_and_recheck():
     result = recheck_assessment(t, tampered)
     assert result["seals_ok"] is False
     assert result["verdicts_rederive"] is False
+
+
+def test_forged_summary_counts_break_verify_and_recheck_even_when_resealed():
+    from crucible.assess import _record_fields, _seal_record
+
+    t = _thesis()
+    a, _ = assess(t, _measurements(t), clock=CLOCK)
+    fields = _record_fields(a.started_at, a.thesis_id, a.thesis_seal, a.claims, 0, 3, 0,
+                            a.verdict_seal, a.measurement_seal, a.stored)
+    forged = dataclasses.replace(a, match=0, drift=3, unverifiable=0, seal=_seal_record(fields))
+
+    assert not verify_assessment(forged)
+    result = recheck_assessment(t, forged)
+    assert result["seals_ok"] is False
+    assert result["verdicts_rederive"] is False

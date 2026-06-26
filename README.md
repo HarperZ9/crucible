@@ -130,7 +130,7 @@ Shipped:
 - A witnessed assessment that persists its verdicts and measurements, so `verify_assessment`
   recomputes the seals from the stored data and `recheck_assessment` re-derives each verdict from the
   thesis and the measurements: a verdict, margin, and grounds cannot be asserted, they must follow
-  from the record.
+  from the record. Summary counts are re-derived from verdict rows as part of verification.
 - A content-addressed registry that re-verifies stored claims (MATCH / MISSING / CORRUPT), checks
   thesis seals (catching a swapped claim a body check would miss), rejects duplicate thesis ids with
   different seals, refuses symlinked storage paths, and refuses to load a tampered thesis.
@@ -165,9 +165,9 @@ Shipped:
   verdict, and prune orphan claim bodies only when explicitly applied.
 - Optional subprocess edges: `SubprocessSteelman` and `SubprocessMeasure` run configured commands
   through bounded JSON stdin/stdout, reject shell strings, enforce timeouts, and stamp claim identity
-  locally. By default they pass only a minimal environment, discard stderr, and keep stdout in a
-  temporary file before enforcing the response bound. The default seams remain Null and the verdict
-  step still has no model in it.
+  locally. By default they pass only a minimal environment, discard stderr, and actively terminate
+  children whose stdout exceeds the configured response bound. The default seams remain Null and the
+  verdict step still has no model in it.
 - Telos artifact interop: `TelosMeasure` consumes `telos.witnessed-artifact/v1` envelopes through a
   caller-provided verifier registry. The carried certificate is not trusted; the named verifier is
   re-run and mapped into the normal `Measurement` -> `verdict_for` spine.

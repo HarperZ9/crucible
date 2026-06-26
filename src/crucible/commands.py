@@ -31,8 +31,10 @@ def _read_json(path: str) -> dict:
 
 def _thesis_from_data(data: dict, *, clock) -> Thesis:
     raw = data.get("claims") or []
-    if not raw:
+    if not isinstance(raw, list) or not raw:
         raise ValueError("thesis JSON needs a non-empty 'claims' list")
+    if any(not isinstance(c, dict) for c in raw):
+        raise ValueError("thesis JSON 'claims' entries must be objects")
     claims = [make_claim(c["text"], c.get("falsification", ""), id=c.get("id")) for c in raw]
     return make_thesis(data.get("title", ""), claims, clock=clock, id=data.get("id"),
                        disposition=data.get("disposition", PUBLISHABLE))
@@ -80,13 +82,27 @@ def _load_measurements(thesis: Thesis, path: str | None) -> list[Measurement]:
     by_id = {c.id: c for c in thesis.claims}
     by_text = _claims_by_text(thesis)
     out: list[Measurement] = []
-    for m in data.get("measurements", []):
+    rows = data.get("measurements", [])
+    if not isinstance(rows, list):
+        raise ValueError("measurements must be a list of objects")
+    for i, m in enumerate(rows, 1):
+        if not isinstance(m, dict):
+            raise ValueError(f"measurement {i} must be an object")
         ref = m.get("claim", "")
         claim = _resolve_claim_ref(ref, by_id, by_text, "measurement")
+        evidence = _evidence(m.get("evidence", ()), f"measurement {i} evidence")
         out.append(Measurement(claim.id, claim.sha256, _as_float_or_none(m.get("deviation")),
                                _as_float(m.get("tolerance"), 0.0), m.get("method", "manual"),
-                               time.time(), tuple(m.get("evidence", ()))))
+                               time.time(), evidence))
     return out
+
+
+def _evidence(value: object, what: str) -> tuple[str, ...]:
+    if value in (None, ()):
+        return ()
+    if not isinstance(value, list) or any(not isinstance(item, str) for item in value):
+        raise ValueError(f"{what} must be a list of strings")
+    return tuple(value)
 
 
 def _resolve_thesis(thesis_arg: str, registry: str | None) -> Thesis:
@@ -205,10 +221,14 @@ def cmd_steelman(args) -> int:
 def build_specs(thesis: Thesis, raw: dict) -> dict:
     """Resolve a ``{claim: {predicted, tolerance, observe, metric}}`` mapping against a thesis (by
     claim id or exact text) into ``{claim_id: MetricSpec}``. Shared by measure and refine."""
+    if not isinstance(raw, dict):
+        raise ValueError("specs must be an object")
     by_id = {c.id: c for c in thesis.claims}
     by_text = _claims_by_text(thesis)
     specs: dict[str, MetricSpec] = {}
-    for ref, s in (raw or {}).items():
+    for ref, s in raw.items():
+        if not isinstance(s, dict):
+            raise ValueError(f"spec for claim {ref!r} must be an object")
         claim = _resolve_claim_ref(ref, by_id, by_text, "spec")
         specs[claim.id] = MetricSpec(float(s["predicted"]), _as_float(s.get("tolerance"), 0.0),
                                      s.get("observe", ""), s.get("metric", "abs"))
@@ -218,8 +238,14 @@ def build_specs(thesis: Thesis, raw: dict) -> dict:
 def _load_substrate(thesis: Thesis, path: str) -> tuple[dict, dict]:
     """Load a measure substrate JSON: ``{specs: {claim: {...}}, substrate: {key: value}}``."""
     data = _read_json(path)
-    specs = build_specs(thesis, data.get("specs") or {})
-    substrate = {k: float(v) for k, v in (data.get("substrate") or {}).items()}
+    specs_raw = data.get("specs")
+    substrate_raw = data.get("substrate")
+    specs_raw = {} if specs_raw is None else specs_raw
+    substrate_raw = {} if substrate_raw is None else substrate_raw
+    if not isinstance(substrate_raw, dict):
+        raise ValueError("substrate must be an object")
+    specs = build_specs(thesis, specs_raw)
+    substrate = {k: float(v) for k, v in substrate_raw.items()}
     return specs, substrate
 
 

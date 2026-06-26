@@ -105,3 +105,16 @@ def test_cli_help_advertises_shipped_command_surface(capsys):
     registry = capsys.readouterr().out
     for action in ("list", "verify", "stats", "search", "prune"):
         assert action in registry
+
+
+def test_release_workflow_uses_pinned_build_tool_requirements():
+    workflow = (ROOT / ".github" / "workflows" / "release.yml").read_text(encoding="utf-8")
+    requirements = ROOT / "requirements-release.txt"
+
+    assert requirements.exists()
+    pins = requirements.read_text(encoding="utf-8")
+    assert "build==" in pins
+    assert "twine==" in pins
+    assert "pip install --requirement requirements-release.txt" in workflow
+    assert "pip install --upgrade " + "build twine" not in workflow
+    assert "workflow_" + "dispatch" not in workflow
