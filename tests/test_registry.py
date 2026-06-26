@@ -131,7 +131,7 @@ def test_assessment_history_appends_and_streams(tmp_path):
 
 
 def test_check_sha_rejects_traversal_and_non_hex():
-    for bad in ("../etc/passwd", "g" * 64, "abc", "ab/cd", 123):
+    for bad in ("../etc/shadow", "g" * 64, "abc", "ab/cd", 123):
         with pytest.raises(ValueError):
             _check_sha(bad)
     good = "a" * 64

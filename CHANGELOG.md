@@ -9,6 +9,8 @@ Stable flagship floor.
 
 - Assessment integrity now seals verdict margin and grounds, and `recheck_assessment` rejects stored
   verdict rows or summary counts that do not re-derive from the thesis and measurements.
+- Measurement rows now persist and seal `measured_at`, and Telos-backed measurements persist a
+  `telos:<verifier>` replay descriptor so oracle-level reassessment checks a real stored row.
 - Drift and registry status/search now use the latest verified assessments, falling back past invalid
   tail rows instead of trusting or hiding history.
 - The registry rejects duplicate thesis ids with different seals, refuses symlinked storage paths,
@@ -65,8 +67,8 @@ Measurement recheck descriptors.
 
 - `Measurement` now accepts an optional `recheck` descriptor, preserved at the end of the dataclass so
   existing positional construction stays compatible.
-- Assessments persist and seal `recheck` descriptors when present; legacy assessment rows without
-  descriptors keep their previous measurement-seal shape and still verify.
+- Assessments persist and seal `measured_at` plus `recheck` descriptors when present; legacy
+  assessment rows without descriptors keep their previous replay shape and still verify.
 - `recheck_measurements` replays descriptor-bearing measurement rows through a caller-supplied oracle
   registry and reports checked, skipped, missing, mismatched, and failed replays.
 - `recheck_assessment(..., measurement_replayers=...)` can include an oracle-level measurement replay

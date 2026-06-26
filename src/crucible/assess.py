@@ -33,7 +33,7 @@ from crucible.verdict import (
 )
 
 _VSEAL_FIELDS = ("claim_id", "claim_sha256", "status", "deviation", "tolerance", "margin", "method", "grounds")
-_MSEAL_FIELDS = ("claim_id", "claim_sha256", "deviation", "tolerance", "method", "evidence")
+_MSEAL_FIELDS = ("claim_id", "claim_sha256", "deviation", "tolerance", "method", "measured_at", "evidence")
 _MSEAL_RECHECK_FIELDS = _MSEAL_FIELDS + ("recheck",)
 
 MeasurementReplayer = Callable[[Mapping[str, object]], Measurement | Mapping[str, object]]
@@ -48,7 +48,8 @@ def _verdict_row(v: Verdict) -> dict:
 def _measurement_row(m: Measurement) -> dict:
     row: dict[str, object] = {
         "claim_id": m.claim_id, "claim_sha256": m.claim_sha256, "deviation": m.deviation,
-        "tolerance": m.tolerance, "method": m.method, "evidence": list(m.evidence),
+        "tolerance": m.tolerance, "method": m.method, "measured_at": m.measured_at,
+        "evidence": list(m.evidence),
     }
     if m.recheck is not None:
         row["recheck"] = _jsonable(m.recheck)
@@ -176,7 +177,7 @@ def _rows(value: object, field: str) -> tuple[dict, ...]:
 
 def _measurement_from_row(r: Mapping) -> Measurement:
     return Measurement(r["claim_id"], r["claim_sha256"], r.get("deviation"), r.get("tolerance", 0.0),
-                       r.get("method", ""), 0.0, tuple(r.get("evidence", ())),
+                       r.get("method", ""), r.get("measured_at", 0.0), tuple(r.get("evidence", ())),
                        r.get("recheck") if isinstance(r.get("recheck"), Mapping) else None)
 
 

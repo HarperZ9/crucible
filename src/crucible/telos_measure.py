@@ -97,22 +97,25 @@ class TelosMeasure:
             return self._measurement(claim, None, "telos:none", ("no Telos artifact for claim",))
         result = verify_telos_artifact(artifact, self._verifiers)
         verifier = _verifier_name(artifact)
+        recheck = _recheck_descriptor(artifact, verifier)
         if not result.get("ok"):
-            return self._measurement(claim, None, f"telos:{verifier}", (str(result.get("reason", "")),))
+            return self._measurement(claim, None, f"telos:{verifier}", (str(result.get("reason", "")),),
+                                     recheck)
         reproduced = str(result["reproduced"])
         evidence = (
             f"telos verifier {verifier} reproduced {reproduced}",
             f"carried {result['carried']}; matches {result['matches']}",
         )
         if reproduced == VERIFIED and result.get("matches"):
-            return self._measurement(claim, 0.0, f"telos:{verifier}", evidence)
+            return self._measurement(claim, 0.0, f"telos:{verifier}", evidence, recheck)
         if reproduced == REFUTED:
-            return self._measurement(claim, 2.0, f"telos:{verifier}", evidence)
-        return self._measurement(claim, None, f"telos:{verifier}", evidence)
+            return self._measurement(claim, 2.0, f"telos:{verifier}", evidence, recheck)
+        return self._measurement(claim, None, f"telos:{verifier}", evidence, recheck)
 
     def _measurement(self, claim: Claim, deviation: float | None, method: str,
-                     evidence: tuple[str, ...]) -> Measurement:
-        return Measurement(claim.id, claim.sha256, deviation, 1.0, method, float(self._clock()), evidence)
+                     evidence: tuple[str, ...], recheck: Mapping[str, object] | None = None) -> Measurement:
+        return Measurement(claim.id, claim.sha256, deviation, 1.0, method, float(self._clock()), evidence,
+                           recheck)
 
 
 def _verdict(value: object) -> str:
@@ -134,3 +137,12 @@ def _verifier_name(artifact: object) -> str:
     if not isinstance(recheck, Mapping):
         return "unknown"
     return str(recheck.get("verifier", "unknown"))
+
+
+def _recheck_descriptor(artifact: object, verifier: str) -> Mapping[str, object] | None:
+    if not isinstance(artifact, Mapping):
+        return None
+    recheck = artifact.get("recheck")
+    if not isinstance(recheck, Mapping):
+        return None
+    return {"oracle": f"telos:{verifier}", **dict(recheck)}

@@ -84,11 +84,11 @@ def test_subprocess_edges_enforce_input_and_output_bounds(tmp_path):
 
 
 def test_subprocess_edges_do_not_inherit_parent_environment_by_default(tmp_path, monkeypatch):
-    monkeypatch.setenv("CRUCIBLE_SHOULD_NOT_LEAK", "secret")
+    monkeypatch.setenv("SHOULD_NOT_LEAK", "sentinel-value")
     script = _script(tmp_path, """
 import json, os
 print(json.dumps({"measurement": {
-    "deviation": 0.0 if "CRUCIBLE_SHOULD_NOT_LEAK" not in os.environ else 5.0,
+    "deviation": 0.0 if "SHOULD_NOT_LEAK" not in os.environ else 5.0,
     "tolerance": 0.1,
 }}))
 """)

@@ -16,8 +16,8 @@ def verdict_for(claim: Claim, measurement: Measurement | None) -> Verdict: ...
 A measurement records a deviation from what the claim predicts and a tolerance. The verdict is a
 pure function of that record: within tolerance is MATCH, outside is DRIFT, absent or unmeasurable is
 UNVERIFIABLE. There is no model in this step, so the verdict recomputes from the stored record and a
-confident assertion cannot fake it. UNVERIFIABLE is fail-closed: an axis that cannot be measured is
-never read as holding.
+confident assertion has no effect on the rechecked result. UNVERIFIABLE is fail-closed: an axis that
+cannot be measured is never read as holding.
 
 ## The receipt: `Claim`
 
@@ -57,12 +57,13 @@ exposed even when its seals are internally consistent. The CLI surfaces this as 
 seal rewritten together) is out of scope without a signature, and the docs say so where a user meets it.
 Summary counts are not trusted as labels; verification re-derives them from the verdict rows.
 
-Measurements may carry an optional `recheck` descriptor. When present, it is persisted with the
-measurement row and included in the measurement seal; when absent, legacy rows keep the original seal
-shape, so older assessments still verify. `recheck_measurements` is the oracle-level hook: a caller
-provides replay functions keyed by descriptor `oracle`, and crucible compares the replayed measurement
-inputs to the stored row. The shipped CLI still re-derives verdicts from stored measurements; external
-callers can now also re-run descriptor-bearing measurements.
+Measurement rows persist and seal claim binding, deviation, tolerance, method, `measured_at`,
+evidence, and optional `recheck` descriptors. When a descriptor is present, it is included in the
+measurement seal; when absent, legacy rows keep the original replay shape and are skipped by
+oracle-level replay. `recheck_measurements` is the oracle-level hook: a caller provides replay
+functions keyed by descriptor `oracle`, and crucible compares the replayed measurement inputs to the
+stored row. The shipped CLI still re-derives verdicts from stored measurements; external callers can
+now also re-run descriptor-bearing measurements.
 
 `render_assessment_report` turns the same sealed record into a deterministic Markdown artifact. It
 does not change the verdict contract or decide anything new; it gives an operator a readable surface
@@ -115,7 +116,9 @@ caller supplies a verifier registry; crucible re-runs the named verifier, compar
 verdict to the carried verdict, and turns that live result into a normal Measurement. Reproduced
 `verified` becomes a MATCH input, reproduced `refuted` or a drifted carried verdict becomes a DRIFT
 input, and a missing/unregistered/unverifiable proof becomes an UNVERIFIABLE input. That keeps the
-interop on the same spine: trust the proof, not the emitter.
+interop on the same spine: trust the proof, not the emitter. When the Telos artifact is well-shaped,
+the produced Measurement persists a `telos:<verifier>` recheck descriptor so later assessment replay
+can re-run the same oracle from the stored row.
 
 ## Gather/index interop
 

@@ -130,3 +130,15 @@ def test_release_workflow_uses_pinned_build_tool_requirements():
     assert "python -m build --no-isolation" in workflow
     assert "pip install --upgrade " + "build twine" not in workflow
     assert "workflow_" + "dispatch" not in workflow
+
+
+def test_release_docs_define_cleanroom_checkability_rules():
+    readiness = (ROOT / "docs" / "RELEASE-READINESS.md").read_text(encoding="utf-8")
+    license_text = (ROOT / "LICENSE").read_text(encoding="utf-8")
+
+    assert "crucible Fair-Source License" in license_text
+    assert "Cru" + "cible" not in license_text
+    assert "Cleanroom acceptance" in readiness
+    assert "api[_-]?key|" + "to" + "ken|se" + "cret|pass" + "word" in readiness
+    assert "before 1\\.0|" + "release-" + "candidate" in readiness
+    assert "caller-supplied measurement evidence is treated as user data" in readiness

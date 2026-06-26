@@ -141,9 +141,9 @@ Shipped:
   computes each claim's deviation from a predicted value over a provided substrate (offline, no model);
   the `NullMeasure` default measures nothing (UNVERIFIABLE). The Telos verifier or a proof oracle for
   abstract math plugs in through the same shape, so the verdict stays grounded, never asserted.
-- Measurement rechecks: `Measurement` can carry an optional `recheck` descriptor, persisted and sealed
-  with the assessment when present. `recheck_measurements` lets a caller provide oracle replayers that
-  reproduce stored measurement inputs from those descriptors.
+- Measurement rechecks: assessment rows persist and seal `measured_at`, evidence, and optional
+  `recheck` descriptors. `recheck_measurements` lets a caller provide oracle replayers that reproduce
+  stored measurement inputs from those descriptors.
 - The refine loop: grade each claim's measured margin, compute harmonic-mean cohesion, reflect the
   weakest claim, and re-measure across substrate rounds until the thesis is cohesively verified or the
   budget is spent honestly. The loop reports the weakest claim instead of pretending a short thesis held.
@@ -170,7 +170,8 @@ Shipped:
   verdict step still has no model in it.
 - Telos artifact interop: `TelosMeasure` consumes `telos.witnessed-artifact/v1` envelopes through a
   caller-provided verifier registry. The carried certificate is not trusted; the named verifier is
-  re-run and mapped into the normal `Measurement` -> `verdict_for` spine.
+  re-run, mapped into the normal `Measurement` -> `verdict_for` spine, and stored with a
+  `telos:<verifier>` replay descriptor.
 - Gather/index interop: `GatherDigestMeasure` consumes sealed Gather digests and checks that a
   claim's expected evidence receipt exists; `IndexMeasure` consumes `index.verification/1` records
   and replays their structural claims against supplied graph packs. Both map into the same normal

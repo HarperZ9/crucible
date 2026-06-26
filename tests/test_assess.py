@@ -110,6 +110,19 @@ def test_measurement_recheck_descriptor_is_persisted_and_sealed():
     assert not verify_assessment(dataclasses.replace(a, measurements=tuple(bad)))
 
 
+def test_measurement_timestamp_is_persisted_and_sealed():
+    t = _thesis()
+    measured = Measurement(t.claims[0].id, t.claims[0].sha256, 0.0, 0.1, "oracle", 123.5)
+    a, _ = assess(t, [measured], clock=CLOCK)
+
+    assert a.measurements[0]["measured_at"] == 123.5
+    assert verify_assessment(Assessment.from_dict(a.to_dict()))
+
+    bad = [dict(m) for m in a.measurements]
+    bad[0]["measured_at"] = 999.0
+    assert not verify_assessment(dataclasses.replace(a, measurements=tuple(bad)))
+
+
 def test_measurement_rechecks_replay_oracle_descriptors():
     t = _thesis()
     desc = {"oracle": "table", "input": {"v": 10}}
