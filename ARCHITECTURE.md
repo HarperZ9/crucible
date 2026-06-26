@@ -68,7 +68,8 @@ stored row. The shipped CLI still re-derives verdicts from stored measurements; 
 now also re-run descriptor-bearing measurements. `crucible recheck REGISTRY` exposes the descriptor
 plan for the latest assessment, `--template FILE` writes a replay pack skeleton for the verifier to
 fill, and `--pack FILE` checks a finished oracle replay pack against those sealed measurement rows
-without creating a second verdict path.
+without creating a second verdict path. If a replay pack carries the template assessment block, the
+block must match the selected thesis id, assessment seal, and measurement seal before replay starts.
 
 `render_assessment_report` turns the same sealed record into a deterministic Markdown artifact. It
 does not change the verdict contract or decide anything new; it gives an operator a readable surface

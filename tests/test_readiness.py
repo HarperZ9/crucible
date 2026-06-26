@@ -160,4 +160,5 @@ def test_release_docs_define_cleanroom_checkability_rules():
     assert "spec.json" in readiness and "review.md" in readiness
     assert "oracle replay pack" in normalized_readiness
     assert "replay pack template" in normalized_readiness
+    assert "assessment block" in normalized_readiness
     assert "crucible review" in normalized_readiness

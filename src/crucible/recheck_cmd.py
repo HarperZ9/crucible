@@ -131,8 +131,9 @@ def _evidence(value: object) -> list:
         return list(value)
     return [] if value in (None, "") else [value]
 
+
 def _emit_replay(args, thesis, assessment: Assessment, plan: dict) -> int:
-    replayers = _load_replay_pack(args.pack)
+    replayers = _load_replay_pack(args.pack, plan["assessment"])
     checks = recheck_assessment(thesis, assessment)
     replay = recheck_measurements(assessment, replayers)
     checks["measurements_rerun"] = replay["ok"]
@@ -163,10 +164,14 @@ def _print_replay(result: dict) -> None:
           f"missing {replay['missing']}, mismatched {replay['mismatched']}, failed {replay['failed']}")
 
 
-def _load_replay_pack(path: str) -> dict:
+def _load_replay_pack(path: str, expected_assessment: Mapping[str, object] | None = None) -> dict:
     with open(path, encoding="utf-8") as f:
         data = json.load(f)
-    rows = data.get("replays") if isinstance(data, dict) else None
+    if not isinstance(data, dict):
+        raise ValueError("replay pack must be a JSON object")
+    if expected_assessment is not None and "assessment" in data:
+        _check_assessment_binding(data["assessment"], expected_assessment)
+    rows = data.get("replays")
     if not isinstance(rows, list):
         raise ValueError("replay pack needs a 'replays' list")
     by_oracle: dict[str, dict[str, dict]] = {}
@@ -182,6 +187,14 @@ def _load_replay_pack(path: str) -> dict:
             raise ValueError(f"replay row {index} recheck needs a non-empty oracle")
         by_oracle.setdefault(oracle, {})[_canon(recheck)] = measurement
     return {oracle: _pack_replayer(rows_by_key) for oracle, rows_by_key in by_oracle.items()}
+
+
+def _check_assessment_binding(value: object, expected: Mapping[str, object]) -> None:
+    if not isinstance(value, Mapping):
+        raise ValueError("replay pack assessment must be an object")
+    for key in ("thesis_id", "assessment_seal", "measurement_seal"):
+        if value.get(key) != expected.get(key):
+            raise ValueError(f"assessment binding mismatch for {key}")
 
 
 def _pack_replayer(rows_by_key: Mapping[str, dict]):

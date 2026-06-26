@@ -163,8 +163,9 @@ crucible recheck .crucible-registry --template replay-template.json
 ```
 
 The template contains claim context, the original `recheck` descriptor, the sealed measurement row to
-reproduce, and blank measurement fields for the verifier to fill. A verifier or oracle wrapper can
-then return a replay pack with the original descriptor and the reproduced measurement row:
+reproduce, and blank measurement fields for the verifier to fill. The assessment block binds a
+returned pack to the thesis id, assessment seal, and measurement seal. A verifier or oracle wrapper
+can then return a replay pack with the original descriptor and the reproduced measurement row:
 
 ```json
 {
@@ -191,9 +192,10 @@ Run the replay check with:
 crucible recheck .crucible-registry --pack replay.json --json
 ```
 
-The replay pack does not decide the verdict. It only proves whether the sealed descriptor-bearing
-measurement rows can be reproduced; the verdict still follows from the stored measurement through
-`verdict_for`.
+The replay pack does not decide the verdict. If it includes an `assessment` block, that block must
+match the selected assessment before measurement replay starts. The pack only proves whether the
+sealed descriptor-bearing measurement rows can be reproduced; the verdict still follows from the
+stored measurement through `verdict_for`.
 
 ## Status
 

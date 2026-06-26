@@ -22,6 +22,8 @@ Operator run surface.
 - CLI: `crucible recheck REGISTRY [--template FILE] [--pack FILE]` lists descriptor-bearing
   measurement rows, writes replay pack templates, and validates finished oracle replay packs without
   creating a second verdict path.
+- Replay packs that return the template assessment block are checked against the selected thesis id,
+  assessment seal, and measurement seal before oracle replay starts.
 
 ## 1.0.0
 

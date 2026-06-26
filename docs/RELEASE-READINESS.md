@@ -61,6 +61,8 @@ is treated as user data and is persisted only when the caller provides it; cruci
 classify arbitrary evidence text as secret or non-secret. Oracle replay pack template files are local
 handoff skeletons; finished oracle replay pack files are verifier-supplied measurement reproductions
 for sealed `recheck` descriptors, not new authority over verdict status.
+When a replay pack returns the template assessment block, `crucible recheck --pack` checks
+that binding before replay.
 
 Run this stale-language scan before release:
 

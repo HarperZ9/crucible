@@ -30,8 +30,8 @@ def _seed_registry(tmp_path):
     return str(reg_dir), thesis, measured
 
 
-def _replay_pack(path, measurement, *, deviation=0.0):
-    return _write(path, {"replays": [{
+def _replay_pack(path, measurement, *, deviation=0.0, assessment=None):
+    payload = {"replays": [{
         "recheck": measurement.recheck,
         "measurement": {
             "claim_id": measurement.claim_id,
@@ -42,7 +42,10 @@ def _replay_pack(path, measurement, *, deviation=0.0):
             "measured_at": measurement.measured_at,
             "evidence": list(measurement.evidence),
         },
-    }]})
+    }]}
+    if assessment is not None:
+        payload["assessment"] = assessment
+    return _write(path, payload)
 
 
 def test_recheck_json_lists_oracle_replay_plan(tmp_path, capsys):
@@ -93,6 +96,20 @@ def test_recheck_pack_replays_descriptor_bearing_measurements(tmp_path, capsys):
                                  "mismatched": 0, "failed": 0}
 
 
+def test_recheck_pack_accepts_matching_assessment_binding(tmp_path, capsys):
+    reg, thesis, measurement = _seed_registry(tmp_path)
+    assert main(["recheck", reg, "--json"]) == 0
+    assessment = json.loads(capsys.readouterr().out)["assessment"]
+    pack = _replay_pack(tmp_path / "bound-replay.json", measurement, assessment=assessment)
+
+    assert main(["recheck", reg, "--pack", pack, "--json"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+
+    assert assessment["thesis_id"] == thesis.id
+    assert payload["ok"] is True
+    assert payload["replay"]["checked"] == 1
+
+
 def test_recheck_pack_reports_replayed_measurement_drift(tmp_path, capsys):
     reg, _thesis, measurement = _seed_registry(tmp_path)
     pack = _replay_pack(tmp_path / "drifted.json", measurement, deviation=2.0)
@@ -103,6 +120,43 @@ def test_recheck_pack_reports_replayed_measurement_drift(tmp_path, capsys):
     assert payload["ok"] is False
     assert payload["checks"]["measurements_rerun"] is False
     assert payload["replay"]["mismatched"] == 1
+
+
+def test_recheck_pack_rejects_wrong_assessment_binding(tmp_path, capsys):
+    reg, _thesis, measurement = _seed_registry(tmp_path)
+    wrong = {
+        "thesis_id": "other",
+        "assessment_seal": "not-this-assessment",
+        "measurement_seal": "not-this-measurement-seal",
+    }
+    pack = _replay_pack(tmp_path / "wrong-assessment.json", measurement, assessment=wrong)
+
+    assert main(["recheck", reg, "--pack", pack]) == 1
+
+    assert "assessment binding mismatch" in capsys.readouterr().err
+
+
+def test_recheck_pack_rejects_null_assessment_binding(tmp_path, capsys):
+    reg, _thesis, measurement = _seed_registry(tmp_path)
+    pack = _write(tmp_path / "null-assessment.json", {
+        "assessment": None,
+        "replays": [{
+            "recheck": measurement.recheck,
+            "measurement": {
+                "claim_id": measurement.claim_id,
+                "claim_sha256": measurement.claim_sha256,
+                "deviation": measurement.deviation,
+                "tolerance": measurement.tolerance,
+                "method": measurement.method,
+                "measured_at": measurement.measured_at,
+                "evidence": list(measurement.evidence),
+            },
+        }],
+    })
+
+    assert main(["recheck", reg, "--pack", pack]) == 1
+
+    assert "replay pack assessment must be an object" in capsys.readouterr().err
 
 
 def test_recheck_rejects_template_and_pack_together(tmp_path, capsys):
