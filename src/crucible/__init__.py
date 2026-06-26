@@ -22,6 +22,14 @@ from crucible.drift import (
     DriftRow,
     drift_track,
 )
+from crucible.ecosystem_measure import (
+    GatherDigestMeasure,
+    IndexMeasure,
+    canonical_sha,
+    receipt_matches,
+    verify_gather_digest,
+    verify_index_verification,
+)
 from crucible.gate import export_guard, export_thesis, gate_check
 from crucible.measure import (
     Measure,
@@ -66,18 +74,20 @@ from crucible.verdict import (
     verdict_for,
 )
 
-__version__ = "0.10.0"
+__version__ = "0.11.0"
 
 __all__ = [
-    "Assessment", "Claim", "DriftReport", "DriftRow", "GradedCriterion", "Measure", "Measurement",
-    "MetricSpec", "NullMeasure", "NullSteelman", "RefineOutcome", "RefineReport", "Reflection",
-    "Refutation", "Registry", "Steelman", "SubprocessMeasure", "SubprocessSteelman", "TableMeasure",
+    "Assessment", "Claim", "DriftReport", "DriftRow", "GatherDigestMeasure", "GradedCriterion",
+    "IndexMeasure", "Measure", "Measurement", "MetricSpec", "NullMeasure", "NullSteelman",
+    "RefineOutcome", "RefineReport", "Reflection", "Refutation", "Registry", "Steelman",
+    "SubprocessMeasure", "SubprocessSteelman", "TableMeasure",
     "TelosMeasure", "Thesis", "Verdict",
     "DRIFT", "FENCED", "MATCH", "PUBLISHABLE", "UNVERIFIABLE",
     "assess", "claim_body", "claim_hash", "cohesion", "content_hash", "make_claim", "make_thesis",
-    "check_content", "drift_track", "export_guard", "export_thesis", "gate_check",
-    "is_telos_artifact", "measure_thesis",
+    "canonical_sha", "check_content", "drift_track", "export_guard", "export_thesis", "gate_check",
+    "is_telos_artifact", "measure_thesis", "receipt_matches",
     "recheck_assessment", "refine", "refine_thesis", "steelman_thesis",
     "prune_objects", "registry_stats", "search_theses", "thesis_seal", "verdict_for", "verdict_seal",
-    "verify_assessment", "verify_telos_artifact", "verify_thesis", "__version__",
+    "verify_assessment", "verify_gather_digest", "verify_index_verification", "verify_telos_artifact",
+    "verify_thesis", "__version__",
 ]

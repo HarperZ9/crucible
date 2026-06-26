@@ -97,6 +97,20 @@ verdict to the carried verdict, and turns that live result into a normal Measure
 input, and a missing/unregistered/unverifiable proof becomes an UNVERIFIABLE input. That keeps the
 interop on the same spine: trust the proof, not the emitter.
 
+## Gather/index interop
+
+`GatherDigestMeasure` consumes Gather's digest contract directly: a list of evidence receipts and a
+seal recomputed from those receipts. A caller maps a crucible claim to the receipt fields it expects
+to exist. A verified digest with that receipt becomes a MATCH input; a verified digest without it
+becomes a DRIFT input; a malformed or missing digest becomes UNVERIFIABLE. This makes "show me the
+evidence receipt" a measurable claim.
+
+`IndexMeasure` consumes `index.verification/1` records directly. The record carries an index claim,
+the canonical hash of the graph pack it was computed against, and a carried verdict. crucible is
+given the graph pack by hash, replays the supported structural claim (`exists` or `depends`), and
+maps the reproduced result into the same Measurement spine. It does not import index, execute index,
+or trust the carried verdict without replaying the pack.
+
 ## Drift tracking
 
 The continuous loop needs an honest account of what changed between rounds. `drift_track(previous,
@@ -137,13 +151,12 @@ impure edge.
 
 crucible stands alone and serves the constellation at once. What ships today is the standing-alone
 half and the published contract: a sealed assessment and its verdicts, re-checkable from disk, that a
-downstream organ reads to learn a thesis's standing. crucible is built to consume other organs through
-their documented on-disk contracts (a Gather witnessed digest as evidence, an index verified map or
-the Telos verifier as a measurement oracle) without importing their internals; those composition
-milestones are on the spec's ladder, Telos at 1.1.0, and are not yet built. Shared primitives, such as
-the `refine` loop, are to be integrated natively rather than taken as third-party dependencies, so
-reuse never costs standing alone. Seams default to Null, so the absence of a peer is a quieter
-capability, never a failure.
+downstream organ reads to learn a thesis's standing. It also includes first protocol adapters for
+Telos witnessed artifacts, Gather witnessed digests, and index verification records. These adapters
+consume documented JSON contracts without importing sibling internals. Shared primitives, such as the
+`refine` loop, are integrated natively rather than taken as third-party dependencies, so reuse never
+costs standing alone. Seams default to Null, so the absence of a peer is a quieter capability, never a
+failure.
 
 ## Peer composition
 
