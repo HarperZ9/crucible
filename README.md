@@ -31,7 +31,8 @@ from the record, so a confident assertion cannot fake it.
 The continuous part is the loop: substrates, measurements, and theses all improve across rounds,
 and the witnessed verdicts track which moved.
 
-Shipped today (0.12.0): the full first loop plus drift tracking, publication-gated export, registry
+Shipped today (0.13.0): the full first loop plus drift tracking, Markdown assessment reports,
+publication-gated export, registry
 operations, optional subprocess-backed seam adapters, Telos witnessed-artifact interop,
 Gather/index protocol interop, measurement recheck descriptors, and 1.0-readiness coverage. You
 register a thesis, steelman it (adversaries propose the test), measure each claim against a substrate
@@ -40,7 +41,8 @@ verdict per claim, compare assessment rounds to see what held, moved, improved, 
 a growing registry by status, scope, and latest verdict, plug configured model/oracle commands into
 the steelman and measure seams, consume `telos.witnessed-artifact/v1` envelopes by re-running their
 named verifiers, use sealed Gather digests as evidence, replay index verification records against
-supplied graph packs, and persist optional measurement replay descriptors for oracle-level checks. A
+supplied graph packs, persist optional measurement replay descriptors for oracle-level checks, and
+render the witnessed assessment as a readable Markdown report. A
 fenced thesis can be assessed locally, but the export edge refuses it by default.
 
 ## The differentiator (do not lose this)
@@ -114,6 +116,9 @@ Shipped:
 - Drift tracking across witnessed assessments: `drift_track(previous, current)` and
   `crucible drift REGISTRY` compare the latest two rounds and classify each claim as held, moved,
   improved, or regressed from the recorded margins.
+- Assessment reports: `render_assessment_report` and `crucible report REGISTRY` render a deterministic
+  Markdown artifact with counts, seals, integrity checks, verdicts, measurement evidence, and recheck
+  descriptors.
 - Publication-gated export: `gate_check`, `export_guard`, `export_thesis`, and
   `crucible export THESIS` refuse fenced material and explicit restricted markers before emitting a
   public thesis contract.
@@ -133,7 +138,8 @@ Shipped:
 - Readiness coverage: the bundled examples run through the public CLI under test, help output covers
   the shipped command surface, and `docs/RELEASE-READINESS.md` records the 1.0 gate checklist.
 - The `crucible` CLI: `register`, `assess`, `steelman`, `measure`,
-  `registry list|verify|stats|search|prune`, `refine`, `drift`, `export`, `verdicts [--verify]`.
+  `registry list|verify|stats|search|prune`, `refine`, `drift`, `report`, `export`,
+  `verdicts [--verify]`.
 
 ## License
 

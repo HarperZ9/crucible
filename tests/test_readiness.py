@@ -70,6 +70,11 @@ def test_example_json_files_roundtrip_through_public_cli(tmp_path, capsys):
     assert len(rows) == 1
     assert rows[0]["title"] == "Binary search comparison bounds"
 
+    assert main(["report", reg]) == 0
+    report = capsys.readouterr().out
+    assert report.startswith("# crucible report: Binary search comparison bounds")
+    assert "## Verdicts" in report
+
     assert main(["export", thesis]) == 0
     exported = _json_out(capsys)
     assert exported["disposition"] == "publishable"
@@ -80,7 +85,7 @@ def test_cli_help_advertises_shipped_command_surface(capsys):
         main(["--help"])
     assert root_help.value.code == 0
     root = capsys.readouterr().out
-    for command in ("register", "assess", "steelman", "measure", "registry",
+    for command in ("register", "assess", "steelman", "measure", "registry", "report",
                     "verdicts", "drift", "export", "refine"):
         assert command in root
 
