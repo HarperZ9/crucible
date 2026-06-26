@@ -37,7 +37,8 @@ class Measurement:
 @dataclass(frozen=True, slots=True)
 class Verdict:
     """A claim's standing: MATCH / DRIFT / UNVERIFIABLE, with the measurement it was computed from and
-    a one-line grounds. The status recomputes from (deviation, tolerance), so it cannot be forged."""
+    a one-line grounds. The status recomputes from (deviation, tolerance), so inconsistent stored
+    verdict rows are caught by recheck."""
 
     claim_id: str
     claim_sha256: str

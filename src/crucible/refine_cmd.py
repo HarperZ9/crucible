@@ -31,7 +31,12 @@ def _rounds(data: dict) -> list[dict]:
     rounds = data.get("rounds")
     if not isinstance(rounds, list) or not rounds:
         raise ValueError("refine config needs a non-empty 'rounds' list of substrates")
-    return [{k: float(v) for k, v in r.items()} for r in rounds]
+    out: list[dict] = []
+    for index, row in enumerate(rounds, 1):
+        if not isinstance(row, dict):
+            raise ValueError(f"refine round {index} must be an object")
+        out.append({k: float(v) for k, v in row.items()})
+    return out
 
 
 def _threshold(data: dict, key: str) -> float:

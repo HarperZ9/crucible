@@ -17,10 +17,11 @@ now that crucible has reached its stable flagship floor.
 ## Stability checks
 
 - `pip install -e ".[dev]"`
-- `python -m pytest -q`
-- `python -m ruff check src tests`
+- `python -m pytest -q --cov=crucible --cov-report=term-missing --cov-fail-under=85`
+- `python -m ruff check src tests examples`
 - `python -m mypy src\crucible`
-- `python -m build`
+- `python -m pip install --requirement requirements-release.txt`
+- `python -m build --no-isolation`
 - `python -m twine check dist\*`
 
 ## 1.0 review gate
@@ -36,5 +37,5 @@ now that crucible has reached its stable flagship floor.
   verifier cannot evaluate success from that minimal state, the spec or readiness artifact must be
   tightened before release.
 - Release workflow: PyPI publishing is tied to GitHub release publication on `v*` tags, uses trusted
-  publishing, pins external GitHub Actions by commit SHA, and installs build tooling from
-  `requirements-release.txt`.
+  publishing, pins external GitHub Actions by commit SHA, and installs pinned build tooling plus the
+  pinned build backend from `requirements-release.txt`.

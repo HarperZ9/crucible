@@ -9,8 +9,8 @@ Stable flagship floor.
 
 - Assessment integrity now seals verdict margin and grounds, and `recheck_assessment` rejects stored
   verdict rows or summary counts that do not re-derive from the thesis and measurements.
-- Drift and registry status/search now use verified latest assessments instead of trusting the newest
-  row blindly.
+- Drift and registry status/search now use the latest verified assessments, falling back past invalid
+  tail rows instead of trusting or hiding history.
 - The registry rejects duplicate thesis ids with different seals, refuses symlinked storage paths,
   and keeps object writes on unique temp files inside the registry root.
 - Batch manifests keep thesis, measurement, and substrate paths inside the manifest bundle; path-like
@@ -22,7 +22,7 @@ Stable flagship floor.
 - CLI JSON loaders reject non-object top-level payloads with clean errors, ambiguous claim text refs
   are rejected, and refine thresholds reject negative or non-finite values cleanly.
 - Release workflows remove manual PyPI dispatch, pin external GitHub Actions by commit SHA, and
-  install build tooling from `requirements-release.txt`.
+  install pinned build tooling plus the pinned build backend from `requirements-release.txt`.
 - README and readiness docs record the clean verifier rule: verifier receives only the original spec
   and artifact, never the worker context or reasoning trace.
 

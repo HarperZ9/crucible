@@ -96,31 +96,27 @@ def _claim_sha(row: Mapping) -> str:
     return _check_sha(row.get("sha256"))
 
 
-def _latest_by_thesis(records: Iterable[Mapping]) -> dict[str, Mapping]:
-    latest: dict[str, Mapping] = {}
-    for record in records:
-        thesis_id = record.get("thesis_id")
-        if isinstance(thesis_id, str):
-            latest[thesis_id] = record
-    return latest
-
-
 def _verified_latest_by_thesis(reg: Registry, records: Iterable[Mapping]) -> tuple[dict[str, Mapping], int]:
-    latest = _latest_by_thesis(records)
     verified: dict[str, Mapping] = {}
     invalid = 0
-    for thesis_id, record in latest.items():
-        try:
-            assessment = Assessment.from_dict(record)
-            thesis = reg.get_thesis(thesis_id)
-            if thesis is None or not all(recheck_assessment(thesis, assessment).values()):
-                invalid += 1
-                continue
-        except (OSError, ValueError, KeyError, TypeError):
+    for record in reversed(list(records)):
+        thesis_id = record.get("thesis_id")
+        if not isinstance(thesis_id, str) or thesis_id in verified:
+            continue
+        if not _record_verified(reg, thesis_id, record):
             invalid += 1
             continue
         verified[thesis_id] = record
     return verified, invalid
+
+
+def _record_verified(reg: Registry, thesis_id: str, record: Mapping) -> bool:
+    try:
+        assessment = Assessment.from_dict(record)
+        thesis = reg.get_thesis(thesis_id)
+        return thesis is not None and all(recheck_assessment(thesis, assessment).values())
+    except (OSError, ValueError, KeyError, TypeError):
+        return False
 
 
 def _record_statuses(record: Mapping | None) -> list[str]:

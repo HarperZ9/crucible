@@ -156,12 +156,13 @@ catalog, and an `assessments.jsonl` history. `verify()` re-hashes every stored b
 MATCH / MISSING / CORRUPT, so the verdict's proof stays durable over a growing registry.
 
 `registry_ops` reads across that store without changing the storage contract. `registry_stats`
-summarizes thesis counts, claim bodies, dispositions, assessment history, invalid latest assessment
-counts, and the latest verified verdict posture per thesis. `search_theses` recalls theses by scope
-text, thesis status, and latest verified verdict status. `prune_objects` identifies orphaned claim
-bodies and is dry-run by default; deletion requires an explicit apply path and validates each object
-path before unlinking it. The registry rejects duplicate thesis ids with different seals and refuses
-symlinked storage paths, so content-addressed writes stay inside the registry root.
+summarizes thesis counts, claim bodies, dispositions, assessment history, skipped invalid latest
+rows, and the latest verified verdict posture per thesis. `search_theses` recalls theses by scope
+text, thesis status, and latest verified verdict status, falling back past invalid tail rows instead
+of trusting or hiding history. `prune_objects` identifies orphaned claim bodies and is dry-run by
+default; deletion requires an explicit apply path and validates each object path before unlinking it.
+The registry rejects duplicate thesis ids with different seals and refuses symlinked storage paths, so
+content-addressed writes stay inside the registry root.
 
 ## Verifier separation
 

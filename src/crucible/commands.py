@@ -35,9 +35,28 @@ def _thesis_from_data(data: dict, *, clock) -> Thesis:
         raise ValueError("thesis JSON needs a non-empty 'claims' list")
     if any(not isinstance(c, dict) for c in raw):
         raise ValueError("thesis JSON 'claims' entries must be objects")
-    claims = [make_claim(c["text"], c.get("falsification", ""), id=c.get("id")) for c in raw]
-    return make_thesis(data.get("title", ""), claims, clock=clock, id=data.get("id"),
-                       disposition=data.get("disposition", PUBLISHABLE))
+    claims = [_claim_from_row(c, i) for i, c in enumerate(raw, 1)]
+    return make_thesis(_string(data.get("title", ""), "title"), claims, clock=clock,
+                       id=_optional_string(data.get("id"), "id"),
+                       disposition=_string(data.get("disposition", PUBLISHABLE), "disposition"))
+
+
+def _claim_from_row(row: dict, index: int):
+    text = _string(row.get("text"), f"claim {index} text")
+    falsification = _string(row.get("falsification", ""), f"claim {index} falsification")
+    return make_claim(text, falsification, id=_optional_string(row.get("id"), f"claim {index} id"))
+
+
+def _string(value: object, field: str) -> str:
+    if not isinstance(value, str):
+        raise ValueError(f"{field} must be a string")
+    return value
+
+
+def _optional_string(value: object, field: str) -> str | None:
+    if value is None:
+        return None
+    return _string(value, field)
 
 
 def _as_float_or_none(x: object) -> float | None:

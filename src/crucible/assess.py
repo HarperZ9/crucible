@@ -126,7 +126,8 @@ class Assessment:
         return Assessment(
             d["started_at"], d["thesis_id"], d["thesis_seal"], d["claims"], d["match"], d["drift"],
             d["unverifiable"], d["verdict_seal"], d["measurement_seal"],
-            tuple(d.get("verdicts", ())), tuple(d.get("measurements", ())), d.get("stored"), d["seal"],
+            _rows(d.get("verdicts", ()), "verdicts"), _rows(d.get("measurements", ()), "measurements"),
+            d.get("stored"), d["seal"],
         )
 
 
@@ -160,6 +161,17 @@ def _counts_match(a: Assessment, rows: Iterable[Mapping]) -> bool:
         and a.drift == counts[DRIFT]
         and a.unverifiable == counts[UNVERIFIABLE]
     )
+
+
+def _rows(value: object, field: str) -> tuple[dict, ...]:
+    if not isinstance(value, (list, tuple)):
+        raise ValueError(f"assessment {field} must be a list of objects")
+    out = []
+    for index, row in enumerate(value, 1):
+        if not isinstance(row, Mapping):
+            raise ValueError(f"assessment {field} row {index} must be an object")
+        out.append(dict(row))
+    return tuple(out)
 
 
 def _measurement_from_row(r: Mapping) -> Measurement:

@@ -51,8 +51,8 @@ fenced thesis can be assessed locally, but the export edge refuses it by default
 A claim's standing is a verdict grounded in a measurement, not a judge's say-so. Steelman
 adversaries propose; the measurement decides. The decision is a pure function of the recorded
 measurement, with no model in the verdict step, so the verdict recomputes from the stored record
-and cannot be forged by a fluent assertion. UNVERIFIABLE is fail-closed: an axis that cannot be
-measured is never read as holding.
+and a fluent assertion has no effect on the rechecked result. UNVERIFIABLE is fail-closed: an axis
+that cannot be measured is never read as holding.
 
 ## The discipline
 

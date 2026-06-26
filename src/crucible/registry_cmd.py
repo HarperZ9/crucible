@@ -110,12 +110,12 @@ def cmd_verdicts(args) -> int:
     reg = Registry(args.dir)
     try:
         records = list(reg.assessments())
+        if args.verify:
+            return _verdicts_verify(reg, records, args.json)
+        return _verdicts_list(records, args.json)
     except _INPUT_ERRORS as exc:
         print(f"verdicts failed: {exc}", file=sys.stderr)
         return 1
-    if args.verify:
-        return _verdicts_verify(reg, records, args.json)
-    return _verdicts_list(records, args.json)
 
 
 def _verdicts_list(records: list[dict], as_json: bool) -> int:
