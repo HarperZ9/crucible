@@ -3,6 +3,22 @@
 All notable changes to crucible. Versions follow semantic versioning; each minor release is built
 behind a feature branch and reviewed before merge.
 
+## 0.11.0
+
+Gather/index protocol interop preview.
+
+- `crucible.ecosystem_measure`: adds `verify_gather_digest`, `receipt_matches`,
+  `verify_index_verification`, and `canonical_sha` for consuming sibling-product JSON contracts
+  without importing sibling packages.
+- `GatherDigestMeasure` maps a verified Gather digest plus receipt selector into a crucible
+  `Measurement`: receipt present -> MATCH input, receipt absent -> DRIFT input, malformed or missing
+  digest -> UNVERIFIABLE input.
+- `IndexMeasure` maps an `index.verification/1` record plus supplied graph pack into a crucible
+  `Measurement`: reproduced MATCH -> MATCH input, reproduced REFUTED/DRIFT -> DRIFT input, missing
+  or unreplayable pack -> UNVERIFIABLE input.
+- Public API: exports `GatherDigestMeasure`, `IndexMeasure`, `verify_gather_digest`,
+  `verify_index_verification`, `receipt_matches`, and `canonical_sha`.
+
 ## 0.10.0
 
 Telos witnessed-artifact interop preview.
