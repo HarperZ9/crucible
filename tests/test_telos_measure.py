@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from crucible.assess import assess, recheck_assessment, recheck_measurements
 from crucible.claim import make_claim
 from crucible.telos_measure import (
     PROTOCOL,
@@ -8,6 +9,7 @@ from crucible.telos_measure import (
     content_hash,
     verify_telos_artifact,
 )
+from crucible.thesis import make_thesis
 from crucible.verdict import DRIFT, MATCH, UNVERIFIABLE, verdict_for
 
 CLOCK = lambda: 1000.0  # noqa: E731
@@ -65,6 +67,29 @@ def test_telos_measure_maps_verified_refuted_and_unverifiable_to_measurements():
     assert verdict_for(claim, unknown).status == UNVERIFIABLE
 
 
+def test_telos_measure_persists_recheck_descriptor_for_assessment_replay():
+    claim = make_claim("a Telos artifact's law holds", "Telos re-verifies as refuted")
+    measure = TelosMeasure({claim.id: _artifact()}, {"conservation": lambda r: "verified"},
+                           clock=CLOCK).measure(claim)
+    thesis = make_thesis_for_claim(claim)
+    assessment, _ = assess(thesis, [measure], clock=CLOCK)
+
+    assert assessment.measurements[0]["recheck"] == {
+        "oracle": "telos:conservation",
+        "verifier": "conservation",
+        "expr": "energy",
+        "system": "sho",
+    }
+
+    def replay(recheck):
+        assert recheck["oracle"] == "telos:conservation"
+        return measure
+
+    assert recheck_measurements(assessment, {"telos:conservation": replay})["checked"] == 1
+    result = recheck_assessment(thesis, assessment, measurement_replayers={"telos:conservation": replay})
+    assert result["measurements_rerun"] is True
+
+
 def test_telos_measure_treats_unregistered_or_missing_artifact_as_unverifiable():
     claim = make_claim("a law holds", "Telos cannot recheck it")
     no_artifact = TelosMeasure({}, {}, clock=CLOCK).measure(claim)
@@ -82,3 +107,7 @@ def test_content_artifact_hash_matches_the_javascript_protocol_shape():
     assert content_hash("abc") == "1a47e90b"
     assert check_content(artifact, "abc") is True
     assert check_content(artifact, "abcd") is False
+
+
+def make_thesis_for_claim(claim):
+    return make_thesis("telos", [claim], clock=CLOCK)

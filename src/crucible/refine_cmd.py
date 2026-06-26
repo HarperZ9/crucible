@@ -12,6 +12,7 @@ specific round).
 from __future__ import annotations
 
 import json
+import math
 import sys
 import time
 
@@ -30,14 +31,22 @@ def _rounds(data: dict) -> list[dict]:
     rounds = data.get("rounds")
     if not isinstance(rounds, list) or not rounds:
         raise ValueError("refine config needs a non-empty 'rounds' list of substrates")
-    return [{k: float(v) for k, v in r.items()} for r in rounds]
+    out: list[dict] = []
+    for index, row in enumerate(rounds, 1):
+        if not isinstance(row, dict):
+            raise ValueError(f"refine round {index} must be an object")
+        out.append({k: float(v) for k, v in row.items()})
+    return out
 
 
 def _threshold(data: dict, key: str) -> float:
     try:
-        return float(data.get(key, 0.0))
+        value = float(data.get(key, 0.0))
     except (TypeError, ValueError) as exc:
         raise ValueError(f"{key} must be a number") from exc
+    if not math.isfinite(value) or value < 0:
+        raise ValueError(f"{key} must be a finite number >= 0")
+    return value
 
 
 def cmd_refine(args) -> int:

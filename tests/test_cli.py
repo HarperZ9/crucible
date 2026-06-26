@@ -53,6 +53,7 @@ def test_assess_json_mode(tmp_path, capsys):
     payload = json.loads(capsys.readouterr().out)
     assert payload["assessment"]["match"] == 1
     assert len(payload["verdicts"]) == 3
+    assert {row["disposition"] for row in payload["verdicts"]} == {"publishable"}
 
 
 def test_assess_by_id_from_registry(tmp_path, capsys):
@@ -131,11 +132,42 @@ def test_register_empty_claims_is_an_error(tmp_path, capsys):
     assert "register failed" in capsys.readouterr().err
 
 
+def test_register_top_level_json_array_is_a_clean_error(tmp_path, capsys):
+    bad = tmp_path / "bad.json"
+    bad.write_text("[]", encoding="utf-8")
+
+    assert main(["register", str(bad)]) == 1
+    assert "register failed" in capsys.readouterr().err
+
+
 def test_assess_measurement_with_unknown_claim_is_an_error(tmp_path, capsys):
     m = _write(tmp_path / "m.json", {"measurements": [{"claim": "nope", "deviation": 0.0, "tolerance": 0.1}]})
     code = main(["assess", _thesis_file(tmp_path), "--measurements", m])
     assert code == 1
     assert "unknown claim" in capsys.readouterr().err
+
+
+def test_assess_measurements_must_be_a_list_of_objects(tmp_path, capsys):
+    bad = _write(tmp_path / "bad-m.json", {"measurements": "not-a-list"})
+
+    assert main(["assess", _thesis_file(tmp_path), "--measurements", bad]) == 1
+    assert "measurements" in capsys.readouterr().err
+
+
+def test_assess_measurement_with_ambiguous_claim_text_is_an_error(tmp_path, capsys):
+    thesis = _write(tmp_path / "ambiguous.json", {
+        "title": "Ambiguous",
+        "claims": [
+            {"id": "a", "text": "same text", "falsification": "first failure"},
+            {"id": "b", "text": "same text", "falsification": "second failure"},
+        ],
+    })
+    measurements = _write(tmp_path / "m.json", {
+        "measurements": [{"claim": "same text", "deviation": 0.0, "tolerance": 0.1}],
+    })
+
+    assert main(["assess", thesis, "--measurements", measurements]) == 1
+    assert "ambiguous claim" in capsys.readouterr().err
 
 
 def test_verdicts_verify_roundtrip_from_disk(tmp_path, capsys):
@@ -235,84 +267,6 @@ def test_steelman_by_id_from_registry(tmp_path, capsys):
 def test_steelman_missing_file_is_an_error(capsys):
     assert main(["steelman", "nope.json"]) == 1
     assert "steelman failed" in capsys.readouterr().err
-
-
-def _substrate_file(tmp_path):
-    return _write(tmp_path / "sub.json", {
-        "specs": {
-            "c-match": {"predicted": 10, "tolerance": 0.5, "observe": "v"},
-            "c-drift": {"predicted": 2, "tolerance": 0.5, "observe": "v"},
-        },
-        "substrate": {"v": 10},
-    })
-
-
-def test_measure_against_substrate_decides_each_claim(tmp_path, capsys):
-    code = main(["measure", _thesis_file(tmp_path), "--substrate", _substrate_file(tmp_path)])
-    assert code == 0
-    out = capsys.readouterr().out
-    assert "measured thesis" in out
-    assert "MATCH 1" in out and "DRIFT 1" in out and "UNVERIFIABLE 1" in out
-
-
-def test_measure_json_and_recheck_from_registry(tmp_path, capsys):
-    reg = str(tmp_path / "reg")
-    code = main(["measure", _thesis_file(tmp_path), "--substrate", _substrate_file(tmp_path),
-                 "--registry", reg, "--json"])
-    assert code == 0
-    payload = json.loads(capsys.readouterr().out)
-    assert payload["assessment"]["match"] == 1 and payload["assessment"]["drift"] == 1
-    # the oracle-produced measurements re-derive from disk
-    assert main(["verdicts", reg, "--verify"]) == 0
-
-
-def test_measure_spec_for_unknown_claim_is_an_error(tmp_path, capsys):
-    sub = _write(tmp_path / "bad.json", {"specs": {"ghost": {"predicted": 1, "observe": "v"}},
-                                         "substrate": {"v": 1}})
-    assert main(["measure", _thesis_file(tmp_path), "--substrate", sub]) == 1
-    assert "unknown claim" in capsys.readouterr().err
-
-
-def test_measure_unknown_metric_is_a_clean_error(tmp_path, capsys):
-    sub = _write(tmp_path / "bad.json", {
-        "specs": {"c-match": {"predicted": 1, "tolerance": 0.1, "observe": "v", "metric": "relative"}},
-        "substrate": {"v": 1}})
-    assert main(["measure", _thesis_file(tmp_path), "--substrate", sub]) == 1
-    assert "measure failed" in capsys.readouterr().err
-
-
-def _refine_config(tmp_path, **overrides):
-    data = {
-        "title": "CLI refine",
-        "claims": [
-            {"text": "c-match", "falsification": "f1"},
-            {"text": "c-drift", "falsification": "f2"},
-        ],
-        "specs": {
-            "c-match": {"predicted": 10, "tolerance": 0.5, "observe": "a"},
-            "c-drift": {"predicted": 2, "tolerance": 0.5, "observe": "b"},
-        },
-        "rounds": [{"a": 10, "b": 10}, {"a": 10, "b": 2}],
-        "target_margin": 0.25,
-        "cohesion_bar": 0.5,
-    }
-    data.update(overrides)
-    return _write(tmp_path / "refine.json", data)
-
-
-def test_refine_json_reports_correct_round(tmp_path, capsys):
-    code = main(["refine", _refine_config(tmp_path), "--json"])
-    assert code == 0
-    payload = json.loads(capsys.readouterr().out)
-    assert payload["status"] == "correct"
-    assert payload["iterations"] == 2
-    assert [v["status"] for v in payload["verdicts"]] == ["MATCH", "MATCH"]
-
-
-def test_refine_invalid_target_is_a_clean_error(tmp_path, capsys):
-    cfg = _refine_config(tmp_path, target_margin="not-a-number")
-    assert main(["refine", cfg]) == 1
-    assert "refine failed" in capsys.readouterr().err
 
 
 def test_steelman_flags_an_unfalsifiable_claim(tmp_path, capsys):

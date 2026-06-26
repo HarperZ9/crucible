@@ -14,7 +14,7 @@ can re-check (the efferent organ). You register a thesis as a set of claims, and
 observation that would refute it. crucible steelmans the claims (proposing the test that would settle
 each), measures them against a substrate oracle, and writes a verdict per claim: MATCH, DRIFT, or
 UNVERIFIABLE. The verdict is grounded in the measurement, not in a judge's opinion, and it recomputes
-from the record, so a confident assertion cannot fake it.
+from the record, so a confident assertion has no effect on the rechecked result.
 
 ## The loop
 
@@ -26,25 +26,24 @@ from the record, so a confident assertion cannot fake it.
 4. **Refine the weakest axis**: strengthen the substrate, sharpen the measurement, or amend the
    thesis, then re-iterate.
 5. **Witness**: a re-checkable verdict per claim (MATCH / DRIFT / UNVERIFIABLE), sealed so a reader
-   can confirm it was not altered.
+   can re-hash the stored record and catch inconsistent tampering. This is not an authorship
+   signature.
 
 The continuous part is the loop: substrates, measurements, and theses all improve across rounds,
 and the witnessed verdicts track which moved.
 
-Shipped today (0.14.1): the full first loop plus drift tracking, Markdown assessment reports,
-publication-gated export, registry
-operations, optional subprocess-backed seam adapters, Telos witnessed-artifact interop,
-Gather/index protocol interop, measurement recheck descriptors, batch assessment/report bundles,
-and 1.0-readiness coverage. You
-register a thesis, steelman it (adversaries propose the test), measure each claim against a substrate
-oracle, refine across substrate rounds toward a cohesively verified thesis, witness a re-derivable
-verdict per claim, compare assessment rounds to see what held, moved, improved, or regressed, inspect
-a growing registry by status, scope, and latest verdict, plug configured model/oracle commands into
-the steelman and measure seams, consume `telos.witnessed-artifact/v1` envelopes by re-running their
-named verifiers, use sealed Gather digests as evidence, replay index verification records against
-supplied graph packs, persist optional measurement replay descriptors for oracle-level checks, run a
-manifest of thesis jobs into one registry, and render witnessed assessments as readable Markdown
-reports. A
+1.0.0 flagship surface: the full first loop plus drift tracking, Markdown assessment reports,
+publication-gated export, registry operations, optional subprocess-backed seam adapters,
+Telos witnessed-artifact interop, Gather/index protocol interop, measurement recheck descriptors,
+batch assessment/report bundles, and clean verifier practice. You register a thesis, steelman it
+(adversaries propose the test), measure each claim against a substrate oracle, refine across
+substrate rounds toward a cohesively verified thesis, witness a re-derivable verdict per claim,
+compare assessment rounds to see what held, moved, improved, or regressed, inspect a growing registry
+by status, scope, and latest verified verdict, plug configured oracle commands into the steelman and
+measure seams, consume `telos.witnessed-artifact/v1` envelopes by re-running their named verifiers,
+use sealed Gather digests as evidence, replay index verification records against supplied graph
+packs, persist optional measurement replay descriptors for oracle-level checks, run a manifest of
+thesis jobs into one registry, and render witnessed assessments as readable Markdown reports. A
 fenced thesis can be assessed locally, but the export edge refuses it by default.
 
 ## The differentiator (do not lose this)
@@ -52,8 +51,8 @@ fenced thesis can be assessed locally, but the export edge refuses it by default
 A claim's standing is a verdict grounded in a measurement, not a judge's say-so. Steelman
 adversaries propose; the measurement decides. The decision is a pure function of the recorded
 measurement, with no model in the verdict step, so the verdict recomputes from the stored record
-and cannot be forged by a fluent assertion. UNVERIFIABLE is fail-closed: an axis that cannot be
-measured is never read as holding.
+and a fluent assertion has no effect on the rechecked result. UNVERIFIABLE is fail-closed: an axis
+that cannot be measured is never read as holding.
 
 ## The discipline
 
@@ -63,11 +62,15 @@ measured is never read as holding.
   measurement within tolerance is MATCH, outside is DRIFT, absent or unmeasurable is UNVERIFIABLE.
 - **A witnessed assessment out.** An assessment folds its verdicts into one re-checkable seal that a
   downstream organ consumes.
+- **A clean verifier boundary.** A verifier gets the original spec and the artifact. It does not need
+  the worker's context, reasoning trace, or intermediate steps. If success cannot be evaluated from
+  that minimal state, the spec is not checkable yet.
 - **Stands alone, serves the constellation.** crucible runs on its own with zero third-party
   dependencies and Null seams, and it composes with the other Telos organs (Gather's evidence,
   index's maps) as a peer through clean protocol contracts. Compose, do not absorb.
 - **Publication-gated.** Theses and verdicts carry a disposition; fenced material is refused at the
-  export edge by default. This public repository carries only self-contained, publishable examples.
+  export edge by default. This is a mechanical disposition and marker guard, not semantic content
+  classification. This public repository carries only self-contained, publishable examples.
 
 ## Install
 
@@ -113,10 +116,10 @@ A job names a thesis plus exactly one measurement source:
 
 ## Status
 
-crucible is in active construction, built the way Gather and Forum were: one reviewed release per
-increment, behind a feature branch, with tests, lint, and type checks green and an independent
-whole-branch review before merge. The operator floor is 1.0; the target is organic completion at
-1.5 or beyond.
+crucible is at its 1.0 flagship floor: the core loop is stable, the public CLI is covered, and the
+release branch passes tests, lint, type checks, build checks, and minimal-context review before
+merge. Development continues by adding sharper substrates and oracle edges without weakening the
+measurement -> verdict spine.
 
 Shipped:
 
@@ -126,19 +129,22 @@ Shipped:
   disposition (so the publication gate can trust the label).
 - A witnessed assessment that persists its verdicts and measurements, so `verify_assessment`
   recomputes the seals from the stored data and `recheck_assessment` re-derives each verdict from the
-  thesis and the measurements: a verdict cannot be asserted, it must follow from the record.
+  thesis and the measurements: a verdict, margin, and grounds cannot be asserted, they must follow
+  from the record. Summary counts are re-derived from verdict rows as part of verification, and the
+  thesis disposition is carried in the assessment and verdict rows.
 - A content-addressed registry that re-verifies stored claims (MATCH / MISSING / CORRUPT), checks
-  thesis seals (catching a swapped claim a body check would miss), and refuses to load a tampered thesis.
+  thesis seals (catching a swapped claim a body check would miss), rejects duplicate thesis ids with
+  different seals, refuses symlinked storage paths, and refuses to load a tampered thesis.
 - The steelman seam: independent adversaries propose the strongest refutation of each claim and the
   test that would settle it (they propose; the measurement decides). The Null default surfaces the
-  claim's own falsification and invents nothing; a model edge plugs in through the same shape later.
+  claim's own falsification and invents nothing; custom edges plug in through the same API shape.
 - The measure seam: a sound oracle that decides a claim against a substrate. The `TableMeasure`
   computes each claim's deviation from a predicted value over a provided substrate (offline, no model);
   the `NullMeasure` default measures nothing (UNVERIFIABLE). The Telos verifier or a proof oracle for
   abstract math plugs in through the same shape, so the verdict stays grounded, never asserted.
-- Measurement rechecks: `Measurement` can carry an optional `recheck` descriptor, persisted and sealed
-  with the assessment when present. `recheck_measurements` lets a caller provide oracle replayers that
-  reproduce stored measurement inputs from those descriptors.
+- Measurement rechecks: assessment rows persist and seal `measured_at`, evidence, and optional
+  `recheck` descriptors. `recheck_measurements` lets a caller provide oracle replayers that reproduce
+  stored measurement inputs from those descriptors.
 - The refine loop: grade each claim's measured margin, compute harmonic-mean cohesion, reflect the
   weakest claim, and re-measure across substrate rounds until the thesis is cohesively verified or the
   budget is spent honestly. The loop reports the weakest claim instead of pretending a short thesis held.
@@ -146,29 +152,34 @@ Shipped:
   `crucible drift REGISTRY` compare the latest two rounds and classify each claim as held, moved,
   improved, or regressed from the recorded margins.
 - Assessment reports: `render_assessment_report` and `crucible report REGISTRY` render a deterministic
-  Markdown artifact with counts, seals, integrity checks, verdicts, measurement evidence, and recheck
-  descriptors.
+  Markdown artifact with counts, seals, integrity checks, verdict dispositions, measurement evidence,
+  and recheck descriptors.
 - Batch assessment: `crucible batch MANIFEST --registry DIR [--reports DIR]` consumes a manifest of
   thesis jobs, records each assessment into one registry, and optionally writes one Markdown report
-  per job.
+  per job. Manifest paths stay inside the manifest bundle, path-like missing refs fail closed, and
+  reports use unique index-prefixed names with exclusive writes.
 - Publication-gated export: `gate_check`, `export_guard`, `export_thesis`, and
   `crucible export THESIS` refuse fenced material and explicit restricted markers before emitting a
   public thesis contract.
 - Registry operations: `registry_stats`, `search_theses`, `prune_objects`, and
   `crucible registry stats|search|prune` summarize the corpus, recall theses by scope/status/latest
-  verdict, and prune orphan claim bodies only when explicitly applied.
+  verdict, and prune orphan claim bodies only when explicitly applied after registry path guards pass.
 - Optional subprocess edges: `SubprocessSteelman` and `SubprocessMeasure` run configured commands
   through bounded JSON stdin/stdout, reject shell strings, enforce timeouts, and stamp claim identity
-  locally. The default seams remain Null and the verdict step still has no model in it.
+  locally. By default they pass only a minimal environment, discard stderr, and actively terminate
+  children whose stdout exceeds the configured response bound. The default seams remain Null and the
+  verdict step still has no model in it.
 - Telos artifact interop: `TelosMeasure` consumes `telos.witnessed-artifact/v1` envelopes through a
   caller-provided verifier registry. The carried certificate is not trusted; the named verifier is
-  re-run and mapped into the normal `Measurement` -> `verdict_for` spine.
+  re-run, mapped into the normal `Measurement` -> `verdict_for` spine, and stored with a
+  `telos:<verifier>` replay descriptor.
 - Gather/index interop: `GatherDigestMeasure` consumes sealed Gather digests and checks that a
   claim's expected evidence receipt exists; `IndexMeasure` consumes `index.verification/1` records
   and replays their structural claims against supplied graph packs. Both map into the same normal
   `Measurement` -> `verdict_for` spine.
 - Readiness coverage: the bundled examples run through the public CLI under test, help output covers
-  the shipped command surface, and `docs/RELEASE-READINESS.md` records the 1.0 gate checklist.
+  the shipped command surface, and `docs/RELEASE-READINESS.md` records the 1.0 gate checklist,
+  including the spec-plus-artifact-only verifier rule.
 - The `crucible` CLI: `register`, `assess`, `steelman`, `measure`,
   `registry list|verify|stats|search|prune`, `refine`, `drift`, `report`, `batch`, `export`,
   `verdicts [--verify]`.

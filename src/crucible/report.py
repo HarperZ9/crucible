@@ -37,37 +37,55 @@ def render_assessment_report(
     ]
     if checks is not None:
         lines.append("- integrity: " + ", ".join(f"{k}={v}" for k, v in checks.items()))
-    lines.extend(["", "## Verdicts", "", "| Claim | Status | Margin | Method | Grounds |",
-                  "| --- | --- | ---: | --- | --- |"])
+    _append_verdicts(lines, verdicts, claim_text)
+    _append_evidence(lines, measurements, claim_text)
+    _append_rechecks(lines, measurements, claim_text)
+    _append_missing(lines, thesis, measurement_by_id)
+    return "\n".join(lines) + "\n"
+
+
+def _append_verdicts(lines: list[str], verdicts: tuple[dict, ...], claim_text: Mapping[str, str]) -> None:
+    lines.extend(["", "## Verdicts", "", "| Claim | Status | Disposition | Margin | Method | Grounds |",
+                  "| --- | --- | --- | ---: | --- | --- |"])
     for row in verdicts:
         cid = str(row.get("claim_id", ""))
-        lines.append(
-            "| " + " | ".join([
-                _md(claim_text.get(cid, cid)),
-                _md(row.get("status", "")),
-                _number(row.get("margin")),
-                _md(row.get("method", "")),
-                _md(row.get("grounds", "")),
-            ]) + " |"
-        )
+        lines.append("| " + " | ".join([
+            _md(claim_text.get(cid, cid)),
+            _md(row.get("status", "")),
+            _md(row.get("disposition", "")),
+            _number(row.get("margin")),
+            _md(row.get("method", "")),
+            _md(row.get("grounds", "")),
+        ]) + " |")
+
+
+def _append_evidence(lines: list[str], measurements: tuple[dict, ...], claim_text: Mapping[str, str]) -> None:
     evidence_rows = _evidence_rows(measurements, claim_text)
-    if evidence_rows:
-        lines.extend(["", "## Measurement Evidence", "", "| Claim | Method | Evidence |",
-                      "| --- | --- | --- |"])
-        for claim, method, evidence in evidence_rows:
-            lines.append(f"| {_md(claim)} | {_md(method)} | {_md(evidence)} |")
+    if not evidence_rows:
+        return
+    lines.extend(["", "## Measurement Evidence", "", "| Claim | Method | Evidence |",
+                  "| --- | --- | --- |"])
+    for claim, method, evidence in evidence_rows:
+        lines.append(f"| {_md(claim)} | {_md(method)} | {_md(evidence)} |")
+
+
+def _append_rechecks(lines: list[str], measurements: tuple[dict, ...], claim_text: Mapping[str, str]) -> None:
     recheck_rows = _recheck_rows(measurements, claim_text)
-    if recheck_rows:
-        lines.extend(["", "## Recheck Descriptors", "", "| Claim | Method | Descriptor |",
-                      "| --- | --- | --- |"])
-        for claim_label, method, descriptor in recheck_rows:
-            lines.append(f"| {_md(claim_label)} | {_md(method)} | {_md(descriptor)} |")
+    if not recheck_rows:
+        return
+    lines.extend(["", "## Recheck Descriptors", "", "| Claim | Method | Descriptor |",
+                  "| --- | --- | --- |"])
+    for claim_label, method, descriptor in recheck_rows:
+        lines.append(f"| {_md(claim_label)} | {_md(method)} | {_md(descriptor)} |")
+
+
+def _append_missing(lines: list[str], thesis: Thesis, measurement_by_id: Mapping[str, dict]) -> None:
     missing = [c for c in thesis.claims if c.id not in measurement_by_id]
-    if missing:
-        lines.extend(["", "## Unmeasured Claims", ""])
-        for missing_claim in missing:
-            lines.append(f"- {_md(missing_claim.text)}")
-    return "\n".join(lines) + "\n"
+    if not missing:
+        return
+    lines.extend(["", "## Unmeasured Claims", ""])
+    for missing_claim in missing:
+        lines.append(f"- {_md(missing_claim.text)}")
 
 
 def _evidence_rows(measurements: tuple[dict, ...], claim_text: Mapping[str, str]) -> list[tuple[str, str, str]]:

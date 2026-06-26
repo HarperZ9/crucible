@@ -1,5 +1,6 @@
 include ARCHITECTURE.md
 include CHANGELOG.md
+include requirements-release.txt
 include docs/*.md
 include examples/*.json
 include examples/*.py

@@ -4,6 +4,7 @@ from __future__ import annotations
 import math
 
 from crucible.claim import make_claim
+from crucible.thesis import FENCED, PUBLISHABLE
 from crucible.verdict import DRIFT, MATCH, UNVERIFIABLE, Measurement, verdict_for
 
 
@@ -21,6 +22,15 @@ def test_match_when_within_tolerance():
     assert v.status == MATCH
     assert v.margin is not None and v.margin > 0
     assert v.claim_sha256 == c.sha256
+    assert v.disposition == PUBLISHABLE
+
+
+def test_verdict_carries_explicit_disposition():
+    c = _claim()
+    v = verdict_for(c, _m(c, 0.05), disposition=FENCED)
+
+    assert v.status == MATCH
+    assert v.disposition == FENCED
 
 
 def test_match_at_the_exact_boundary():

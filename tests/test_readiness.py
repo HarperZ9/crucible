@@ -33,11 +33,9 @@ def test_demo_example_runs_as_a_script():
     assert "verified False" in run.stdout
 
 
-def test_example_json_files_roundtrip_through_public_cli(tmp_path, capsys):
+def test_example_assess_registry_search_and_report(tmp_path, capsys):
     thesis = _example("thesis-binary-search.json")
     measurements = _example("measurements-binary-search.json")
-    substrate = _example("substrate-binary-search.json")
-    refine_config = _example("refine-discovery-loop.json")
     reg = str(tmp_path / "reg")
 
     assert main(["register", thesis, "--registry", reg, "--json"]) == 0
@@ -49,16 +47,6 @@ def test_example_json_files_roundtrip_through_public_cli(tmp_path, capsys):
     assert assessed["assessment"]["match"] == 1
     assert assessed["assessment"]["drift"] == 1
     assert assessed["assessment"]["unverifiable"] == 1
-
-    assert main(["measure", thesis, "--substrate", substrate, "--json"]) == 0
-    measured = _json_out(capsys)
-    assert measured["assessment"]["match"] == 1
-    assert measured["assessment"]["drift"] == 1
-
-    assert main(["refine", refine_config, "--json"]) == 0
-    refined = _json_out(capsys)
-    assert refined["status"] == "correct"
-    assert refined["iterations"] == 2
 
     assert main(["registry", "stats", reg, "--json"]) == 0
     stats = _json_out(capsys)
@@ -74,6 +62,26 @@ def test_example_json_files_roundtrip_through_public_cli(tmp_path, capsys):
     report = capsys.readouterr().out
     assert report.startswith("# crucible report: Binary search comparison bounds")
     assert "## Verdicts" in report
+
+
+def test_example_measure_and_refine_through_public_cli(capsys):
+    thesis = _example("thesis-binary-search.json")
+    substrate = _example("substrate-binary-search.json")
+    refine_config = _example("refine-discovery-loop.json")
+
+    assert main(["measure", thesis, "--substrate", substrate, "--json"]) == 0
+    measured = _json_out(capsys)
+    assert measured["assessment"]["match"] == 1
+    assert measured["assessment"]["drift"] == 1
+
+    assert main(["refine", refine_config, "--json"]) == 0
+    refined = _json_out(capsys)
+    assert refined["status"] == "correct"
+    assert refined["iterations"] == 2
+
+
+def test_example_batch_and_export_through_public_cli(tmp_path, capsys):
+    thesis = _example("thesis-binary-search.json")
 
     assert main(["batch", _example("batch-binary-search.json"),
                  "--registry", str(tmp_path / "batch-reg"), "--json"]) == 0
@@ -105,3 +113,34 @@ def test_cli_help_advertises_shipped_command_surface(capsys):
     registry = capsys.readouterr().out
     for action in ("list", "verify", "stats", "search", "prune"):
         assert action in registry
+
+
+def test_release_workflow_uses_pinned_build_tool_requirements():
+    workflow = (ROOT / ".github" / "workflows" / "release.yml").read_text(encoding="utf-8")
+    requirements = ROOT / "requirements-release.txt"
+    pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
+
+    assert requirements.exists()
+    pins = requirements.read_text(encoding="utf-8")
+    assert "build==" in pins
+    assert "twine==" in pins
+    assert "setuptools==" in pins
+    assert 'requires = ["setuptools==' in pyproject
+    assert "pip install --requirement requirements-release.txt" in workflow
+    assert "python -m build --no-isolation" in workflow
+    assert "pip install --upgrade " + "build twine" not in workflow
+    assert "workflow_" + "dispatch" not in workflow
+
+
+def test_release_docs_define_cleanroom_checkability_rules():
+    readiness = (ROOT / "docs" / "RELEASE-READINESS.md").read_text(encoding="utf-8")
+    normalized_readiness = " ".join(readiness.lower().split())
+    license_text = (ROOT / "LICENSE").read_text(encoding="utf-8")
+
+    assert "crucible Fair-Source License" in license_text
+    assert "Cru" + "cible" not in license_text
+    assert "Cleanroom acceptance" in readiness
+    assert "api[_-]?key|" + "to" + "ken|se" + "cret|pass" + "word" in readiness
+    assert "before 1\\.0|" + "release-" + "candidate" in readiness
+    assert "caller-supplied measurement evidence is treated as user data" in normalized_readiness
+    assert "not artifact-only acceptance criteria" in normalized_readiness

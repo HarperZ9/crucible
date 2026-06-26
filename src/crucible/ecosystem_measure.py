@@ -26,7 +26,7 @@ INDEX_VERIFICATION_SCHEMA = "index.verification/1"
 
 def canonical_sha(obj: object) -> str:
     """index's canonical SHA-256: compact sorted JSON, then SHA-256."""
-    blob = json.dumps(obj, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    blob = json.dumps(obj, sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
     return hashlib.sha256(blob).hexdigest()
 
 

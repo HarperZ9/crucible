@@ -16,8 +16,8 @@ def verdict_for(claim: Claim, measurement: Measurement | None) -> Verdict: ...
 A measurement records a deviation from what the claim predicts and a tolerance. The verdict is a
 pure function of that record: within tolerance is MATCH, outside is DRIFT, absent or unmeasurable is
 UNVERIFIABLE. There is no model in this step, so the verdict recomputes from the stored record and a
-confident assertion cannot fake it. UNVERIFIABLE is fail-closed: an axis that cannot be measured is
-never read as holding.
+confident assertion has no effect on the rechecked result. UNVERIFIABLE is fail-closed: an axis that
+cannot be measured is never read as holding.
 
 ## The receipt: `Claim`
 
@@ -55,13 +55,17 @@ are exactly what the pure function yields, so a verdict that was asserted rather
 exposed even when its seals are internally consistent. The CLI surfaces this as `crucible verdicts
 --verify`. The seal proves integrity, not authorship: a fully consistent re-forge (every field and
 seal rewritten together) is out of scope without a signature, and the docs say so where a user meets it.
+Summary counts are not trusted as labels; verification re-derives them from the verdict rows.
+Assessment and verdict rows also carry the thesis disposition, and the disposition participates in
+the assessment and verdict seals so publication posture is visible in witnessed outputs.
 
-Measurements may carry an optional `recheck` descriptor. When present, it is persisted with the
-measurement row and included in the measurement seal; when absent, legacy rows keep the original seal
-shape, so older assessments still verify. `recheck_measurements` is the oracle-level hook: a caller
-provides replay functions keyed by descriptor `oracle`, and crucible compares the replayed measurement
-inputs to the stored row. The shipped CLI still re-derives verdicts from stored measurements; external
-callers can now also re-run descriptor-bearing measurements.
+Measurement rows persist and seal claim binding, deviation, tolerance, method, `measured_at`,
+evidence, and optional `recheck` descriptors. When a descriptor is present, it is included in the
+measurement seal; when absent, legacy rows keep the original replay shape and are skipped by
+oracle-level replay. `recheck_measurements` is the oracle-level hook: a caller provides replay
+functions keyed by descriptor `oracle`, and crucible compares the replayed measurement inputs to the
+stored row. The shipped CLI still re-derives verdicts from stored measurements; external callers can
+now also re-run descriptor-bearing measurements.
 
 `render_assessment_report` turns the same sealed record into a deterministic Markdown artifact. It
 does not change the verdict contract or decide anything new; it gives an operator a readable surface
@@ -81,7 +85,7 @@ default, exactly as Gather isolates its synthesizer.
 
 - **Steelman** (`Steelman` protocol): independent adversaries propose refutations. The default
   `NullSteelman` surfaces the claim's own stated falsification as the standing test and invents
-  nothing; a model edge plugs in to generate independent refutations. Adversaries propose what to
+  nothing; custom edges plug in to generate independent refutations. Adversaries propose what to
   measure; the measurement decides. `steelman_thesis` stamps each refutation's source from the
   producing steelman's name, so the label is the producer's.
 - **Measure** (`Measure` protocol): the sound-oracle edge that decides a claim against a substrate.
@@ -101,9 +105,10 @@ The core imports neither the Null nor any model, so the package keeps zero third
 
 `SubprocessSteelman` and `SubprocessMeasure` are optional stdlib adapters for configured commands.
 They exchange one bounded JSON request/response over stdin/stdout, enforce a timeout, and reject shell
-strings so arguments are not re-parsed by a shell. A child process may propose a challenge or report a
-deviation, but crucible stamps the claim identity, claim hash, and producer name locally. The verdict
-still follows from `verdict_for`; a subprocess cannot assert MATCH.
+strings so arguments are not re-parsed by a shell. By default they pass only a minimal environment,
+discard stderr, and terminate children whose stdout grows past the response cap. A child process may
+propose a challenge or report a deviation, but crucible stamps the claim identity, claim hash, and
+producer name locally. The verdict still follows from `verdict_for`; a subprocess cannot assert MATCH.
 
 ## Telos artifact interop
 
@@ -113,7 +118,9 @@ caller supplies a verifier registry; crucible re-runs the named verifier, compar
 verdict to the carried verdict, and turns that live result into a normal Measurement. Reproduced
 `verified` becomes a MATCH input, reproduced `refuted` or a drifted carried verdict becomes a DRIFT
 input, and a missing/unregistered/unverifiable proof becomes an UNVERIFIABLE input. That keeps the
-interop on the same spine: trust the proof, not the emitter.
+interop on the same spine: trust the proof, not the emitter. When the Telos artifact is well-shaped,
+the produced Measurement persists a `telos:<verifier>` recheck descriptor so later assessment replay
+can re-run the same oracle from the stored row.
 
 ## Gather/index interop
 
@@ -143,7 +150,8 @@ Assessment and export are deliberately separate. A fenced thesis may be register
 locally, but the public export edge applies `gate_check` and refuses anything with a fenced
 disposition or an explicit fenced/restricted marker in the title, claim text, or falsification. The
 exported contract omits runtime metadata and carries only the title, disposition, thesis seal, and
-content-hashed claims needed for public re-checking.
+content-hashed claims needed for public re-checking. This gate is a mechanical disposition and marker
+guard, not a semantic content classifier.
 
 ## The registry
 
@@ -153,28 +161,39 @@ catalog, and an `assessments.jsonl` history. `verify()` re-hashes every stored b
 MATCH / MISSING / CORRUPT, so the verdict's proof stays durable over a growing registry.
 
 `registry_ops` reads across that store without changing the storage contract. `registry_stats`
-summarizes thesis counts, claim bodies, dispositions, assessment history, and the latest verdict
-posture per thesis. `search_theses` recalls theses by scope text, thesis status, and latest verdict
-status. `prune_objects` identifies orphaned claim bodies and is dry-run by default; deletion requires
-an explicit apply path and validates each object path before unlinking it.
+summarizes thesis counts, claim bodies, dispositions, assessment history, skipped invalid latest
+rows, and the latest verified verdict posture per thesis. `search_theses` recalls theses by scope
+text, thesis status, and latest verified verdict status, falling back past invalid tail rows instead
+of trusting or hiding history. `prune_objects` identifies orphaned claim bodies and is dry-run by
+default; deletion requires an explicit apply path and validates the object root plus each object path
+with the registry realpath guard before unlinking it. The registry rejects duplicate thesis ids with
+different seals and refuses symlinked storage paths, so content-addressed writes stay inside the
+registry root.
+
+## Verifier separation
+
+The review loop is intentionally clean. A verifier receives the original spec/readiness docs and the
+artifact under review. It does not receive the worker's context, reasoning trace, or intermediate
+steps. If success cannot be evaluated from that minimal state, the spec is not checkable yet and the
+readiness artifact needs work before release.
 
 ## Determinism and the zero-dependency core
 
 Clocks are injected everywhere time is recorded; iteration is sorted; JSON is canonical
 (`sort_keys`, `ensure_ascii=False`). So an assessment replays and a seal recomputes. The core is pure
-standard library. A model edge may pull in whatever it needs, but only behind a seam, and only at the
-impure edge.
+standard library. A custom edge may pull in whatever it needs, but only behind a seam, and only at
+the impure edge.
 
 ## Protocol interoperability (the dual mandate)
 
-crucible stands alone and serves the constellation at once. What ships today is the standing-alone
-half and the published contract: a sealed assessment and its verdicts, re-checkable from disk, that a
-downstream organ reads to learn a thesis's standing. It also includes first protocol adapters for
-Telos witnessed artifacts, Gather witnessed digests, and index verification records. These adapters
-consume documented JSON contracts without importing sibling internals. Shared primitives, such as the
-`refine` loop, are integrated natively rather than taken as third-party dependencies, so reuse never
-costs standing alone. Seams default to Null, so the absence of a peer is a quieter capability, never a
-failure.
+crucible stands alone and serves the constellation at once. At the 1.0 flagship floor, the
+standing-alone half and the published contract are shipped: a sealed assessment and its verdicts,
+re-checkable from disk, that a downstream organ reads to learn a thesis's standing. It also includes
+protocol adapters for Telos witnessed artifacts, Gather witnessed digests, and index verification
+records. These adapters consume documented JSON contracts without importing sibling internals. Shared
+primitives, such as the `refine` loop, are integrated natively rather than taken as third-party
+dependencies, so reuse never costs standing alone. Seams default to Null, so the absence of a peer is
+a quieter capability, never a failure.
 
 ## Peer composition
 

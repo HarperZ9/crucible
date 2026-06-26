@@ -7,7 +7,7 @@ invariants, laws, or counterexamples, then let a sound oracle judge them.
 
 The default ``NullSteelman`` stands alone and invents nothing: it surfaces the claim's own stated
 falsification as the standing test, or flags a claim that states no falsification as unrefutable. A
-model edge (a real independent refuter, proposing attacks the claim did not anticipate) plugs in
+custom edge (a real independent refuter, proposing attacks the claim did not anticipate) plugs in
 through the ``Steelman`` protocol without the core importing it.
 """
 from __future__ import annotations
@@ -39,9 +39,9 @@ class Refutation:
 
 
 class Steelman(Protocol):
-    """The seam where a claim meets its adversary, the optional model edge. ``refute`` proposes zero
-    or more refutations of a claim; it never decides the claim (the measurement does). The default is
-    the deterministic ``NullSteelman``, so crucible stands alone; a model plugs in through this shape."""
+    """The seam where a claim meets its adversary. ``refute`` proposes zero or more refutations of a
+    claim; it never decides the claim (the measurement does). The default is the deterministic
+    ``NullSteelman``, so crucible stands alone; custom engines plug in through this shape."""
 
     name: str
 

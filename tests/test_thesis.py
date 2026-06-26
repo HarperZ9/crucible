@@ -76,4 +76,4 @@ def test_fenced_disposition_allowed_bad_rejected():
     t = make_thesis("t", _claims(), clock=CLOCK, disposition=FENCED)
     assert t.disposition == FENCED
     with pytest.raises(ValueError):
-        make_thesis("t", _claims(), clock=CLOCK, disposition="secret")
+        make_thesis("t", _claims(), clock=CLOCK, disposition="private")

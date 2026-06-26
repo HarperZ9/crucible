@@ -41,7 +41,7 @@ def test_steelman_thesis_proposes_one_test_per_claim_in_order():
 
 
 class _FakeSteelman:
-    """A second, conforming Steelman: proves the seam is engine-agnostic (a model edge plugs in
+    """A second, conforming Steelman: proves the seam is engine-agnostic (a custom edge plugs in
     without the core importing it). It claims one independent attack per claim."""
 
     name = "fake-model"

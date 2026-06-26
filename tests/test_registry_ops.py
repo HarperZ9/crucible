@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 
 from crucible.assess import assess
@@ -52,6 +53,45 @@ def test_search_theses_filters_by_scope_status_and_latest_verdict(tmp_path):
     assert [r["id"] for r in search_theses(reg, verdict=DRIFT)] == [engine.id]
 
 
+def test_registry_stats_and_search_exclude_tampered_latest_assessment(tmp_path):
+    reg, engine, _finance = _seed_registry(tmp_path)
+    path = tmp_path / "assessments.jsonl"
+    rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
+    rows[0]["verdicts"][0]["margin"] = -999.0
+    path.write_text("\n".join(json.dumps(row) for row in rows) + "\n", encoding="utf-8")
+
+    stats = registry_stats(reg)
+    found = search_theses(reg, verdict=DRIFT)
+
+    assert stats["latest_assessments"] == 1
+    assert stats["invalid_latest_assessments"] == 1
+    assert stats["verdicts"][MATCH] == 0
+    assert stats["verdicts"][DRIFT] == 0
+    assert [r["id"] for r in found] == []
+    assert [r["id"] for r in search_theses(reg, scope="latency")] == [engine.id]
+
+
+def test_registry_stats_and_search_fall_back_to_latest_verified_assessment(tmp_path):
+    reg, engine, _finance = _seed_registry(tmp_path)
+    assess(engine, [
+        Measurement(engine.claims[0].id, engine.claims[0].sha256, 0.0, 0.1, "bench", 0.0),
+        Measurement(engine.claims[1].id, engine.claims[1].sha256, 0.0, 0.1, "bench", 0.0),
+    ], registry=reg, clock=CLOCK)
+    path = tmp_path / "assessments.jsonl"
+    rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
+    rows[-1]["verdicts"][0]["margin"] = -999.0
+    path.write_text("\n".join(json.dumps(row) for row in rows) + "\n", encoding="utf-8")
+
+    stats = registry_stats(reg)
+    found = search_theses(reg, verdict=DRIFT)
+
+    assert stats["latest_assessments"] == 2
+    assert stats["invalid_latest_assessments"] == 1
+    assert stats["verdicts"][MATCH] == 1
+    assert stats["verdicts"][DRIFT] == 1
+    assert [r["id"] for r in found] == [engine.id]
+
+
 def test_prune_objects_dry_runs_then_deletes_orphaned_bodies(tmp_path):
     reg, _engine, _finance = _seed_registry(tmp_path)
     orphan = "f" * 64
@@ -71,3 +111,22 @@ def test_prune_objects_dry_runs_then_deletes_orphaned_bodies(tmp_path):
     assert applied["dry_run"] is False
     assert applied["deleted"] == [orphan]
     assert not os.path.exists(orphan_path)
+
+
+def test_prune_objects_refuses_escaped_objects_root(tmp_path):
+    reg, _engine, _finance = _seed_registry(tmp_path / "reg")
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    orphan = "f" * 64
+    shard = outside / orphan[:2]
+    shard.mkdir()
+    victim = shard / orphan[2:]
+    victim.write_text("outside body", encoding="utf-8")
+    reg._objects = str(outside)  # noqa: SLF001 - simulate a junctioned/escaped objects root.
+
+    try:
+        assert prune_objects(reg, apply=True)["deleted"] == []
+    except ValueError:
+        pass
+
+    assert victim.exists()

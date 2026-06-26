@@ -4,6 +4,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Iterable, Mapping
 
+from crucible.assess import Assessment, recheck_assessment
 from crucible.registry import Registry, _check_sha
 from crucible.thesis import FENCED, PUBLISHABLE
 from crucible.verdict import DRIFT, MATCH, UNVERIFIABLE
@@ -16,7 +17,7 @@ def registry_stats(reg: Registry) -> dict:
     """Summarize the registry's current thesis catalog and latest witnessed verdict posture."""
     rows = list(reg.theses())
     records = list(reg.assessments())
-    latest = _latest_by_thesis(records)
+    latest, invalid_latest = _verified_latest_by_thesis(reg, records)
     claim_shas = [_claim_sha(cr) for row in rows for cr in row.get("claims", [])]
     dispositions = {status: 0 for status in sorted(STATUSES)}
     for row in rows:
@@ -34,6 +35,7 @@ def registry_stats(reg: Registry) -> dict:
         "unique_claims": len(set(claim_shas)),
         "assessments": len(records),
         "latest_assessments": sum(1 for thesis_id in latest if thesis_id in thesis_ids),
+        "invalid_latest_assessments": invalid_latest,
         "dispositions": _nonzero(dispositions),
         "verdicts": verdicts,
     }
@@ -52,7 +54,7 @@ def search_theses(
     if verdict is not None and verdict not in VERDICTS:
         raise ValueError(f"verdict must be one of {', '.join(VERDICTS)}")
     needle = (scope or "").casefold().strip()
-    latest = _latest_by_thesis(list(reg.assessments()))
+    latest, _invalid_latest = _verified_latest_by_thesis(reg, list(reg.assessments()))
     out: list[dict] = []
     for row in reg.theses():
         if status is not None and row.get("disposition") != status:
@@ -94,13 +96,27 @@ def _claim_sha(row: Mapping) -> str:
     return _check_sha(row.get("sha256"))
 
 
-def _latest_by_thesis(records: Iterable[Mapping]) -> dict[str, Mapping]:
-    latest: dict[str, Mapping] = {}
-    for record in records:
+def _verified_latest_by_thesis(reg: Registry, records: Iterable[Mapping]) -> tuple[dict[str, Mapping], int]:
+    verified: dict[str, Mapping] = {}
+    invalid = 0
+    for record in reversed(list(records)):
         thesis_id = record.get("thesis_id")
-        if isinstance(thesis_id, str):
-            latest[thesis_id] = record
-    return latest
+        if not isinstance(thesis_id, str) or thesis_id in verified:
+            continue
+        if not _record_verified(reg, thesis_id, record):
+            invalid += 1
+            continue
+        verified[thesis_id] = record
+    return verified, invalid
+
+
+def _record_verified(reg: Registry, thesis_id: str, record: Mapping) -> bool:
+    try:
+        assessment = Assessment.from_dict(record)
+        thesis = reg.get_thesis(thesis_id)
+        return thesis is not None and all(recheck_assessment(thesis, assessment).values())
+    except (OSError, ValueError, KeyError, TypeError):
+        return False
 
 
 def _record_statuses(record: Mapping | None) -> list[str]:
@@ -142,13 +158,16 @@ def _search_row(row: Mapping, latest_verdicts: list[str]) -> dict:
 
 def _object_shas(reg: Registry) -> set[str]:
     root = Path(getattr(reg, "_objects"))
+    reg._guard_path(str(root))  # noqa: SLF001 - same-package registry path guard.
     if not root.exists():
         return set()
     shas: set[str] = set()
     for shard in root.iterdir():
+        reg._guard_path(str(shard))  # noqa: SLF001
         if not shard.is_dir() or len(shard.name) != 2:
             continue
         for body in shard.iterdir():
+            reg._guard_path(str(body))  # noqa: SLF001
             if body.is_file() and not body.name.endswith(".tmp"):
                 sha = shard.name + body.name
                 try:
@@ -161,6 +180,8 @@ def _object_shas(reg: Registry) -> set[str]:
 def _safe_object_path(reg: Registry, sha: str) -> Path:
     root = Path(getattr(reg, "_objects")).resolve()
     path = Path(reg._object_path(sha)).resolve()  # noqa: SLF001 - same-package object-store helper.
+    reg._guard_path(str(root))  # noqa: SLF001
+    reg._guard_path(str(path))  # noqa: SLF001
     try:
         path.relative_to(root)
     except ValueError as exc:

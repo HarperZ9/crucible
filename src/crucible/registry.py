@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import os
+import tempfile
 from typing import Iterator, Mapping
 
 from crucible.claim import Claim, claim_body, content_hash
@@ -44,6 +45,7 @@ class Registry:
 
     def __init__(self, root: str, *, fsync: bool = True) -> None:
         self._root = root
+        self._root_real = os.path.realpath(root)
         self._objects = os.path.join(root, "objects")
         self._theses = os.path.join(root, "theses.jsonl")
         self._assessments = os.path.join(root, "assessments.jsonl")
@@ -60,21 +62,33 @@ class Registry:
         no-op (dedup). Temp file then rename, so a body is never half-present."""
         sha = content_hash(text)
         path = self._object_path(sha)
-        if os.path.exists(path):
+        self._guard_path(path)
+        if os.path.lexists(path):
+            self._reject_link(path)
+            if not os.path.isfile(path):
+                raise ValueError(f"registry object path is not a file: {path}")
             return sha, False
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        tmp = path + ".tmp"
-        with open(tmp, "w", encoding="utf-8") as f:
-            f.write(text)
-            f.flush()
-            if self._fsync:
-                os.fsync(f.fileno())
-        os.replace(tmp, path)
+        parent = os.path.dirname(path)
+        os.makedirs(parent, exist_ok=True)
+        self._guard_path(parent)
+        fd, tmp = tempfile.mkstemp(prefix=os.path.basename(path) + ".", suffix=".tmp", dir=parent)
+        try:
+            with os.fdopen(fd, "w", encoding="utf-8") as f:
+                f.write(text)
+                f.flush()
+                if self._fsync:
+                    os.fsync(f.fileno())
+            os.replace(tmp, path)
+        finally:
+            if os.path.exists(tmp):
+                os.unlink(tmp)
         return sha, True
 
     def read_body(self, sha: str) -> str:
         """Read a stored claim body by its content hash."""
-        with open(self._object_path(sha), encoding="utf-8") as f:
+        path = self._object_path(sha)
+        self._guard_path(path)
+        with open(path, encoding="utf-8") as f:
             return f.read()
 
     # --- registering and loading theses ---
@@ -85,11 +99,14 @@ class Registry:
         Returns a summary ``{added, deduped, total}``. The bodies are written before the row, so a
         row never points at a body that is not on disk.
         """
+        existing = [r for r in self.theses() if r.get("id") == thesis.id]
+        if any(r.get("seal") != thesis.seal for r in existing):
+            raise ValueError(f"thesis id {thesis.id!r} already exists with a different seal")
         added = deduped = 0
         for c in thesis.claims:
             _sha, is_new = self._write_object(claim_body(c.text, c.falsification))
             added, deduped = (added + 1, deduped) if is_new else (added, deduped + 1)
-        registered = not self._has_thesis(thesis.id, thesis.seal)
+        registered = not existing
         if registered:
             self._append(self._theses, self._thesis_row(thesis))
         if self._fsync:
@@ -169,11 +186,18 @@ class Registry:
             return {**base, "status": CORRUPT}
         try:
             path = self._object_path(sha)
+            self._guard_path(path)
         except ValueError:
             return {**base, "status": CORRUPT}
         if not os.path.exists(path):
             return {**base, "status": MISSING}
-        return {**base, "status": MATCH if content_hash(self.read_body(sha)) == sha else CORRUPT}
+        if not os.path.isfile(path):
+            return {**base, "status": CORRUPT}
+        try:
+            body = self.read_body(sha)
+        except OSError:
+            return {**base, "status": CORRUPT}
+        return {**base, "status": MATCH if content_hash(body) == sha else CORRUPT}
 
     def verify_seals(self) -> list[dict]:
         """Re-check each thesis's seal: load its claims and confirm the seal binds them, the title, and
@@ -194,6 +218,7 @@ class Registry:
 
     def _append(self, path: str, row: dict) -> None:
         os.makedirs(self._root, exist_ok=True)
+        self._guard_path(path)
         with open(path, "a", encoding="utf-8") as f:
             f.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
             f.flush()
@@ -210,10 +235,10 @@ class Registry:
         finally:
             os.close(fd)
 
-    @staticmethod
-    def _stream_jsonl(path: str, what: str) -> Iterator[dict]:
+    def _stream_jsonl(self, path: str, what: str) -> Iterator[dict]:
         """Stream a JSONL file one row at a time. A malformed line raises a located ValueError
         rather than a silent skip: an accountable store surfaces corruption, it does not hide it."""
+        self._guard_path(path)
         if not os.path.exists(path):
             return
         with open(path, encoding="utf-8") as f:
@@ -222,6 +247,35 @@ class Registry:
                 if not line:
                     continue
                 try:
-                    yield json.loads(line)
+                    row = json.loads(line)
                 except json.JSONDecodeError as exc:
                     raise ValueError(f"registry {what} line {n} is not valid JSON: {exc}") from exc
+                if not isinstance(row, dict):
+                    raise ValueError(f"registry {what} line {n} is not a JSON object")
+                yield row
+
+    def _guard_path(self, path: str) -> None:
+        self._reject_links_in_path(path)
+        try:
+            inside = os.path.commonpath([self._root_real, os.path.realpath(path)]) == self._root_real
+        except ValueError:
+            inside = False
+        if not inside:
+            raise ValueError(f"registry path escaped root: {path}")
+
+    @staticmethod
+    def _reject_link(path: str) -> None:
+        if os.path.lexists(path) and os.path.islink(path):
+            raise ValueError(f"registry path is a symlink: {path}")
+
+    def _reject_links_in_path(self, path: str) -> None:
+        root = os.path.normcase(os.path.abspath(self._root))
+        current = os.path.normcase(os.path.abspath(path))
+        while True:
+            self._reject_link(current)
+            if current == root:
+                return
+            parent = os.path.dirname(current)
+            if parent == current:
+                return
+            current = parent
