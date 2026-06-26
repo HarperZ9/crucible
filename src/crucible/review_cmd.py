@@ -38,6 +38,7 @@ def review_bundle(bundle: str) -> dict:
         "spec_matches_run": False,
         "report_matches_run": False,
         "review_instructions": False,
+        "run_integrity": False,
     }
     if checks["required_files"]:
         spec = _load_json(os.path.join(base, "spec.json"), "spec.json", findings)
@@ -46,6 +47,7 @@ def review_bundle(bundle: str) -> dict:
         checks["spec_matches_run"] = _spec_matches_run(spec, run, findings)
         checks["report_matches_run"] = _report_matches_run(base, spec, run, findings)
         checks["review_instructions"] = _review_instructions(base, findings)
+        checks["run_integrity"] = _run_integrity(run, findings)
     return {
         "ok": all(checks.values()),
         "bundle": base,
@@ -81,6 +83,23 @@ def _no_extra_context(base: str, findings: list[str]) -> bool:
     for name in extras:
         findings.append(f"unexpected context file in cleanroom bundle: {name}")
     return not extras
+
+
+def _run_integrity(run: Mapping | None, findings: list[str]) -> bool:
+    if run is None:
+        return False
+    embedded = run.get("checks")
+    if not isinstance(embedded, Mapping):
+        findings.append("run.json checks must be an object")
+        return False
+    checks_ok = all(value is True for value in embedded.values())
+    if run.get("ok") != checks_ok:
+        findings.append("run.json ok must equal all embedded checks")
+        return False
+    if not checks_ok:
+        findings.append("run.json integrity checks must all pass")
+        return False
+    return True
 
 
 def _review_instructions(base: str, findings: list[str]) -> bool:
@@ -161,10 +180,7 @@ def _spec_matches_run(spec: Mapping | None, run: Mapping | None, findings: list[
 
 
 def _report_matches_run(
-    base: str,
-    spec: Mapping | None,
-    run: Mapping | None,
-    findings: list[str],
+    base: str, spec: Mapping | None, run: Mapping | None, findings: list[str],
 ) -> bool:
     if spec is None or run is None:
         return False
@@ -256,12 +272,7 @@ def _same(left: Mapping, right: Mapping, key: str, findings: list[str], label: s
 
 
 def _same_cross(
-    left: Mapping,
-    lk: str,
-    right: Mapping,
-    rk: str,
-    findings: list[str],
-    label: str,
+    left: Mapping, lk: str, right: Mapping, rk: str, findings: list[str], label: str,
 ) -> bool:
     if left.get(lk) == right.get(rk):
         return True

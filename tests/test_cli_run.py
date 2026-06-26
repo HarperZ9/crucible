@@ -130,10 +130,31 @@ def test_review_validates_cleanroom_bundle_contract(tmp_path, capsys):
         "spec_matches_run": True,
         "report_matches_run": True,
         "review_instructions": True,
+        "run_integrity": True,
     }
     assert payload["allowed_inputs"] == ["spec.json", "run.json", "report.md"]
     assert payload["excluded"] == ["worker context", "reasoning trace", "intermediate steps"]
     assert payload["findings"] == []
+
+
+def test_review_fails_closed_on_failed_run_integrity_checks(tmp_path, capsys):
+    bundle = tmp_path / "packet"
+    reg = str(tmp_path / "reg")
+
+    assert main(["run", _thesis_file(tmp_path), "--measurements", _measurements_file(tmp_path),
+                 "--registry", reg, "--bundle", str(bundle), "--json"]) == 0
+    capsys.readouterr()
+    run_path = bundle / "run.json"
+    payload = json.loads(run_path.read_text(encoding="utf-8"))
+    payload["ok"] = False
+    run_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    assert main(["review", str(bundle), "--json"]) == 1
+    reviewed = json.loads(capsys.readouterr().out)
+
+    assert reviewed["ok"] is False
+    assert reviewed["checks"]["run_integrity"] is False
+    assert any("run.json ok must equal all embedded checks" in finding for finding in reviewed["findings"])
 
 
 def test_review_fails_closed_on_extra_context_files(tmp_path, capsys):

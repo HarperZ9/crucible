@@ -190,8 +190,8 @@ artifact under review. It does not receive the worker's context, reasoning trace
 steps. If success cannot be evaluated from that minimal state, the spec is not checkable yet and the
 readiness artifact needs work before release. For run packets, `crucible review BUNDLE` makes that
 rule executable: extra context files fail the packet before any verifier judgment begins, and
-`report.md` must match the assessment artifact rendered from `run.json`, and `review.md` must
-match the canonical cleanroom instructions.
+`run.json` must declare passing embedded integrity checks, `report.md` must match the assessment
+artifact rendered from `run.json`, and `review.md` must match the canonical cleanroom instructions.
 
 ## Determinism and the zero-dependency core
 

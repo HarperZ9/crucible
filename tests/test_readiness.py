@@ -80,6 +80,7 @@ def test_example_assess_registry_search_and_report(tmp_path, capsys):
     reviewed = _json_out(capsys)
     assert reviewed["checks"]["report_matches_run"] is True
     assert reviewed["checks"]["review_instructions"] is True
+    assert reviewed["checks"]["run_integrity"] is True
 
 
 def test_example_measure_and_refine_through_public_cli(capsys):
@@ -169,4 +170,5 @@ def test_release_docs_define_cleanroom_checkability_rules():
     assert "report content that does not render from `run.json`" in normalized_readiness
     assert "review instructions that diverge from the cleanroom boundary" in normalized_readiness
     assert "references those artifacts relative to the packet root" in normalized_readiness
+    assert "failed embedded run integrity checks" in normalized_readiness
     assert "crucible review" in normalized_readiness
