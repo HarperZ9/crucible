@@ -75,6 +75,16 @@ def test_example_json_files_roundtrip_through_public_cli(tmp_path, capsys):
     assert report.startswith("# crucible report: Binary search comparison bounds")
     assert "## Verdicts" in report
 
+    assert main(["batch", _example("batch-binary-search.json"),
+                 "--registry", str(tmp_path / "batch-reg"), "--json"]) == 0
+    batched = _json_out(capsys)
+    assert len(batched["jobs"]) == 2
+    assert batched["jobs"][0]["id"] == "binary-search-manual"
+    assert batched["jobs"][0]["match"] == 1
+    assert batched["jobs"][0]["drift"] == 1
+    assert batched["jobs"][1]["id"] == "binary-search-substrate"
+    assert batched["jobs"][1]["unverifiable"] == 1
+
     assert main(["export", thesis]) == 0
     exported = _json_out(capsys)
     assert exported["disposition"] == "publishable"
@@ -85,7 +95,7 @@ def test_cli_help_advertises_shipped_command_surface(capsys):
         main(["--help"])
     assert root_help.value.code == 0
     root = capsys.readouterr().out
-    for command in ("register", "assess", "steelman", "measure", "registry", "report",
+    for command in ("register", "assess", "steelman", "measure", "registry", "report", "batch",
                     "verdicts", "drift", "export", "refine"):
         assert command in root
 

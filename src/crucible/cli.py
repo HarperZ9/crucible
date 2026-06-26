@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 
 from crucible import __version__
+from crucible.batch_cmd import cmd_batch
 from crucible.commands import (
     cmd_assess,
     cmd_export,
@@ -103,6 +104,15 @@ def build_parser() -> argparse.ArgumentParser:
     rpt.add_argument("--out", default=None, metavar="FILE",
                      help="write the Markdown report to FILE instead of stdout")
     rpt.set_defaults(func=cmd_report)
+
+    bat = sub.add_parser("batch", help="assess a manifest of thesis jobs into a registry")
+    bat.add_argument("manifest", help="path to a batch manifest JSON")
+    bat.add_argument("--registry", required=True, metavar="DIR",
+                     help="record batch assessments into registry DIR")
+    bat.add_argument("--reports", default=None, metavar="DIR",
+                     help="write one Markdown report per job")
+    bat.add_argument("--json", action="store_true", help="emit JSON instead of human text")
+    bat.set_defaults(func=cmd_batch)
 
     dr = sub.add_parser("drift", help="compare the latest two witnessed assessments in a registry")
     dr.add_argument("dir", help="the registry directory")

@@ -1,0 +1,14 @@
+{
+  "jobs": [
+    {
+      "id": "binary-search-manual",
+      "thesis": "thesis-binary-search.json",
+      "measurements": "measurements-binary-search.json"
+    },
+    {
+      "id": "binary-search-substrate",
+      "thesis": "thesis-binary-search.json",
+      "substrate": "substrate-binary-search.json"
+    }
+  ]
+}

@@ -3,6 +3,18 @@
 All notable changes to crucible. Versions follow semantic versioning; each minor release is built
 behind a feature branch and reviewed before merge.
 
+## 0.14.0
+
+Batch assessment workflow.
+
+- `crucible.batch_cmd`: adds a manifest runner that assesses multiple thesis jobs into one
+  content-addressed registry.
+- Manifest jobs accept either explicit measurements or a substrate oracle file, preserving the same
+  grounded measurement -> verdict spine as the single-thesis commands.
+- CLI: `crucible batch MANIFEST --registry DIR [--reports DIR] [--json]` emits a row per job and can
+  write one deterministic Markdown report per assessment.
+- Readiness coverage now runs the batch command through the bundled example thesis surface.
+
 ## 0.13.0
 
 Markdown assessment reports.
