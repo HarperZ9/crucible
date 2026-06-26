@@ -116,8 +116,8 @@ def test_cli_help_advertises_shipped_command_surface(capsys):
         main(["--help"])
     assert root_help.value.code == 0
     root = capsys.readouterr().out
-    for command in ("register", "assess", "steelman", "measure", "run", "registry", "report", "batch",
-                    "verdicts", "drift", "export", "refine"):
+    for command in ("register", "assess", "steelman", "measure", "run", "recheck", "registry",
+                    "report", "batch", "verdicts", "drift", "export", "refine"):
         assert command in root
 
     with pytest.raises(SystemExit) as registry_help:
@@ -158,3 +158,4 @@ def test_release_docs_define_cleanroom_checkability_rules():
     assert "caller-supplied measurement evidence is treated as user data" in normalized_readiness
     assert "not artifact-only acceptance criteria" in normalized_readiness
     assert "spec.json" in readiness and "review.md" in readiness
+    assert "oracle replay pack" in normalized_readiness

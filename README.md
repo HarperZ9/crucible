@@ -35,10 +35,10 @@ and the witnessed verdicts track which moved.
 1.0.0 delivered the flagship floor: the full first loop plus drift tracking, Markdown assessment
 reports, publication-gated export, registry operations, optional subprocess-backed seam adapters,
 Telos witnessed-artifact interop, Gather/index protocol interop, measurement recheck descriptors,
-batch assessment/report bundles, and clean verifier practice. The 1.1.0 branch adds an operator run
-command over that spine. You register a thesis, steelman it (adversaries propose the test), measure
-each claim against a substrate oracle, refine across
-substrate rounds toward a cohesively verified thesis, witness a re-derivable verdict per claim,
+batch assessment/report bundles, and clean verifier practice. The 1.1.0 branch adds operator run and
+oracle recheck commands over that spine. You register a thesis, steelman it (adversaries propose the
+test), measure each claim against a substrate oracle, refine across substrate rounds toward a
+cohesively verified thesis, witness a re-derivable verdict per claim,
 compare assessment rounds to see what held, moved, improved, or regressed, inspect a growing registry
 by status, scope, and latest verified verdict, plug configured oracle commands into the steelman and
 measure seams, consume `telos.witnessed-artifact/v1` envelopes by re-running their named verifiers,
@@ -136,6 +136,46 @@ derived verdict rows, disk recheck status, and verifier packet paths. `--bundle 
 packet gives a verifier only the original spec and artifact. Use `--substrate` instead of
 `--measurements` to run through the table oracle in the same session shape.
 
+## Oracle recheck packs
+
+Descriptor-bearing measurements can be inspected from the registry:
+
+```bash
+crucible recheck .crucible-registry --json
+```
+
+A verifier or oracle wrapper can then return a replay pack with the original `recheck` descriptor and
+the reproduced measurement row:
+
+```json
+{
+  "replays": [
+    {
+      "recheck": {"oracle": "telos:conservation", "verifier": "conservation"},
+      "measurement": {
+        "claim_id": "claim-id",
+        "claim_sha256": "claim-sha256",
+        "deviation": 0.0,
+        "tolerance": 0.1,
+        "method": "telos:conservation",
+        "measured_at": 1000.0,
+        "evidence": ["verifier reproduced certificate"]
+      }
+    }
+  ]
+}
+```
+
+Run the replay check with:
+
+```bash
+crucible recheck .crucible-registry --pack replay.json --json
+```
+
+The replay pack does not decide the verdict. It only proves whether the sealed descriptor-bearing
+measurement rows can be reproduced; the verdict still follows from the stored measurement through
+`verdict_for`.
+
 ## Status
 
 crucible is at its 1.0 flagship floor: the core loop is stable, the public CLI is covered, and the
@@ -167,6 +207,9 @@ Shipped:
 - Measurement rechecks: assessment rows persist and seal `measured_at`, evidence, and optional
   `recheck` descriptors. `recheck_measurements` lets a caller provide oracle replayers that reproduce
   stored measurement inputs from those descriptors.
+- Oracle replay CLI: `crucible recheck REGISTRY [--pack FILE]` lists descriptor-bearing measurement
+  rows for a clean verifier and can validate an oracle replay pack against the sealed measurement
+  rows without creating a second verdict path.
 - The refine loop: grade each claim's measured margin, compute harmonic-mean cohesion, reflect the
   weakest claim, and re-measure across substrate rounds until the thesis is cohesively verified or the
   budget is spent honestly. The loop reports the weakest claim instead of pretending a short thesis held.
@@ -207,8 +250,8 @@ Shipped:
   the shipped command surface, and `docs/RELEASE-READINESS.md` records the 1.0 gate checklist,
   including the spec-plus-artifact-only verifier rule.
 - The `crucible` CLI: `register`, `assess`, `steelman`, `measure`,
-  `run`, `registry list|verify|stats|search|prune`, `refine`, `drift`, `report`, `batch`, `export`,
-  `verdicts [--verify]`.
+  `run`, `recheck`, `registry list|verify|stats|search|prune`, `refine`, `drift`, `report`, `batch`,
+  `export`, `verdicts [--verify]`.
 
 ## License
 

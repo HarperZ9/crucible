@@ -65,7 +65,9 @@ measurement seal; when absent, legacy rows keep the original replay shape and ar
 oracle-level replay. `recheck_measurements` is the oracle-level hook: a caller provides replay
 functions keyed by descriptor `oracle`, and crucible compares the replayed measurement inputs to the
 stored row. The shipped CLI still re-derives verdicts from stored measurements; external callers can
-now also re-run descriptor-bearing measurements.
+now also re-run descriptor-bearing measurements. `crucible recheck REGISTRY` exposes the descriptor
+plan for the latest assessment, and `--pack FILE` checks an oracle replay pack against those sealed
+measurement rows without creating a second verdict path.
 
 `render_assessment_report` turns the same sealed record into a deterministic Markdown artifact. It
 does not change the verdict contract or decide anything new; it gives an operator a readable surface

@@ -5,12 +5,12 @@ now that crucible has reached its stable flagship floor.
 
 ## Verified surface
 
-- The public CLI commands are covered: `register`, `assess`, `steelman`, `measure`, `run`, `registry`,
-  `verdicts`, `drift`, `report`, `batch`, `export`, and `refine`.
+- The public CLI commands are covered: `register`, `assess`, `steelman`, `measure`, `run`, `recheck`,
+  `registry`, `verdicts`, `drift`, `report`, `batch`, `export`, and `refine`.
 - Registry actions are covered: `list`, `verify`, `stats`, `search`, and `prune`.
 - Bundled examples run through the public CLI, including manual measurements, table measurements,
-  refinement, one-command runs with cleanroom review packets, registry stats/search, report rendering,
-  the batch manifest example, and publication-gated export.
+  refinement, one-command runs with cleanroom review packets, oracle replay pack checks, registry
+  stats/search, report rendering, the batch manifest example, and publication-gated export.
 - The offline `examples/demo.py` runs as a script and demonstrates MATCH, DRIFT, UNVERIFIABLE, and
   seal tamper detection.
 
@@ -54,7 +54,8 @@ Secret hygiene is mechanical at the release gate: no committed credentials, `.en
 runtime dependencies are empty, and subprocess-backed edges run with explicit clean environment
 allowlists instead of inheriting the parent process environment. Caller-supplied measurement evidence
 is treated as user data and is persisted only when the caller provides it; crucible does not claim to
-classify arbitrary evidence text as secret or non-secret.
+classify arbitrary evidence text as secret or non-secret. Oracle replay pack files are verifier-supplied
+measurement reproductions for sealed `recheck` descriptors, not new authority over verdict status.
 
 Run this stale-language scan before release:
 

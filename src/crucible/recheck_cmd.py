@@ -1,0 +1,130 @@
+"""CLI command for oracle-level measurement recheck descriptors."""
+from __future__ import annotations
+
+import json
+import sys
+from collections.abc import Mapping
+
+from crucible.assess import Assessment, recheck_assessment, recheck_measurements
+from crucible.registry import Registry
+
+_INPUT_ERRORS = (OSError, ValueError, KeyError, TypeError, IndexError, json.JSONDecodeError)
+
+
+def cmd_recheck(args) -> int:
+    try:
+        reg = Registry(args.dir)
+        assessment = _assessment_at(reg, int(args.index))
+        thesis = reg.get_thesis(assessment.thesis_id)
+        if thesis is None:
+            raise ValueError(f"no thesis {assessment.thesis_id!r} in registry {args.dir}")
+        plan = recheck_plan(thesis, assessment)
+        if args.pack:
+            return _emit_replay(args, thesis, assessment, plan)
+        _emit_plan(plan, args.json)
+        return 0
+    except _INPUT_ERRORS as exc:
+        print(f"recheck failed: {exc}", file=sys.stderr)
+        return 1
+
+
+def recheck_plan(thesis, assessment: Assessment) -> dict:
+    claim_text = {c.id: c.text for c in thesis.claims}
+    verdict_status = {str(v.get("claim_id", "")): v.get("status") for v in assessment.verdicts}
+    descriptors = []
+    skipped = 0
+    for row in assessment.measurements:
+        recheck = row.get("recheck")
+        if not isinstance(recheck, Mapping):
+            skipped += 1
+            continue
+        claim_id = str(row.get("claim_id", ""))
+        descriptors.append({
+            "claim_id": claim_id,
+            "claim_sha256": row.get("claim_sha256", ""),
+            "claim_text": claim_text.get(claim_id, claim_id),
+            "status": verdict_status.get(claim_id, ""),
+            "method": row.get("method", ""),
+            "oracle": recheck.get("oracle", ""),
+            "recheck": dict(recheck),
+        })
+    return {
+        "assessment": {
+            "thesis_id": assessment.thesis_id,
+            "assessment_seal": assessment.seal,
+            "measurement_seal": assessment.measurement_seal,
+        },
+        "summary": {"descriptors": len(descriptors), "skipped": skipped},
+        "descriptors": descriptors,
+    }
+
+
+def _assessment_at(reg: Registry, index: int) -> Assessment:
+    records = list(reg.assessments())
+    if not records:
+        raise ValueError("no assessments in registry")
+    return Assessment.from_dict(records[index])
+
+
+def _emit_replay(args, thesis, assessment: Assessment, plan: dict) -> int:
+    replayers = _load_replay_pack(args.pack)
+    checks = recheck_assessment(thesis, assessment)
+    replay = recheck_measurements(assessment, replayers)
+    checks["measurements_rerun"] = replay["ok"]
+    result = {"ok": all(checks.values()), "checks": checks, "replay": replay, "plan": plan}
+    if args.json:
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+    else:
+        _print_replay(result)
+    return 0 if result["ok"] else 1
+
+
+def _emit_plan(plan: dict, as_json: bool) -> None:
+    if as_json:
+        print(json.dumps(plan, indent=2, ensure_ascii=False))
+        return
+    summary = plan["summary"]
+    seal = plan["assessment"]["assessment_seal"][:12]
+    print(f"oracle recheck plan for {seal}...: {summary['descriptors']} descriptor(s), "
+          f"{summary['skipped']} skipped")
+    for row in plan["descriptors"]:
+        print(f"  {row['claim_id']:<16} {row['oracle']} {row['method']} {row['status']}")
+
+
+def _print_replay(result: dict) -> None:
+    replay = result["replay"]
+    status = "passed" if result["ok"] else "failed"
+    print(f"oracle replay {status}: checked {replay['checked']}, skipped {replay['skipped']}, "
+          f"missing {replay['missing']}, mismatched {replay['mismatched']}, failed {replay['failed']}")
+
+
+def _load_replay_pack(path: str) -> dict:
+    with open(path, encoding="utf-8") as f:
+        data = json.load(f)
+    rows = data.get("replays") if isinstance(data, dict) else None
+    if not isinstance(rows, list):
+        raise ValueError("replay pack needs a 'replays' list")
+    by_oracle: dict[str, dict[str, dict]] = {}
+    for index, row in enumerate(rows, 1):
+        if not isinstance(row, dict):
+            raise ValueError(f"replay row {index} must be an object")
+        recheck = row.get("recheck")
+        measurement = row.get("measurement")
+        if not isinstance(recheck, dict) or not isinstance(measurement, dict):
+            raise ValueError(f"replay row {index} needs object recheck and measurement")
+        oracle = recheck.get("oracle")
+        if not isinstance(oracle, str) or not oracle:
+            raise ValueError(f"replay row {index} recheck needs a non-empty oracle")
+        by_oracle.setdefault(oracle, {})[_canon(recheck)] = measurement
+    return {oracle: _pack_replayer(rows_by_key) for oracle, rows_by_key in by_oracle.items()}
+
+
+def _pack_replayer(rows_by_key: Mapping[str, dict]):
+    def replay(recheck: Mapping[str, object]) -> dict:
+        return rows_by_key[_canon(recheck)]
+
+    return replay
+
+
+def _canon(value: Mapping[str, object]) -> str:
+    return json.dumps(value, sort_keys=True, ensure_ascii=False, separators=(",", ":"))

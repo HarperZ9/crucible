@@ -20,6 +20,7 @@ from crucible.commands import (
     cmd_steelman,
 )
 from crucible.drift_cmd import cmd_drift
+from crucible.recheck_cmd import cmd_recheck
 from crucible.refine_cmd import cmd_refine
 from crucible.registry_cmd import cmd_registry, cmd_verdicts
 from crucible.report_cmd import cmd_report
@@ -39,6 +40,7 @@ def build_parser() -> argparse.ArgumentParser:
     _add_core_commands(sub)
     _add_refine_command(sub)
     _add_registry_commands(sub)
+    _add_recheck_command(sub)
     _add_artifact_commands(sub)
     return parser
 
@@ -125,6 +127,17 @@ def _add_registry_commands(sub) -> None:
                     help="re-derive each assessment's verdicts from the thesis and measurements on disk")
     vd.add_argument("--json", action="store_true", help="emit JSON instead of human text")
     vd.set_defaults(func=cmd_verdicts)
+
+
+def _add_recheck_command(sub) -> None:
+    rc = sub.add_parser("recheck", help="inspect or replay oracle-level measurement descriptors")
+    rc.add_argument("dir", help="the registry directory")
+    rc.add_argument("--index", default="-1",
+                    help="assessment index to inspect, default -1 for the latest")
+    rc.add_argument("--pack", default=None, metavar="FILE",
+                    help="JSON replay pack with reproduced measurements for descriptor-bearing rows")
+    rc.add_argument("--json", action="store_true", help="emit JSON instead of human text")
+    rc.set_defaults(func=cmd_recheck)
 
 
 def _add_artifact_commands(sub) -> None:
