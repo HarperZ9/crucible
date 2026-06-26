@@ -186,7 +186,8 @@ registry root.
 The review loop is intentionally clean. A verifier receives the original spec/readiness docs and the
 artifact under review. It does not receive the worker's context, reasoning trace, or intermediate
 steps. If success cannot be evaluated from that minimal state, the spec is not checkable yet and the
-readiness artifact needs work before release.
+readiness artifact needs work before release. For run packets, `crucible review BUNDLE` makes that
+rule executable: extra context files fail the packet before any verifier judgment begins.
 
 ## Determinism and the zero-dependency core
 

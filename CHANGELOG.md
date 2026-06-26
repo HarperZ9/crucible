@@ -17,6 +17,8 @@ Operator run surface.
   `spec.json`, `run.json`, `report.md`, and `review.md`, refusing pre-existing packet directories.
 - Bundle run records carry a machine-readable verifier boundary: cleanroom mode, allowed packet
   inputs, excluded worker context, and the checkability rule for underspecified specs.
+- CLI: `crucible review BUNDLE` validates the cleanroom packet before verifier handoff, including
+  required files, absence of extra context, verifier boundary metadata, and spec/run agreement.
 - CLI: `crucible recheck REGISTRY [--template FILE] [--pack FILE]` lists descriptor-bearing
   measurement rows, writes replay pack templates, and validates finished oracle replay packs without
   creating a second verdict path.

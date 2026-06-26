@@ -24,6 +24,7 @@ from crucible.recheck_cmd import cmd_recheck
 from crucible.refine_cmd import cmd_refine
 from crucible.registry_cmd import cmd_registry, cmd_verdicts
 from crucible.report_cmd import cmd_report
+from crucible.review_cmd import cmd_review
 from crucible.run_cmd import cmd_run
 
 
@@ -41,6 +42,7 @@ def build_parser() -> argparse.ArgumentParser:
     _add_refine_command(sub)
     _add_registry_commands(sub)
     _add_recheck_command(sub)
+    _add_review_command(sub)
     _add_artifact_commands(sub)
     return parser
 
@@ -141,6 +143,12 @@ def _add_recheck_command(sub) -> None:
     rc.add_argument("--json", action="store_true", help="emit JSON instead of human text")
     rc.set_defaults(func=cmd_recheck)
 
+
+def _add_review_command(sub) -> None:
+    rev = sub.add_parser("review", help="validate a cleanroom review bundle before verifier handoff")
+    rev.add_argument("bundle", help="bundle directory created by crucible run --bundle")
+    rev.add_argument("--json", action="store_true", help="emit JSON instead of human text")
+    rev.set_defaults(func=cmd_review)
 
 def _add_artifact_commands(sub) -> None:
     rpt = sub.add_parser("report", help="render a Markdown report for a witnessed assessment")

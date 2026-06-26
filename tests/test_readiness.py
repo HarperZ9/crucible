@@ -116,7 +116,7 @@ def test_cli_help_advertises_shipped_command_surface(capsys):
         main(["--help"])
     assert root_help.value.code == 0
     root = capsys.readouterr().out
-    for command in ("register", "assess", "steelman", "measure", "run", "recheck", "registry",
+    for command in ("register", "assess", "steelman", "measure", "run", "recheck", "review", "registry",
                     "report", "batch", "verdicts", "drift", "export", "refine"):
         assert command in root
 
@@ -160,3 +160,4 @@ def test_release_docs_define_cleanroom_checkability_rules():
     assert "spec.json" in readiness and "review.md" in readiness
     assert "oracle replay pack" in normalized_readiness
     assert "replay pack template" in normalized_readiness
+    assert "crucible review" in normalized_readiness

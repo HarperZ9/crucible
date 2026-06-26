@@ -36,8 +36,9 @@ and the witnessed verdicts track which moved.
 reports, publication-gated export, registry operations, optional subprocess-backed seam adapters,
 Telos witnessed-artifact interop, Gather/index protocol interop, measurement recheck descriptors,
 batch assessment/report bundles, and clean verifier practice. The 1.1.0 branch adds operator run and
-oracle recheck commands over that spine. You register a thesis, steelman it (adversaries propose the
-test), measure each claim against a substrate oracle, refine across substrate rounds toward a
+oracle recheck and cleanroom review commands over that spine. You register a thesis, steelman it
+(adversaries propose the test), measure each claim against a substrate oracle, refine across substrate
+rounds toward a
 cohesively verified thesis, witness a re-derivable verdict per claim,
 compare assessment rounds to see what held, moved, improved, or regressed, inspect a growing registry
 by status, scope, and latest verified verdict, plug configured oracle commands into the steelman and
@@ -67,7 +68,8 @@ that cannot be measured is never read as holding.
 - **A clean verifier boundary.** A verifier gets the original spec and the artifact. It does not need
   the worker's context, reasoning trace, or intermediate steps. If success cannot be evaluated from
   that minimal state, the spec is not checkable yet. `crucible run --bundle` makes that boundary
-  concrete with a packet-level review note.
+  concrete with a packet-level review note, and `crucible review BUNDLE` validates the packet before
+  handoff.
 - **Stands alone, serves the constellation.** crucible runs on its own with zero third-party
   dependencies and Null seams, and it composes with the other Telos organs (Gather's evidence,
   index's maps) as a peer through clean protocol contracts. Compose, do not absorb.
@@ -135,6 +137,16 @@ derived verdict rows, disk recheck status, and verifier packet paths. `--bundle 
 `DIR/spec.json`, `DIR/run.json`, `DIR/report.md`, and `DIR/review.md` with exclusive writes. The
 packet gives a verifier only the original spec and artifact. Use `--substrate` instead of
 `--measurements` to run through the table oracle in the same session shape.
+
+Before handing the packet to a verifier, validate the cleanroom boundary:
+
+```bash
+crucible review reports/binary-search-run --json
+```
+
+The review check fails closed if the bundle is missing required files, carries extra context such as
+notes or chat logs, omits the cleanroom verifier boundary, or has a `spec.json` that no longer
+matches the run record.
 
 ## Oracle recheck packs
 
@@ -235,6 +247,9 @@ Shipped:
   the null steelman, measurement, witnessed assessment, disk recheck, and optional Markdown/JSON
   artifact writes as one scannable session. `--bundle DIR` writes `spec.json`, `run.json`,
   `report.md`, and `review.md` as a self-contained cleanroom review packet.
+- Cleanroom bundle review: `crucible review BUNDLE` validates that a review packet contains only
+  the allowed spec/artifact files, carries the verifier boundary, and has matching `spec.json` and
+  run-record thesis metadata before verifier handoff.
 - Publication-gated export: `gate_check`, `export_guard`, `export_thesis`, and
   `crucible export THESIS` refuse fenced material and explicit restricted markers before emitting a
   public thesis contract.
@@ -258,8 +273,8 @@ Shipped:
   the shipped command surface, and `docs/RELEASE-READINESS.md` records the 1.0 gate checklist,
   including the spec-plus-artifact-only verifier rule.
 - The `crucible` CLI: `register`, `assess`, `steelman`, `measure`,
-  `run`, `recheck`, `registry list|verify|stats|search|prune`, `refine`, `drift`, `report`, `batch`,
-  `export`, `verdicts [--verify]`.
+  `run`, `recheck`, `review`, `registry list|verify|stats|search|prune`, `refine`, `drift`,
+  `report`, `batch`, `export`, `verdicts [--verify]`.
 
 ## License
 

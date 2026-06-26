@@ -92,6 +92,46 @@ def test_run_bundle_writes_self_contained_review_packet(tmp_path, capsys):
     assert json.loads((bundle / "run.json").read_text(encoding="utf-8"))["bundle"] == str(bundle)
 
 
+def test_review_validates_cleanroom_bundle_contract(tmp_path, capsys):
+    bundle = tmp_path / "packet"
+    reg = str(tmp_path / "reg")
+
+    assert main(["run", _thesis_file(tmp_path), "--measurements", _measurements_file(tmp_path),
+                 "--registry", reg, "--bundle", str(bundle), "--json"]) == 0
+    capsys.readouterr()
+
+    assert main(["review", str(bundle), "--json"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+
+    assert payload["ok"] is True
+    assert payload["checks"] == {
+        "required_files": True,
+        "no_extra_context": True,
+        "verifier_boundary": True,
+        "spec_matches_run": True,
+    }
+    assert payload["allowed_inputs"] == ["spec.json", "run.json", "report.md"]
+    assert payload["excluded"] == ["worker context", "reasoning trace", "intermediate steps"]
+    assert payload["findings"] == []
+
+
+def test_review_fails_closed_on_extra_context_files(tmp_path, capsys):
+    bundle = tmp_path / "packet"
+    reg = str(tmp_path / "reg")
+
+    assert main(["run", _thesis_file(tmp_path), "--measurements", _measurements_file(tmp_path),
+                 "--registry", reg, "--bundle", str(bundle), "--json"]) == 0
+    capsys.readouterr()
+    (bundle / "notes.md").write_text("worker chat and hidden reasoning", encoding="utf-8")
+
+    assert main(["review", str(bundle), "--json"]) == 1
+    payload = json.loads(capsys.readouterr().out)
+
+    assert payload["ok"] is False
+    assert payload["checks"]["no_extra_context"] is False
+    assert any("notes.md" in finding for finding in payload["findings"])
+
+
 def test_run_human_output_with_substrate_is_scannable(tmp_path, capsys):
     reg = str(tmp_path / "reg")
 
