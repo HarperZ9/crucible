@@ -3,6 +3,17 @@
 All notable changes to crucible. Versions follow semantic versioning; each minor release is built
 behind a feature branch and reviewed before merge.
 
+## 1.1.0
+
+Operator run surface.
+
+- CLI: `crucible run THESIS --registry DIR (--measurements FILE | --substrate FILE)` runs the
+  steelman, measurement, witnessed assessment, and disk recheck path as one session.
+- `crucible run --json` emits a complete run record with thesis metadata, refutations, assessment,
+  verdicts, disk recheck status, and optional report path.
+- `crucible run --report FILE` writes the deterministic Markdown assessment report for the same
+  witnessed assessment, while `--out FILE` writes the JSON run record with exclusive creation.
+
 ## 1.0.0
 
 Stable flagship floor.

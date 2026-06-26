@@ -23,6 +23,7 @@ from crucible.drift_cmd import cmd_drift
 from crucible.refine_cmd import cmd_refine
 from crucible.registry_cmd import cmd_registry, cmd_verdicts
 from crucible.report_cmd import cmd_report
+from crucible.run_cmd import cmd_run
 
 
 def _add_common(p: argparse.ArgumentParser) -> None:
@@ -75,6 +76,21 @@ def _add_core_commands(sub) -> None:
                      help="path to a substrate JSON: per-claim specs (predicted, tolerance, observe) plus observed values")
     _add_common(mea)
     mea.set_defaults(func=cmd_measure)
+
+    run = sub.add_parser("run", help="run a complete steelman, measurement, witnessed assessment, and optional report")
+    run.add_argument("thesis", help="path to a thesis JSON, or a thesis id when --registry is given")
+    run.add_argument("--measurements", default=None, metavar="FILE",
+                     help="path to a measurements JSON; exclusive with --substrate")
+    run.add_argument("--substrate", default=None, metavar="FILE",
+                     help="path to a substrate JSON; exclusive with --measurements")
+    run.add_argument("--registry", default=None, metavar="DIR",
+                     help="record and re-check the witnessed assessment in registry DIR")
+    run.add_argument("--report", default=None, metavar="FILE",
+                     help="write a Markdown report for this run")
+    run.add_argument("--out", default=None, metavar="FILE",
+                     help="write the JSON run record to FILE")
+    run.add_argument("--json", action="store_true", help="emit JSON instead of human text")
+    run.set_defaults(func=cmd_run)
 
 
 def _add_refine_command(sub) -> None:

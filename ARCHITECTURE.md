@@ -78,6 +78,12 @@ records each assessment into one registry and can write one Markdown report per 
 coordinates throughput while leaving claim receipts, measurements, verdicts, assessment seals, and
 report rendering unchanged.
 
+`crucible run` is the single-thesis operator surface over the same path. It runs the null steelman,
+loads either explicit measurements or a table substrate, records the witnessed assessment, reloads the
+latest registry record for a disk recheck, and can write both the Markdown report and a JSON run
+record. It does not introduce a second source of truth: the assessment and verdict rows remain the
+authority, and the run record is the session envelope around them.
+
 ## The seams (the impure and the optional)
 
 crucible's core is pure standard library. Optional edges live behind a Protocol seam with a Null

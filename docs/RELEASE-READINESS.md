@@ -5,11 +5,11 @@ now that crucible has reached its stable flagship floor.
 
 ## Verified surface
 
-- The public CLI commands are covered: `register`, `assess`, `steelman`, `measure`, `registry`,
+- The public CLI commands are covered: `register`, `assess`, `steelman`, `measure`, `run`, `registry`,
   `verdicts`, `drift`, `report`, `batch`, `export`, and `refine`.
 - Registry actions are covered: `list`, `verify`, `stats`, `search`, and `prune`.
 - Bundled examples run through the public CLI, including manual measurements, table measurements,
-  refinement, registry stats/search, report rendering, the batch manifest example, and
+  refinement, one-command runs, registry stats/search, report rendering, the batch manifest example, and
   publication-gated export.
 - The offline `examples/demo.py` runs as a script and demonstrates MATCH, DRIFT, UNVERIFIABLE, and
   seal tamper detection.

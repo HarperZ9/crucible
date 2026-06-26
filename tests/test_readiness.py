@@ -37,6 +37,9 @@ def test_example_assess_registry_search_and_report(tmp_path, capsys):
     thesis = _example("thesis-binary-search.json")
     measurements = _example("measurements-binary-search.json")
     reg = str(tmp_path / "reg")
+    run_reg = str(tmp_path / "run-reg")
+    run_report = str(tmp_path / "run-report.md")
+    run_record = tmp_path / "run.json"
 
     assert main(["register", thesis, "--registry", reg, "--json"]) == 0
     registered = _json_out(capsys)
@@ -62,6 +65,13 @@ def test_example_assess_registry_search_and_report(tmp_path, capsys):
     report = capsys.readouterr().out
     assert report.startswith("# crucible report: Binary search comparison bounds")
     assert "## Verdicts" in report
+
+    assert main(["run", thesis, "--measurements", measurements, "--registry", run_reg,
+                 "--report", run_report, "--out", str(run_record), "--json"]) == 0
+    run = _json_out(capsys)
+    assert run["ok"] is True
+    assert run["report"] == run_report
+    assert json.loads(run_record.read_text(encoding="utf-8"))["assessment"]["match"] == 1
 
 
 def test_example_measure_and_refine_through_public_cli(capsys):
@@ -103,7 +113,7 @@ def test_cli_help_advertises_shipped_command_surface(capsys):
         main(["--help"])
     assert root_help.value.code == 0
     root = capsys.readouterr().out
-    for command in ("register", "assess", "steelman", "measure", "registry", "report", "batch",
+    for command in ("register", "assess", "steelman", "measure", "run", "registry", "report", "batch",
                     "verdicts", "drift", "export", "refine"):
         assert command in root
 

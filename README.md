@@ -32,19 +32,21 @@ from the record, so a confident assertion has no effect on the rechecked result.
 The continuous part is the loop: substrates, measurements, and theses all improve across rounds,
 and the witnessed verdicts track which moved.
 
-1.0.0 flagship surface: the full first loop plus drift tracking, Markdown assessment reports,
-publication-gated export, registry operations, optional subprocess-backed seam adapters,
+1.0.0 delivered the flagship floor: the full first loop plus drift tracking, Markdown assessment
+reports, publication-gated export, registry operations, optional subprocess-backed seam adapters,
 Telos witnessed-artifact interop, Gather/index protocol interop, measurement recheck descriptors,
-batch assessment/report bundles, and clean verifier practice. You register a thesis, steelman it
-(adversaries propose the test), measure each claim against a substrate oracle, refine across
+batch assessment/report bundles, and clean verifier practice. The 1.1.0 branch adds an operator run
+command over that spine. You register a thesis, steelman it (adversaries propose the test), measure
+each claim against a substrate oracle, refine across
 substrate rounds toward a cohesively verified thesis, witness a re-derivable verdict per claim,
 compare assessment rounds to see what held, moved, improved, or regressed, inspect a growing registry
 by status, scope, and latest verified verdict, plug configured oracle commands into the steelman and
 measure seams, consume `telos.witnessed-artifact/v1` envelopes by re-running their named verifiers,
 use sealed Gather digests as evidence, replay index verification records against supplied graph
 packs, persist optional measurement replay descriptors for oracle-level checks, run a manifest of
-thesis jobs into one registry, and render witnessed assessments as readable Markdown reports. A
-fenced thesis can be assessed locally, but the export edge refuses it by default.
+thesis jobs into one registry, render witnessed assessments as readable Markdown reports, or run the
+whole steelman -> measure -> assess -> recheck path as one session artifact. A fenced thesis can be
+assessed locally, but the export edge refuses it by default.
 
 ## The differentiator (do not lose this)
 
@@ -114,6 +116,24 @@ A job names a thesis plus exactly one measurement source:
 }
 ```
 
+## One-command runs
+
+For an operator session, `run` ties the loop together and records the witnessed assessment into a
+registry before reporting the disk recheck:
+
+```bash
+crucible run examples/thesis-binary-search.json \
+  --measurements examples/measurements-binary-search.json \
+  --registry .crucible-registry \
+  --report reports/binary-search.md \
+  --out reports/binary-search-run.json \
+  --json
+```
+
+The JSON run record includes thesis metadata, steelman refutations, the witnessed assessment, the
+derived verdict rows, disk recheck status, and the optional Markdown report path. Use `--substrate`
+instead of `--measurements` to run through the table oracle in the same session shape.
+
 ## Status
 
 crucible is at its 1.0 flagship floor: the core loop is stable, the public CLI is covered, and the
@@ -158,6 +178,9 @@ Shipped:
   thesis jobs, records each assessment into one registry, and optionally writes one Markdown report
   per job. Manifest paths stay inside the manifest bundle, path-like missing refs fail closed, and
   reports use unique index-prefixed names with exclusive writes.
+- Operator runs: `crucible run THESIS --registry DIR (--measurements FILE | --substrate FILE)` runs
+  the null steelman, measurement, witnessed assessment, disk recheck, and optional Markdown/JSON
+  artifact writes as one scannable session.
 - Publication-gated export: `gate_check`, `export_guard`, `export_thesis`, and
   `crucible export THESIS` refuse fenced material and explicit restricted markers before emitting a
   public thesis contract.
@@ -181,7 +204,7 @@ Shipped:
   the shipped command surface, and `docs/RELEASE-READINESS.md` records the 1.0 gate checklist,
   including the spec-plus-artifact-only verifier rule.
 - The `crucible` CLI: `register`, `assess`, `steelman`, `measure`,
-  `registry list|verify|stats|search|prune`, `refine`, `drift`, `report`, `batch`, `export`,
+  `run`, `registry list|verify|stats|search|prune`, `refine`, `drift`, `report`, `batch`, `export`,
   `verdicts [--verify]`.
 
 ## License
