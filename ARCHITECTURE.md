@@ -87,6 +87,16 @@ strings so arguments are not re-parsed by a shell. A child process may propose a
 deviation, but crucible stamps the claim identity, claim hash, and producer name locally. The verdict
 still follows from `verdict_for`; a subprocess cannot assert MATCH.
 
+## Telos artifact interop
+
+`TelosMeasure` consumes the Telos engine's `telos.witnessed-artifact/v1` protocol without importing
+Telos. The artifact carries a compact certificate and a `recheck` descriptor naming a verifier. A
+caller supplies a verifier registry; crucible re-runs the named verifier, compares the reproduced
+verdict to the carried verdict, and turns that live result into a normal Measurement. Reproduced
+`verified` becomes a MATCH input, reproduced `refuted` or a drifted carried verdict becomes a DRIFT
+input, and a missing/unregistered/unverifiable proof becomes an UNVERIFIABLE input. That keeps the
+interop on the same spine: trust the proof, not the emitter.
+
 ## Drift tracking
 
 The continuous loop needs an honest account of what changed between rounds. `drift_track(previous,
