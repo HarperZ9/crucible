@@ -3,6 +3,15 @@
 All notable changes to crucible. Versions follow semantic versioning; each minor release is built
 behind a feature branch and reviewed before merge.
 
+## Unreleased
+
+Presentation and operator-surface housekeeping for Project Telos parity.
+
+- README: brings Crucible up to the shared five-flagship presentation shape with title-case product naming, current CI badge, consistent navigation, and a current-status block.
+- Status copy: updates the visible status from the old 1.0 flagship floor to the 1.1 operator floor.
+- Status payload: exposes current operator commands, MCP tool names, and the 1.1 operator-floor summary under `native`.
+- MCP tools: records native availability for `crucible.status`, `crucible.doctor`, `crucible.assess`, and `crucible.recheck`.
+
 ## 1.1.0
 
 Operator run surface.

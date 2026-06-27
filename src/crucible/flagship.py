@@ -33,8 +33,19 @@ def _next(tool: str, action: str, reason: str) -> dict:
 def status_payload() -> dict:
     return envelope(
         "status",
-        native={"role": "verification-pressure", "verdicts": ["MATCH", "DRIFT", "UNVERIFIABLE"]},
-        next_actions=[_next("telos", "reconcile", "carry verified claims into the shared room")],
+        native={
+            "role": "verification-pressure",
+            "verdicts": ["MATCH", "DRIFT", "UNVERIFIABLE"],
+            "operator_commands": ["status", "doctor", "demo", "mcp"],
+            "mcp_tools": [
+                "crucible.status",
+                "crucible.doctor",
+                "crucible.assess",
+                "crucible.recheck",
+            ],
+            "current_status": "1.1.0 operator floor with run, review, recheck, and MCP parity",
+        },
+        next_actions=[_next("telos", "workflow", "carry verified claims into the shared room")],
     )
 
 
@@ -60,7 +71,7 @@ def demo_payload() -> dict:
                 "--measurements examples/measurements-binary-search.json --json"
             )
         },
-        next_actions=[_next("forum", "ledger", "record verification handoff")],
+        next_actions=[_next("forum", "ledger.summary", "record verification handoff")],
     )
 
 

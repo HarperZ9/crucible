@@ -1,14 +1,16 @@
 <p align="center">
-  <img src="docs/brand/crucible-hero.svg" alt="crucible, a Project Telos flagship for measurement-backed claim evaluation">
+  <img src="docs/brand/crucible-hero.svg" alt="Crucible, a Project Telos flagship for measurement-backed claim evaluation">
 </p>
 <!-- Project mark: docs/brand/crucible-mark.svg -->
 
-# crucible
+# Crucible
 
 > Turn claims into verdicts grounded in measurement.
 
-[Project Telos](https://harperz9.github.io) | [gather](https://github.com/HarperZ9/gather) | [index](https://github.com/HarperZ9/index) | [forum](https://github.com/HarperZ9/forum) | [crucible](https://github.com/HarperZ9/crucible) | [telos](https://github.com/HarperZ9/telos)
+[Project Telos](https://harperz9.github.io) | [Gather](https://github.com/HarperZ9/gather) | [Crucible](https://github.com/HarperZ9/crucible) | [Index](https://github.com/HarperZ9/index) | [Forum](https://github.com/HarperZ9/forum) | [Telos](https://github.com/HarperZ9/telos)
 
+[![CI](https://github.com/HarperZ9/crucible/actions/workflows/ci.yml/badge.svg)](https://github.com/HarperZ9/crucible/actions/workflows/ci.yml)
+![version: 1.1](https://img.shields.io/badge/version-1.1-informational.svg)
 ![python: 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)
 ![deps: none (core)](https://img.shields.io/badge/core%20deps-none-success.svg)
 ![license: fair-source](https://img.shields.io/badge/license-fair--source-blue.svg)
@@ -29,6 +31,12 @@ Claims are cheap until a decision depends on them. crucible makes a thesis stand
 ## Work with it
 
 Use it on a claim that needs to survive review, sponsor a domain oracle, or fund the cleanroom review path for harder evaluations.
+
+## Current status
+
+- **Release:** `crucible-bench 1.1.0`; command `crucible`; Python 3.11+; zero third-party runtime dependencies in core.
+- **Operator surface:** `crucible status --json`, `crucible doctor --json`, `crucible demo --json`, and `crucible mcp` expose the Project Telos action envelope and native MCP tools: `crucible.status`, `crucible.doctor`, `crucible.assess`, and `crucible.recheck`.
+- **Current floor:** 1.1.0 is the operator floor: one-command runs, cleanroom review packets, oracle replay templates, registry rechecks, and the native MCP bridge over the measurement -> verdict spine.
 
 ## What it does
 
@@ -233,10 +241,10 @@ stored measurement through `verdict_for`.
 
 ## Status
 
-crucible is at its 1.0 flagship floor: the core loop is stable, the public CLI is covered, and the
-release branch passes tests, lint, type checks, build checks, and minimal-context review before
-merge. Development continues by adding sharper substrates and oracle edges without weakening the
-measurement -> verdict spine.
+Crucible is at its 1.1 operator floor: the core loop is stable, the public CLI is covered, and the
+release branch has the one-command run, cleanroom review, oracle replay, registry recheck, and native
+MCP surfaces needed by the Project Telos five-flagship room. Development continues by adding sharper
+substrates and oracle edges without weakening the measurement -> verdict spine.
 
 Shipped:
 
