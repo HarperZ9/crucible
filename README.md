@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/brand/crucible-hero.svg" alt="Crucible, a Project Telos flagship for measurement-backed claim evaluation">
+  <img src="docs/brand/crucible-hero.png" alt="Crucible, a Project Telos flagship for measurement-backed claim evaluation">
 </p>
 <!-- Project mark: docs/brand/crucible-mark.svg -->
 

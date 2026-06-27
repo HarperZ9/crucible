@@ -18,7 +18,7 @@ def test_flagship_brand_assets_exist_and_are_referenced():
     readme = (root / "README.md").read_text(encoding="utf-8")
     for rel in [
         "docs/brand/crucible-mark.svg",
-        "docs/brand/crucible-hero.svg",
+        "docs/brand/crucible-hero.png",
         "examples/crucible-demo.html",
     ]:
         assert (root / rel).exists(), rel
