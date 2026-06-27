@@ -7,7 +7,12 @@ from typing import Any
 
 from crucible import __version__
 from crucible.assess import assess
-from crucible.commands import _load_measurements, _read_json, _thesis_from_data, _verdict_dict
+from crucible.commands import (
+    _load_measurements,
+    _read_json,
+    _thesis_from_data,
+    _verdict_dict,
+)
 from crucible.flagship import doctor_payload, status_payload
 from crucible.recheck_cmd import recheck_payload
 

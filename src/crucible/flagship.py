@@ -6,6 +6,18 @@ from crucible import __version__
 
 SCHEMA = "project-telos.flagship-action/v1"
 TOOL = "crucible"
+PRIMARY_COMMANDS = [
+    "register",
+    "steelman",
+    "measure",
+    "assess",
+    "run",
+    "recheck",
+    "review",
+    "registry",
+    "report",
+    "drift",
+]
 
 
 def envelope(command: str, *, status: str = "MATCH", native: dict | None = None,
@@ -35,6 +47,7 @@ def status_payload() -> dict:
         "status",
         native={
             "role": "verification-pressure",
+            "commands": PRIMARY_COMMANDS,
             "verdicts": ["MATCH", "DRIFT", "UNVERIFIABLE"],
             "operator_commands": ["status", "doctor", "demo", "mcp"],
             "mcp_tools": [
@@ -43,6 +56,18 @@ def status_payload() -> dict:
                 "crucible.assess",
                 "crucible.recheck",
             ],
+            "integration_surfaces": [
+                "CLI",
+                "MCP stdio",
+                "Telos catalog",
+                "cleanroom review bundles",
+                "Gather/Index/Forum handoff",
+            ],
+            "presentation": {
+                "readme": "current",
+                "changelog": "current",
+                "status_block": "1.1.0 operator floor",
+            },
             "current_status": "1.1.0 operator floor with run, review, recheck, and MCP parity",
         },
         next_actions=[_next("telos", "workflow", "carry verified claims into the shared room")],

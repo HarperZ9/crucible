@@ -9,6 +9,9 @@ def test_status_json_is_action_envelope(capsys):
     assert payload["schema"] == "project-telos.flagship-action/v1"
     assert payload["tool"] == "crucible"
     assert payload["native"]["role"] == "verification-pressure"
+    assert payload["native"]["commands"][:4] == ["register", "steelman", "measure", "assess"]
+    assert payload["native"]["presentation"]["readme"] == "current"
+    assert "MCP stdio" in payload["native"]["integration_surfaces"]
     assert "crucible.recheck" in payload["native"]["mcp_tools"]
 
 
