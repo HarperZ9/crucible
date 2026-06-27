@@ -21,6 +21,7 @@ from crucible.commands import (
 )
 from crucible.drift_cmd import cmd_drift
 from crucible.flagship import cmd_demo, cmd_doctor, cmd_status
+from crucible.mcp import serve as serve_mcp
 from crucible.recheck_cmd import cmd_recheck
 from crucible.refine_cmd import cmd_refine
 from crucible.registry_cmd import cmd_registry, cmd_verdicts
@@ -60,6 +61,8 @@ def build_parser() -> argparse.ArgumentParser:
     _add_recheck_command(sub)
     _add_review_command(sub)
     _add_artifact_commands(sub)
+    mcp = sub.add_parser("mcp", help="serve Crucible tools over MCP stdio")
+    mcp.set_defaults(func=lambda _args: serve_mcp())
     return parser
 
 
