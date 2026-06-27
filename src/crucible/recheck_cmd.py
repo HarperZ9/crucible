@@ -13,25 +13,40 @@ _INPUT_ERRORS = (OSError, ValueError, KeyError, TypeError, IndexError, json.JSON
 
 def cmd_recheck(args) -> int:
     try:
-        reg = Registry(args.dir)
-        assessment = _assessment_at(reg, int(args.index))
-        thesis = reg.get_thesis(assessment.thesis_id)
-        if thesis is None:
-            raise ValueError(f"no thesis {assessment.thesis_id!r} in registry {args.dir}")
-        plan = recheck_plan(thesis, assessment)
         if args.pack and args.template:
             raise ValueError("--template cannot be combined with --pack")
+        payload = recheck_payload(args.dir, index=int(args.index), pack=args.pack)
         if args.template:
-            _write_template(args.template, plan)
+            _write_template(args.template, payload)
             print(f"wrote replay template to {args.template}")
             return 0
         if args.pack:
-            return _emit_replay(args, thesis, assessment, plan)
-        _emit_plan(plan, args.json)
+            if args.json:
+                print(json.dumps(payload, indent=2, ensure_ascii=False))
+            else:
+                _print_replay(payload)
+            return 0 if payload["ok"] else 1
+        _emit_plan(payload, args.json)
         return 0
     except _INPUT_ERRORS as exc:
         print(f"recheck failed: {exc}", file=sys.stderr)
         return 1
+
+
+def recheck_payload(registry_dir: str, *, index: int = -1, pack: str | None = None) -> dict:
+    reg = Registry(registry_dir)
+    assessment = _assessment_at(reg, int(index))
+    thesis = reg.get_thesis(assessment.thesis_id)
+    if thesis is None:
+        raise ValueError(f"no thesis {assessment.thesis_id!r} in registry {registry_dir}")
+    plan = recheck_plan(thesis, assessment)
+    if pack is None:
+        return plan
+    replayers = _load_replay_pack(pack, plan["assessment"])
+    checks = recheck_assessment(thesis, assessment)
+    replay = recheck_measurements(assessment, replayers)
+    checks["measurements_rerun"] = replay["ok"]
+    return {"ok": all(checks.values()), "checks": checks, "replay": replay, "plan": plan}
 
 
 def recheck_plan(thesis, assessment: Assessment) -> dict:
@@ -132,17 +147,6 @@ def _evidence(value: object) -> list:
     return [] if value in (None, "") else [value]
 
 
-def _emit_replay(args, thesis, assessment: Assessment, plan: dict) -> int:
-    replayers = _load_replay_pack(args.pack, plan["assessment"])
-    checks = recheck_assessment(thesis, assessment)
-    replay = recheck_measurements(assessment, replayers)
-    checks["measurements_rerun"] = replay["ok"]
-    result = {"ok": all(checks.values()), "checks": checks, "replay": replay, "plan": plan}
-    if args.json:
-        print(json.dumps(result, indent=2, ensure_ascii=False))
-    else:
-        _print_replay(result)
-    return 0 if result["ok"] else 1
 
 
 def _emit_plan(plan: dict, as_json: bool) -> None:

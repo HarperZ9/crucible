@@ -9,6 +9,7 @@ from crucible import __version__
 from crucible.assess import assess
 from crucible.commands import _load_measurements, _read_json, _thesis_from_data, _verdict_dict
 from crucible.flagship import doctor_payload, status_payload
+from crucible.recheck_cmd import recheck_payload
 
 MCP_PROTOCOL_VERSION = "2025-06-18"
 
@@ -52,6 +53,25 @@ def _tool_defs() -> list[dict]:
                 "required": ["thesis"],
             },
         },
+        {
+            "name": "crucible.recheck",
+            "description": "Inspect or replay oracle-level measurement descriptors from a Crucible registry.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "dir": {"type": "string", "description": "path to a Crucible registry directory"},
+                    "index": {
+                        "type": ["integer", "string"],
+                        "description": "assessment index to inspect, default -1 for the latest",
+                    },
+                    "pack": {
+                        "type": "string",
+                        "description": "optional JSON replay pack with reproduced measurements",
+                    },
+                },
+                "required": ["dir"],
+            },
+        },
     ]
 
 
@@ -78,6 +98,19 @@ def call_tool(name: str, args: dict) -> str:
         if measurements is not None and not isinstance(measurements, str):
             raise ValueError("measurements must be a path string when provided")
         return json.dumps(_assess_from_files(thesis, measurements), indent=2, ensure_ascii=False)
+    if name == "crucible.recheck":
+        registry_dir = args.get("dir")
+        if not isinstance(registry_dir, str) or not registry_dir:
+            raise ValueError("crucible.recheck requires a non-empty registry dir")
+        index_value = args.get("index", -1)
+        try:
+            index = int(index_value)
+        except (TypeError, ValueError) as exc:
+            raise ValueError("index must be an integer") from exc
+        pack = args.get("pack")
+        if pack is not None and not isinstance(pack, str):
+            raise ValueError("pack must be a path string when provided")
+        return json.dumps(recheck_payload(registry_dir, index=index, pack=pack), indent=2, ensure_ascii=False)
     raise ValueError(f"unknown tool: {name}")
 
 
