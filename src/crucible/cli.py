@@ -20,6 +20,7 @@ from crucible.commands import (
     cmd_steelman,
 )
 from crucible.drift_cmd import cmd_drift
+from crucible.flagship import cmd_demo, cmd_doctor, cmd_status
 from crucible.recheck_cmd import cmd_recheck
 from crucible.refine_cmd import cmd_refine
 from crucible.registry_cmd import cmd_registry, cmd_verdicts
@@ -34,10 +35,25 @@ def _add_common(p: argparse.ArgumentParser) -> None:
     p.add_argument("--json", action="store_true", help="emit JSON instead of human text")
 
 
+def _add_flagship_commands(sub) -> None:
+    status = sub.add_parser("status", help="emit Crucible's Project Telos operator-spine status")
+    status.add_argument("--json", action="store_true", help="emit a Project Telos action envelope")
+    status.set_defaults(func=cmd_status)
+
+    doctor = sub.add_parser("doctor", help="check Crucible's operator-spine readiness")
+    doctor.add_argument("--json", action="store_true", help="emit a Project Telos action envelope")
+    doctor.set_defaults(func=cmd_doctor)
+
+    demo = sub.add_parser("demo", help="show Crucible's operator-spine demo command")
+    demo.add_argument("--json", action="store_true", help="emit a Project Telos action envelope")
+    demo.set_defaults(func=cmd_demo)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="crucible", description="crucible: accountable judgment of ideas.")
     parser.add_argument("--version", action="version", version=f"crucible {__version__}")
     sub = parser.add_subparsers(dest="command")
+    _add_flagship_commands(sub)
     _add_core_commands(sub)
     _add_refine_command(sub)
     _add_registry_commands(sub)
