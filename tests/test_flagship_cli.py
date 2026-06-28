@@ -13,6 +13,12 @@ def test_status_json_is_action_envelope(capsys):
     assert payload["native"]["presentation"]["readme"] == "current"
     assert "MCP stdio" in payload["native"]["integration_surfaces"]
     assert "crucible.recheck" in payload["native"]["mcp_tools"]
+    contracts = payload["native"]["telos_contracts"]
+    assert contracts["host_surfaces"] == ["CLI JSON", "MCP stdio", "plugins", "IDEs", "TUIs", "apps"]
+    assert "project-telos.action-receipt/v1" in contracts["schemas"]
+    assert "creative" in contracts["workflow_domains"]
+    assert "scientific" in contracts["workflow_domains"]
+    assert "re-checkable verdicts" in contracts["second_brain_role"]
 
 
 def test_doctor_human_prints_next_action(capsys):

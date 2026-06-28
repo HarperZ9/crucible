@@ -8,6 +8,7 @@ behind a feature branch and reviewed before merge.
 - MCP parity: expands the stdio MCP server beyond status/doctor/assess/recheck to host-call the run, review, report, batch, registry, drift, refine, and verdicts workflows through the existing CLI contract.
 
 - Enterprise readiness: adds `docs/ENTERPRISE-READINESS.md` for context envelopes, action receipts, readability gates, and host-neutral operation.
+- Operator surface: the status payload now advertises shared Project Telos CLI/MCP/plugin/IDE/TUI/app contracts for enterprise, research, creative, scientific, and education workflows.
 
 Presentation and operator-surface housekeeping for Project Telos parity.
 

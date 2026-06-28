@@ -18,6 +18,17 @@ PRIMARY_COMMANDS = [
     "report",
     "drift",
 ]
+TELOS_CONTRACTS = {
+    "host_surfaces": ["CLI JSON", "MCP stdio", "plugins", "IDEs", "TUIs", "apps"],
+    "schemas": [
+        "project-telos.flagship-action/v1",
+        "project-telos.context-envelope/v1",
+        "project-telos.action-receipt/v1",
+    ],
+    "workflow_domains": ["enterprise", "research", "creative", "scientific", "education"],
+    "second_brain_role": "turn claims, creative outputs, measurements, and agent actions into re-checkable verdicts",
+    "privacy_boundary": "hosts receive receipts, hashes, redacted refs, and verdicts; raw private payloads stay in local adapters",
+}
 
 
 def envelope(command: str, *, status: str = "MATCH", native: dict | None = None,
@@ -77,6 +88,7 @@ def status_payload() -> dict:
                 "status_block": "1.1.0 operator floor",
             },
             "current_status": "1.1.0 operator floor with run, review, recheck, and MCP parity",
+            "telos_contracts": TELOS_CONTRACTS,
         },
         next_actions=[_next("telos", "workflow", "carry verified claims into the shared room")],
     )

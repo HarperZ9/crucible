@@ -35,7 +35,7 @@ Use it on a claim that needs to survive review, sponsor a domain oracle, or fund
 ## Current status
 
 - **Release:** `crucible-bench 1.1.0`; command `crucible`; Python 3.11+; zero third-party runtime dependencies in core.
-- **Operator surface:** `crucible status --json`, `crucible doctor --json`, `crucible demo --json`, and `crucible mcp` expose the Project Telos action envelope, the primary workflow commands, integration surfaces, and native MCP tools for status, doctor, assess, recheck, run, review, report, batch, registry, drift, refine, and verdicts.
+- **Operator surface:** `crucible status --json`, `crucible doctor --json`, `crucible demo --json`, and `crucible mcp` expose the Project Telos action envelope, the primary workflow commands, integration surfaces, and native MCP tools for status, doctor, assess, recheck, run, review, report, batch, registry, drift, refine, and verdicts. The status payload also advertises shared CLI/MCP/plugin/IDE/TUI/app contracts for enterprise, research, creative, scientific, and education workflows.
 - **Current floor:** 1.1.0 is the operator floor: one-command runs, cleanroom review packets, oracle replay templates, registry rechecks, and the native MCP bridge over the measurement -> verdict spine and cleanroom packet workflow.
 
 - **Enterprise readiness:** [docs/ENTERPRISE-READINESS.md](docs/ENTERPRISE-READINESS.md) records the large-context, action-receipt, readability, and host-integration contract for unattended agent workflows.
