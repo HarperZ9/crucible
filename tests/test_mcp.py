@@ -70,7 +70,19 @@ def test_initialize_announces_crucible():
 def test_tools_list_uses_catalog_names():
     resp = handle_request({"jsonrpc": "2.0", "id": 2, "method": "tools/list"})
     names = {tool["name"] for tool in resp["result"]["tools"]}
-    assert {"crucible.status", "crucible.doctor", "crucible.assess", "crucible.recheck"} <= names
+    assert {
+        "crucible.status",
+        "crucible.doctor",
+        "crucible.assess",
+        "crucible.recheck",
+        "crucible.run",
+        "crucible.review",
+        "crucible.report",
+        "crucible.batch",
+        "crucible.registry",
+        "crucible.drift",
+        "crucible.refine",
+    } <= names
 
 
 def test_status_tool_returns_action_envelope():
@@ -148,6 +160,89 @@ def test_recheck_tool_reports_replay_drift_as_false_not_error(tmp_path):
     assert body["checks"]["measurements_rerun"] is False
     assert body["replay"]["mismatched"] == 1
 
+
+
+def _mcp_thesis(path):
+    return _write(path, {
+        "id": "mcp-thesis",
+        "title": "MCP thesis",
+        "claims": [
+            {"text": "latency holds", "falsification": "latency exceeds budget"},
+            {"text": "quality holds", "falsification": "quality falls below floor"},
+        ],
+    })
+
+
+def _mcp_measurements(path, *, latency=0.0, quality=1.0):
+    return _write(path, {"measurements": [
+        {"claim": "latency holds", "deviation": latency, "tolerance": 0.1, "method": "bench"},
+        {"claim": "quality holds", "deviation": quality, "tolerance": 0.1, "method": "bench"},
+    ]})
+
+
+def test_run_review_report_and_registry_tools_share_cli_contract(tmp_path):
+    thesis = _mcp_thesis(tmp_path / "thesis.json")
+    measurements = _mcp_measurements(tmp_path / "measurements.json")
+    registry = str(tmp_path / "reg")
+    bundle = str(tmp_path / "packet")
+
+    run = _call("crucible.run", {
+        "thesis": thesis,
+        "measurements": measurements,
+        "registry": registry,
+        "bundle": bundle,
+    })
+    run_body = json.loads(run["result"]["content"][0]["text"])
+    assert run_body["ok"] is True
+    assert run_body["bundle"] == "."
+
+    review = _call("crucible.review", {"bundle": bundle})
+    review_body = json.loads(review["result"]["content"][0]["text"])
+    assert review_body["ok"] is True
+    assert review_body["checks"]["run_integrity"] is True
+
+    report = _call("crucible.report", {"dir": registry})
+    assert report["result"]["content"][0]["text"].startswith("# crucible report: MCP thesis")
+
+    stats = _call("crucible.registry", {"action": "stats", "dir": registry})
+    stats_body = json.loads(stats["result"]["content"][0]["text"])
+    assert stats_body["assessments"] == 1
+
+
+def test_refine_batch_and_drift_tools_are_host_callable(tmp_path):
+    refine_cfg = _write(tmp_path / "refine.json", {
+        "title": "MCP refine",
+        "claims": [
+            {"text": "c-match", "falsification": "f1"},
+            {"text": "c-drift", "falsification": "f2"},
+        ],
+        "specs": {
+            "c-match": {"predicted": 10, "tolerance": 0.5, "observe": "a"},
+            "c-drift": {"predicted": 2, "tolerance": 0.5, "observe": "b"},
+        },
+        "rounds": [{"a": 10, "b": 10}, {"a": 10, "b": 2}],
+    })
+    refined = _call("crucible.refine", {"config": refine_cfg})
+    refined_body = json.loads(refined["result"]["content"][0]["text"])
+    assert refined_body["status"] == "correct"
+
+    thesis = _mcp_thesis(tmp_path / "thesis.json")
+    first = _mcp_measurements(tmp_path / "m1.json", quality=0.05)
+    second = _mcp_measurements(tmp_path / "m2.json", quality=1.0)
+    registry = str(tmp_path / "reg")
+
+    batch_manifest = _write(tmp_path / "batch.json", {
+        "jobs": [{"id": "mcp-job", "thesis": thesis, "measurements": first}],
+    })
+    batch = _call("crucible.batch", {"manifest": batch_manifest, "registry": registry})
+    batch_body = json.loads(batch["result"]["content"][0]["text"])
+    assert batch_body["ok"] is True
+    assert batch_body["jobs"][0]["id"] == "mcp-job"
+
+    _call("crucible.run", {"thesis": thesis, "measurements": second, "registry": registry})
+    drift = _call("crucible.drift", {"dir": registry})
+    drift_body = json.loads(drift["result"]["content"][0]["text"])
+    assert drift_body["summary"]["regressed"] == 1
 
 def test_unknown_tool_is_jsonrpc_error():
     resp = _call("crucible.nope")

@@ -5,6 +5,8 @@ behind a feature branch and reviewed before merge.
 
 ## Unreleased
 
+- MCP parity: expands the stdio MCP server beyond status/doctor/assess/recheck to host-call the run, review, report, batch, registry, drift, refine, and verdicts workflows through the existing CLI contract.
+
 - Enterprise readiness: adds `docs/ENTERPRISE-READINESS.md` for context envelopes, action receipts, readability gates, and host-neutral operation.
 
 Presentation and operator-surface housekeeping for Project Telos parity.
@@ -12,7 +14,7 @@ Presentation and operator-surface housekeeping for Project Telos parity.
 - README: brings Crucible up to the shared five-flagship presentation shape with title-case product naming, current CI badge, consistent navigation, and a current-status block.
 - Status copy: updates the visible status from the old 1.0 flagship floor to the 1.1 operator floor.
 - Status payload: exposes the primary workflow commands, current operator commands, integration surfaces, presentation freshness, MCP tool names, and the 1.1 operator-floor summary under `native`.
-- MCP tools: records native availability for `crucible.status`, `crucible.doctor`, `crucible.assess`, and `crucible.recheck`.
+- MCP tools: records native availability for `crucible.status`, `crucible.doctor`, `crucible.assess`, `crucible.recheck`, `crucible.run`, `crucible.review`, `crucible.report`, `crucible.batch`, `crucible.registry`, `crucible.drift`, `crucible.refine`, and `crucible.verdicts`.
 
 ## 1.1.0
 

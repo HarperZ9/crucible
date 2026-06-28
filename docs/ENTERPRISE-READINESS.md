@@ -17,6 +17,7 @@ This guide aligns the flagship with Project Telos context envelopes and action r
 - `crucible run THESIS --registry DIR --bundle DIR --json` for an operator packet.
 - `crucible review BUNDLE --json` before verifier handoff.
 - `crucible recheck REGISTRY --json` or `--pack` for oracle replay.
+- `crucible mcp` exposes the same host-callable spine for assess, recheck, run, review, report, batch, registry, drift, refine, and verdict inspection.
 
 ## Context Envelope Contribution
 
@@ -42,6 +43,6 @@ Enterprise agent output should be easier for the next agent and a human reviewer
 
 ## Platform Boundary
 
-The flagship remains usable alone through CLI JSON and as part of a larger surface through MCP. OpenAI, Anthropic, IDE, CLI, TUI, and application hosts should consume the same tool outputs and receipt fields rather than reimplementing flagship behavior.
+The flagship remains usable alone through CLI JSON and as part of a larger surface through MCP with parity for the main operator workflow. OpenAI, Anthropic, IDE, CLI, TUI, and application hosts should consume the same tool outputs and receipt fields rather than reimplementing flagship behavior.
 
 See Project Telos `project-telos.context-envelope/v1` and `project-telos.action-receipt/v1` for the shared cross-tool contract.
