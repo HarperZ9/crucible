@@ -22,7 +22,7 @@ _INPUT_ERRORS = (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError)
 
 
 def _read_json(path: str) -> dict:
-    with open(path, encoding="utf-8") as f:
+    with open(path, encoding="utf-8-sig") as f:
         data = json.load(f)
     if not isinstance(data, dict):
         raise ValueError(f"{path} must contain a JSON object")

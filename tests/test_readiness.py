@@ -141,7 +141,7 @@ def test_cli_help_advertises_shipped_command_surface(capsys):
     assert root_help.value.code == 0
     root = capsys.readouterr().out
     for command in ("register", "assess", "steelman", "measure", "run", "recheck", "review", "registry",
-                    "report", "batch", "verdicts", "drift", "export", "refine"):
+                    "report", "batch", "verdicts", "drift", "export", "refine", "measurement-gate"):
         assert command in root
 
     with pytest.raises(SystemExit) as registry_help:

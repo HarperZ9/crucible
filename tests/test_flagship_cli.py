@@ -13,6 +13,9 @@ def test_status_json_is_action_envelope(capsys):
     assert payload["native"]["presentation"]["readme"] == "current"
     assert "MCP stdio" in payload["native"]["integration_surfaces"]
     assert "crucible.recheck" in payload["native"]["mcp_tools"]
+    assert "crucible.measurement_gate" in payload["native"]["mcp_tools"]
+    assert "measurement-gate" in payload["native"]["commands"]
+    assert "creative_measurement_gate" in payload["native"]["capabilities"]
     contracts = payload["native"]["telos_contracts"]
     assert contracts["host_surfaces"] == ["CLI JSON", "MCP stdio", "plugins", "IDEs", "TUIs", "apps"]
     assert "project-telos.action-receipt/v1" in contracts["schemas"]

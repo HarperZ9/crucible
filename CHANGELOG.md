@@ -5,6 +5,14 @@ behind a feature branch and reviewed before merge.
 
 ## Unreleased
 
+- Creative measurement gate: adds `crucible measurement-gate PACKET [--criteria FILE]` and the
+  `crucible.measurement_gate` MCP tool for verifying Telos histogram, dither, Gaussian-splat,
+  clustered-lighting, and audio-spectral measurement packets without exporting raw pixels, assets,
+  prompts, tool arguments, or full payloads.
+- Gate verdicts: keeps `decision_outcome` (`allow`, `require_review`, `block`) separate from
+  `verification_verdict` (MATCH, DRIFT, UNVERIFIABLE) and emits normalized failure codes for operator
+  alerting, including raw payload leaks, cluster budget overruns, dither-pattern gaps, provenance
+  gaps, pixel-dimension mismatches, and audio-spectrum gaps.
 - MCP parity: expands the stdio MCP server beyond status/doctor/assess/recheck to host-call the run, review, report, batch, registry, drift, refine, and verdicts workflows through the existing CLI contract.
 
 - Enterprise readiness: adds `docs/ENTERPRISE-READINESS.md` for context envelopes, action receipts, readability gates, and host-neutral operation.
@@ -15,7 +23,7 @@ Presentation and operator-surface housekeeping for Project Telos parity.
 - README: brings Crucible up to the shared five-flagship presentation shape with title-case product naming, current CI badge, consistent navigation, and a current-status block.
 - Status copy: updates the visible status from the old 1.0 flagship floor to the 1.1 operator floor.
 - Status payload: exposes the primary workflow commands, current operator commands, integration surfaces, presentation freshness, MCP tool names, and the 1.1 operator-floor summary under `native`.
-- MCP tools: records native availability for `crucible.status`, `crucible.doctor`, `crucible.assess`, `crucible.recheck`, `crucible.run`, `crucible.review`, `crucible.report`, `crucible.batch`, `crucible.registry`, `crucible.drift`, `crucible.refine`, and `crucible.verdicts`.
+- MCP tools: records native availability for `crucible.status`, `crucible.doctor`, `crucible.assess`, `crucible.measurement_gate`, `crucible.recheck`, `crucible.run`, `crucible.review`, `crucible.report`, `crucible.batch`, `crucible.registry`, `crucible.drift`, `crucible.refine`, and `crucible.verdicts`.
 
 ## 1.1.0
 

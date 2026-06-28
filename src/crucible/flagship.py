@@ -12,6 +12,7 @@ PRIMARY_COMMANDS = [
     "measure",
     "assess",
     "run",
+    "measurement-gate",
     "recheck",
     "review",
     "registry",
@@ -60,6 +61,12 @@ def status_payload() -> dict:
             "role": "verification-pressure",
             "commands": PRIMARY_COMMANDS,
             "verdicts": ["MATCH", "DRIFT", "UNVERIFIABLE"],
+            "capabilities": [
+                "claim_verdicts",
+                "oracle_rechecks",
+                "cleanroom_review",
+                "creative_measurement_gate",
+            ],
             "operator_commands": ["status", "doctor", "demo", "mcp"],
             "mcp_tools": [
                 "crucible.status",
@@ -67,6 +74,7 @@ def status_payload() -> dict:
                 "crucible.assess",
                 "crucible.recheck",
                 "crucible.run",
+                "crucible.measurement_gate",
                 "crucible.review",
                 "crucible.report",
                 "crucible.batch",

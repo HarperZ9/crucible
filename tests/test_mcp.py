@@ -82,6 +82,7 @@ def test_tools_list_uses_catalog_names():
         "crucible.registry",
         "crucible.drift",
         "crucible.refine",
+        "crucible.measurement_gate",
     } <= names
 
 
@@ -120,6 +121,37 @@ def test_assess_tool_returns_witnessed_counts(tmp_path):
     assert body["assessment"]["match"] == 1
     assert body["assessment"]["unverifiable"] == 1
     assert [verdict["status"] for verdict in body["verdicts"]] == ["MATCH", "UNVERIFIABLE"]
+
+
+def test_measurement_gate_tool_verifies_telos_packet(tmp_path):
+    packet = _write(tmp_path / "packet.json", {
+        "schema": "project-telos.measurement-layers/v1",
+        "tool": "telos.measurement.layers",
+        "source_receipts": [{
+            "title": "Project Telos measurement layers",
+            "url": "demo/measurement-layers.mjs",
+            "provenance_class": "lawful_source",
+            "receipt_hash": "sha256:abc",
+        }],
+        "privacy": {"raw_payload_required": False, "raw_assets_required_for_interop": False},
+        "measurements": [{
+            "layer_id": "lighting.cluster-meter",
+            "cluster_count": 12,
+            "max_lights_per_cluster": 4,
+            "over_budget_clusters": 1,
+            "measurement_hash": "fnv1a:cluster",
+        }],
+    })
+    criteria = _write(tmp_path / "criteria.json", {
+        "lighting.cluster-meter": {"max_over_budget_clusters": 0},
+    })
+
+    resp = _call("crucible.measurement_gate", {"packet": packet, "criteria": criteria})
+    body = json.loads(resp["result"]["content"][0]["text"])
+
+    assert body["verification_verdict"] == "DRIFT"
+    assert body["decision_outcome"] == "require_review"
+    assert body["rows"][0]["failure_code"] == "cluster_budget_exceeded"
 
 
 def test_recheck_tool_returns_cli_recheck_plan(tmp_path):

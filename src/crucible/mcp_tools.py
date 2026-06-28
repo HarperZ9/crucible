@@ -13,6 +13,8 @@ from crucible.commands import (
     _verdict_dict,
 )
 from crucible.flagship import doctor_payload, status_payload
+from crucible.measurement_gate import verify_measurement_packet
+from crucible.measurement_gate_cmd import _criteria
 from crucible.recheck_cmd import recheck_payload
 
 
@@ -68,6 +70,14 @@ def tool_defs() -> list[dict]:
                 "out": _path("optional JSON run-record output path"),
                 "bundle": _path("optional cleanroom review packet directory"),
             }, ["thesis", "registry"]),
+        },
+        {
+            "name": "crucible.measurement_gate",
+            "description": "Verify Telos creative/rendering measurement packets against explicit criteria.",
+            "inputSchema": _obj({
+                "packet": _path("path to a project-telos.measurement-layers/v1 JSON packet"),
+                "criteria": _path("optional JSON criteria keyed by measurement layer id"),
+            }, ["packet"]),
         },
         {
             "name": "crucible.review",
@@ -199,6 +209,12 @@ def _run_tool(args: dict) -> str:
     return _invoke_cli(argv)
 
 
+def _measurement_gate_tool(args: dict) -> str:
+    packet = _read_json(_require_str(args, "packet"))
+    criteria = _criteria(_optional_str(args, "criteria"))
+    return json.dumps(verify_measurement_packet(packet, criteria=criteria), indent=2, ensure_ascii=False)
+
+
 def _registry_tool(args: dict) -> str:
     action = _require_str(args, "action")
     if action not in {"list", "verify", "stats", "search", "prune"}:
@@ -237,6 +253,8 @@ def call_tool(name: str, args: dict) -> str:
         )
     if name == "crucible.run":
         return _run_tool(args)
+    if name == "crucible.measurement_gate":
+        return _measurement_gate_tool(args)
     if name == "crucible.review":
         return _invoke_cli(["review", _require_str(args, "bundle"), "--json"])
     if name == "crucible.report":

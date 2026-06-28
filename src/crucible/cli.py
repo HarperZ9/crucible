@@ -22,6 +22,7 @@ from crucible.commands import (
 from crucible.drift_cmd import cmd_drift
 from crucible.flagship import cmd_demo, cmd_doctor, cmd_status
 from crucible.mcp import serve as serve_mcp
+from crucible.measurement_gate_cmd import cmd_measurement_gate
 from crucible.recheck_cmd import cmd_recheck
 from crucible.refine_cmd import cmd_refine
 from crucible.registry_cmd import cmd_registry, cmd_verdicts
@@ -116,6 +117,13 @@ def _add_core_commands(sub) -> None:
                      help="create DIR with spec.json, run.json, report.md, and review.md")
     run.add_argument("--json", action="store_true", help="emit JSON instead of human text")
     run.set_defaults(func=cmd_run)
+
+    gate = sub.add_parser("measurement-gate", help="verify a Telos creative measurement packet")
+    gate.add_argument("packet", help="path to a project-telos.measurement-layers/v1 JSON packet")
+    gate.add_argument("--criteria", default=None, metavar="FILE",
+                      help="optional JSON criteria keyed by measurement layer id")
+    gate.add_argument("--json", action="store_true", help="emit JSON instead of human text")
+    gate.set_defaults(func=cmd_measurement_gate)
 
 
 def _add_refine_command(sub) -> None:

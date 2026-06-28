@@ -35,7 +35,7 @@ Use it on a claim that needs to survive review, sponsor a domain oracle, or fund
 ## Current status
 
 - **Release:** `crucible-bench 1.1.0`; command `crucible`; Python 3.11+; zero third-party runtime dependencies in core.
-- **Operator surface:** `crucible status --json`, `crucible doctor --json`, `crucible demo --json`, and `crucible mcp` expose the Project Telos action envelope, the primary workflow commands, integration surfaces, and native MCP tools for status, doctor, assess, recheck, run, review, report, batch, registry, drift, refine, and verdicts. The status payload also advertises shared CLI/MCP/plugin/IDE/TUI/app contracts for enterprise, research, creative, scientific, and education workflows.
+- **Operator surface:** `crucible status --json`, `crucible doctor --json`, `crucible demo --json`, and `crucible mcp` expose the Project Telos action envelope, the primary workflow commands, integration surfaces, and native MCP tools for status, doctor, assess, measurement-gate, recheck, run, review, report, batch, registry, drift, refine, and verdicts. The status payload also advertises shared CLI/MCP/plugin/IDE/TUI/app contracts for enterprise, research, creative, scientific, and education workflows.
 - **Current floor:** 1.1.0 is the operator floor: one-command runs, cleanroom review packets, oracle replay templates, registry rechecks, and the native MCP bridge over the measurement -> verdict spine and cleanroom packet workflow.
 
 - **Enterprise readiness:** [docs/ENTERPRISE-READINESS.md](docs/ENTERPRISE-READINESS.md) records the large-context, action-receipt, readability, and host-integration contract for unattended agent workflows.
@@ -73,8 +73,8 @@ and the witnessed verdicts track which moved.
 1.0.0 delivered the flagship floor: the full first loop plus drift tracking, Markdown assessment
 reports, publication-gated export, registry operations, optional subprocess-backed seam adapters,
 Telos witnessed-artifact interop, Gather/index protocol interop, measurement recheck descriptors,
-batch assessment/report bundles, and clean verifier practice. The 1.1.0 branch adds operator run and
-oracle recheck and cleanroom review commands over that spine. You register a thesis, steelman it
+batch assessment/report bundles, and clean verifier practice. The 1.1.0 branch adds operator run,
+creative measurement gates, oracle recheck, and cleanroom review commands over that spine. You register a thesis, steelman it
 (adversaries propose the test), measure each claim against a substrate oracle, refine across substrate
 rounds toward a
 cohesively verified thesis, witness a re-derivable verdict per claim,
@@ -86,6 +86,33 @@ packs, persist optional measurement replay descriptors for oracle-level checks, 
 thesis jobs into one registry, render witnessed assessments as readable Markdown reports, or run the
 whole steelman -> measure -> assess -> recheck path as one cleanroom review packet. A fenced thesis
 can be assessed locally, but the export edge refuses it by default.
+
+## Creative measurement gates
+
+Telos can emit `project-telos.measurement-layers/v1` packets from creative and rendering sensors:
+histogram fields, dither-spectrum meters, Gaussian-splat probes, clustered-lighting meters, and audio
+spectral meters. Crucible verifies those packets without requiring raw pixels, raw splats, private
+assets, prompts, tool arguments, or full result payloads to cross the interop boundary.
+
+```bash
+crucible measurement-gate telos-measurement-packet.json --json
+```
+
+Optional criteria files tighten the gate for a host or verifier:
+
+```json
+{
+  "visual.histogram-field": {"expected_total_pixels": 4096},
+  "visual.dither-spectrum-meter": {"min_unique_levels": 4},
+  "lighting.cluster-meter": {"max_over_budget_clusters": 0}
+}
+```
+
+The output keeps the operational decision separate from the audit verdict: `decision_outcome` is
+`allow`, `require_review`, or `block`, while `verification_verdict` remains MATCH, DRIFT, or
+UNVERIFIABLE. Failure codes are normalized for operator alerts: `pixel_dimensions_mismatch`,
+`dither_pattern_unverifiable`, `asset_provenance_missing`, `cluster_budget_exceeded`,
+`audio_spectrum_unverifiable`, `measurement_source_missing`, and `raw_payload_leak`.
 
 ## The differentiator (do not lose this)
 
@@ -276,6 +303,9 @@ Shipped:
   descriptor-bearing measurement rows, writes replay pack templates for clean verifier handoff, and
   validates finished oracle replay packs against the sealed measurement rows without creating a second
   verdict path.
+- Creative measurement gate: `crucible measurement-gate PACKET [--criteria FILE]` verifies Telos
+  histogram, dither, splat, clustered-lighting, and audio-spectral measurement packets with normalized
+  failure codes, raw-payload leak detection, and a separate allow/review/block decision outcome.
 - The refine loop: grade each claim's measured margin, compute harmonic-mean cohesion, reflect the
   weakest claim, and re-measure across substrate rounds until the thesis is cohesively verified or the
   budget is spent honestly. The loop reports the weakest claim instead of pretending a short thesis held.
@@ -323,7 +353,7 @@ Shipped:
   the shipped command surface, and `docs/RELEASE-READINESS.md` records the 1.0 gate checklist,
   including the spec-plus-artifact-only verifier rule.
 - The `crucible` CLI: `register`, `assess`, `steelman`, `measure`,
-  `run`, `recheck`, `review`, `registry list|verify|stats|search|prune`, `refine`, `drift`,
+  `run`, `measurement-gate`, `recheck`, `review`, `registry list|verify|stats|search|prune`, `refine`, `drift`,
   `report`, `batch`, `export`, `verdicts [--verify]`.
 
 ## License

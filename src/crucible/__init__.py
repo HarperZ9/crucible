@@ -39,6 +39,7 @@ from crucible.measure import (
     TableMeasure,
     measure_thesis,
 )
+from crucible.measurement_gate import verify_measurement_packet
 from crucible.refine import (
     GradedCriterion,
     RefineOutcome,
@@ -90,7 +91,7 @@ __all__ = [
     "canonical_sha", "check_content", "drift_track", "export_guard", "export_thesis", "gate_check",
     "is_telos_artifact", "measure_thesis", "receipt_matches",
     "recheck_assessment", "recheck_measurements", "refine", "refine_thesis", "render_assessment_report",
-    "steelman_thesis", "margin",
+    "steelman_thesis", "margin", "verify_measurement_packet",
     "prune_objects", "registry_stats", "search_theses", "thesis_seal", "verdict_for", "verdict_seal",
     "verify_assessment", "verify_gather_digest", "verify_index_verification", "verify_telos_artifact",
     "verify_thesis", "__version__",
