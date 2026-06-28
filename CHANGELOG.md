@@ -5,6 +5,8 @@ behind a feature branch and reviewed before merge.
 
 ## Unreleased
 
+- Enterprise readiness: adds `docs/ENTERPRISE-READINESS.md` for context envelopes, action receipts, readability gates, and host-neutral operation.
+
 Presentation and operator-surface housekeeping for Project Telos parity.
 
 - README: brings Crucible up to the shared five-flagship presentation shape with title-case product naming, current CI badge, consistent navigation, and a current-status block.
