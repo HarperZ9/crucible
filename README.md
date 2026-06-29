@@ -1,11 +1,11 @@
 <p align="center">
-  <img src="docs/brand/crucible-hero.png" alt="crucible, a Project Telos flagship for measurement-backed claim evaluation">
+  <img src="docs/brand/crucible-hero.png" alt="Crucible, check claims against evidence">
 </p>
 <!-- Project mark: docs/brand/crucible-mark.svg -->
 
 # crucible
 
-> Turn claims into verdicts grounded in measurement.
+> Check claims against evidence and return a verdict.
 
 [Project Telos](https://harperz9.github.io) | [gather](https://github.com/HarperZ9/gather) | [crucible](https://github.com/HarperZ9/crucible) | [index](https://github.com/HarperZ9/index) | [forum](https://github.com/HarperZ9/forum) | [telos](https://github.com/HarperZ9/telos)
 
