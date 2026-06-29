@@ -32,6 +32,12 @@ Claims are cheap until a decision depends on them. crucible makes a thesis stand
 
 Use it on a claim that needs to survive review, an eval result that needs more than pass/fail, or a workflow where MATCH, DRIFT, and UNVERIFIABLE should be explicit. Useful support right now is domain-oracle testing, fixture packs, cleanroom review pressure, and grassroots funding for harder measurements.
 
+## What to test first
+
+- Bring one claim, the evidence it depends on, and the condition that would falsify it.
+- Check whether crucible can separate a measured match from drift and from evidence that is simply not strong enough to verify.
+- The most useful issue is not "the score feels wrong"; it is a fixture where the verdict should be MATCH, DRIFT, or UNVERIFIABLE for a concrete reason and the packet fails to preserve that reason.
+
 ## Current status
 
 - **Release:** `crucible-bench 1.1.0`; command `crucible`; Python 3.11+; zero third-party runtime dependencies in core.
