@@ -1,13 +1,13 @@
 <p align="center">
-  <img src="docs/brand/crucible-hero.png" alt="Crucible, a Project Telos flagship for measurement-backed claim evaluation">
+  <img src="docs/brand/crucible-hero.png" alt="crucible, a Project Telos flagship for measurement-backed claim evaluation">
 </p>
 <!-- Project mark: docs/brand/crucible-mark.svg -->
 
-# Crucible
+# crucible
 
 > Turn claims into verdicts grounded in measurement.
 
-[Project Telos](https://harperz9.github.io) | [Gather](https://github.com/HarperZ9/gather) | [Crucible](https://github.com/HarperZ9/crucible) | [Index](https://github.com/HarperZ9/index) | [Forum](https://github.com/HarperZ9/forum) | [Telos](https://github.com/HarperZ9/telos)
+[Project Telos](https://harperz9.github.io) | [gather](https://github.com/HarperZ9/gather) | [crucible](https://github.com/HarperZ9/crucible) | [index](https://github.com/HarperZ9/index) | [forum](https://github.com/HarperZ9/forum) | [telos](https://github.com/HarperZ9/telos)
 
 [![CI](https://github.com/HarperZ9/crucible/actions/workflows/ci.yml/badge.svg)](https://github.com/HarperZ9/crucible/actions/workflows/ci.yml)
 ![version: 1.1](https://img.shields.io/badge/version-1.1-informational.svg)
@@ -30,13 +30,14 @@ Claims are cheap until a decision depends on them. crucible makes a thesis stand
 
 ## Work with it
 
-Use it on a claim that needs to survive review, sponsor a domain oracle, or fund the cleanroom review path for harder evaluations.
+Use it on a claim that needs to survive review, an eval result that needs more than pass/fail, or a workflow where MATCH, DRIFT, and UNVERIFIABLE should be explicit. Useful support right now is domain-oracle testing, fixture packs, cleanroom review pressure, and grassroots funding for harder measurements.
 
 ## Current status
 
 - **Release:** `crucible-bench 1.1.0`; command `crucible`; Python 3.11+; zero third-party runtime dependencies in core.
 - **Operator surface:** `crucible status --json`, `crucible doctor --json`, `crucible demo --json`, and `crucible mcp` expose the Project Telos action envelope, the primary workflow commands, integration surfaces, and native MCP tools for status, doctor, assess, measurement-gate, recheck, run, review, report, batch, registry, drift, refine, and verdicts. The same CLI is available from source checkouts with `python -m crucible`. The status payload also advertises shared CLI/MCP/plugin/IDE/TUI/app contracts for enterprise, research, creative, scientific, and education workflows.
 - **Current floor:** 1.1.0 is the operator floor: one-command runs, cleanroom review packets, oracle replay templates, registry rechecks, and the native MCP bridge over the measurement -> verdict spine and cleanroom packet workflow.
+- **Public role:** measured-judgment layer for Project Telos: crucible consumes gather evidence, index context, and forum routes, then emits verdict packets that telos can surface and replay.
 
 - **Enterprise readiness:** [docs/ENTERPRISE-READINESS.md](docs/ENTERPRISE-READINESS.md) records the large-context, action-receipt, readability, and host-integration contract for unattended agent workflows.
 
@@ -91,7 +92,7 @@ can be assessed locally, but the export edge refuses it by default.
 
 Telos can emit `project-telos.measurement-layers/v1` packets from creative and rendering sensors:
 histogram fields, dither-spectrum meters, Gaussian-splat probes, clustered-lighting meters, and audio
-spectral meters. Crucible verifies those packets without requiring raw pixels, raw splats, private
+spectral meters. crucible verifies those packets without requiring raw pixels, raw splats, private
 assets, prompts, tool arguments, or full result payloads to cross the interop boundary.
 
 ```bash
@@ -270,7 +271,7 @@ stored measurement through `verdict_for`.
 
 ## Status
 
-Crucible is at its 1.1 operator floor: the core loop is stable, the public CLI is covered, and the
+crucible is at its 1.1 operator floor: the core loop is stable, the public CLI is covered, and the
 release branch has the one-command run, cleanroom review, oracle replay, registry recheck, and native
 MCP surfaces needed by the Project Telos five-flagship room. Development continues by adding sharper
 substrates and oracle edges without weakening the measurement -> verdict spine.
