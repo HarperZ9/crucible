@@ -5,6 +5,9 @@ behind a feature branch and reviewed before merge.
 
 ## Unreleased
 
+- CLI compatibility: `python -m crucible` now dispatches the normal Crucible CLI, so source
+  checkouts, MCP hosts, IDE harnesses, and automation runners can use the same command surface as
+  the installed `crucible` script.
 - Creative measurement gate: adds `crucible measurement-gate PACKET [--criteria FILE]` and the
   `crucible.measurement_gate` MCP tool for verifying Telos histogram, dither, Gaussian-splat,
   clustered-lighting, and audio-spectral measurement packets without exporting raw pixels, assets,
