@@ -22,7 +22,7 @@ def cmd_registry(args) -> int:
         if args.action == "verify":
             return _registry_verify(reg, args.json)
         if args.action == "stats":
-            return _registry_stats(reg, args.json)
+            return _registry_stats(reg, args)
         if args.action == "search":
             return _registry_search(reg, args)
         return _registry_prune(reg, args)
@@ -62,18 +62,24 @@ def _registry_verify(reg: Registry, as_json: bool) -> int:
     return 0 if ok else 1
 
 
-def _registry_stats(reg: Registry, as_json: bool) -> int:
+def _registry_stats(reg: Registry, args) -> int:
     stats = registry_stats(reg)
-    if as_json:
+    asserted = stats["match_provenance"]["asserted"]
+    code = 1 if args.require_witnessed_match and asserted else 0
+    if args.json:
         print(json.dumps(stats, indent=2, ensure_ascii=False))
-        return 0
-    print(f"{stats['theses']} thesis(es), {stats['claims']} claim ref(s), "
-          f"{stats['unique_claims']} unique claim body/bodies")
-    print(f"{stats['assessments']} assessment record(s), "
-          f"{stats['latest_assessments']} latest assessment(s)")
-    print("dispositions: " + _counts(stats["dispositions"]))
-    print("verdicts: " + _counts(stats["verdicts"]))
-    return 0
+    else:
+        print(f"{stats['theses']} thesis(es), {stats['claims']} claim ref(s), "
+              f"{stats['unique_claims']} unique claim body/bodies")
+        print(f"{stats['assessments']} assessment record(s), "
+              f"{stats['latest_assessments']} latest assessment(s)")
+        print("dispositions: " + _counts(stats["dispositions"]))
+        print("verdicts: " + _counts(stats["verdicts"]))
+        print("match provenance: " + _counts(stats["match_provenance"]))
+    if code:
+        print(f"require-witnessed-match: {asserted} MATCH verdict(s) rest on asserted "
+              "measurements with no recheck descriptor", file=sys.stderr)
+    return code
 
 
 def _registry_search(reg: Registry, args) -> int:

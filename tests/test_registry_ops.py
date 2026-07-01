@@ -45,6 +45,29 @@ def test_registry_stats_counts_theses_claims_dispositions_and_latest_verdicts(tm
     assert stats["verdicts"]["UNVERIFIABLE"] == 1
 
 
+def test_registry_stats_classifies_match_provenance(tmp_path):
+    # The theatrical-MATCH hole: a registry can show 100% MATCH where every
+    # deviation is author-supplied 0.0 and no refutation can ever execute.
+    # Provenance splits each latest MATCH by whether its measurement carries a
+    # recheck descriptor (witnessed) or rests on assertion alone (asserted).
+    reg, _engine, _finance = _seed_registry(tmp_path)
+    witnessed = make_thesis("Witnessed engine", [
+        make_claim("throughput stays above floor", "throughput falls below floor"),
+        make_claim("startup stays under budget", "startup exceeds budget"),
+    ], clock=CLOCK)
+    assess(witnessed, [
+        Measurement(witnessed.claims[0].id, witnessed.claims[0].sha256, 0.0, 0.1, "bench", 0.0,
+                    recheck={"oracle": "bench", "argv": ["bench", "--throughput"]}),
+        Measurement(witnessed.claims[1].id, witnessed.claims[1].sha256, 0.05, 0.1, "bench", 0.0),
+    ], registry=reg, clock=CLOCK)
+
+    stats = registry_stats(reg)
+
+    # engine's MATCH: asserted zero; witnessed claim 0: witnessed; claim 1:
+    # asserted with a real nonzero deviation. DRIFT/UNVERIFIABLE never count.
+    assert stats["match_provenance"] == {"witnessed": 1, "asserted": 2, "asserted_zero": 1}
+
+
 def test_search_theses_filters_by_scope_status_and_latest_verdict(tmp_path):
     reg, engine, finance = _seed_registry(tmp_path)
 

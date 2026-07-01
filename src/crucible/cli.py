@@ -147,6 +147,9 @@ def _add_registry_commands(sub) -> None:
     rgy.add_argument("--verdict", choices=["MATCH", "DRIFT", "UNVERIFIABLE"],
                      help="filter search by latest verdict status")
     rgy.add_argument("--apply", action="store_true", help="apply registry prune deletions")
+    rgy.add_argument("--require-witnessed-match", action="store_true",
+                     help="stats exits 1 when any latest MATCH rests on a measurement "
+                          "with no recheck descriptor")
     rgy.add_argument("--json", action="store_true", help="emit JSON instead of human text")
     rgy.set_defaults(func=cmd_registry)
 
