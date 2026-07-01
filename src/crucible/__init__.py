@@ -17,6 +17,7 @@ from crucible.assess import (
     verdict_seal,
     verify_assessment,
 )
+from crucible.browser_evidence import verify_browser_evidence
 from crucible.claim import Claim, claim_body, claim_hash, content_hash, make_claim
 from crucible.drift import (
     DriftReport,
@@ -93,6 +94,6 @@ __all__ = [
     "recheck_assessment", "recheck_measurements", "refine", "refine_thesis", "render_assessment_report",
     "steelman_thesis", "margin", "verify_measurement_packet",
     "prune_objects", "registry_stats", "search_theses", "thesis_seal", "verdict_for", "verdict_seal",
-    "verify_assessment", "verify_gather_digest", "verify_index_verification", "verify_telos_artifact",
-    "verify_thesis", "__version__",
+    "verify_assessment", "verify_browser_evidence", "verify_gather_digest", "verify_index_verification",
+    "verify_telos_artifact", "verify_thesis", "__version__",
 ]
