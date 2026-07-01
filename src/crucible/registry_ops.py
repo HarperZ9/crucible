@@ -38,6 +38,9 @@ def registry_stats(reg: Registry) -> dict:
         "invalid_latest_assessments": invalid_latest,
         "dispositions": _nonzero(dispositions),
         "verdicts": verdicts,
+        "match_provenance": _match_provenance(
+            record for thesis_id, record in latest.items() if thesis_id in thesis_ids
+        ),
     }
 
 
@@ -117,6 +120,32 @@ def _record_verified(reg: Registry, thesis_id: str, record: Mapping) -> bool:
         return thesis is not None and all(recheck_assessment(thesis, assessment).values())
     except (OSError, ValueError, KeyError, TypeError):
         return False
+
+
+def _match_provenance(records: Iterable[Mapping]) -> dict[str, int]:
+    """Split the latest MATCH verdicts by evidence class. A MATCH whose measurement carries a
+    ``recheck`` descriptor is witnessed: replay machinery can re-execute it. A MATCH without one
+    rests on an author-supplied deviation alone (asserted); ``asserted_zero`` sub-counts the
+    author-supplied-perfection rows a confident registry is most likely to be padded with."""
+    counts = {"witnessed": 0, "asserted": 0, "asserted_zero": 0}
+    for record in records:
+        rows = record.get("verdicts")
+        if not isinstance(rows, list):
+            continue
+        measurements = record.get("measurements")
+        by_id = {m.get("claim_id"): m for m in measurements if isinstance(m, Mapping)} \
+            if isinstance(measurements, list) else {}
+        for row in rows:
+            if row.get("status") != MATCH:
+                continue
+            measurement = by_id.get(row.get("claim_id"))
+            if isinstance(measurement, Mapping) and isinstance(measurement.get("recheck"), Mapping):
+                counts["witnessed"] += 1
+                continue
+            counts["asserted"] += 1
+            if isinstance(measurement, Mapping) and measurement.get("deviation") == 0.0:
+                counts["asserted_zero"] += 1
+    return counts
 
 
 def _record_statuses(record: Mapping | None) -> list[str]:

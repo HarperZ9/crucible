@@ -42,6 +42,47 @@ def test_registry_stats_json_reports_current_shape(tmp_path, capsys):
     assert payload["verdicts"]["DRIFT"] == 1
 
 
+def test_registry_stats_gate_rejects_asserted_matches(tmp_path, capsys):
+    reg = str(tmp_path / "reg")
+    assert main(["assess", _thesis_file(tmp_path), "--measurements", _measurements_file(tmp_path),
+                 "--registry", reg]) == 0
+    capsys.readouterr()
+
+    assert main(["registry", "stats", reg, "--json"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["match_provenance"] == {"witnessed": 0, "asserted": 1, "asserted_zero": 1}
+
+    # The manual-measurements MATCH has no recheck descriptor: the gate fails.
+    assert main(["registry", "stats", reg, "--require-witnessed-match"]) == 1
+    assert "asserted" in capsys.readouterr().err
+
+
+def test_registry_stats_gate_passes_witnessed_matches(tmp_path, capsys):
+    reg = str(tmp_path / "reg")
+    measurements = _write(tmp_path / "witnessed.json", {"measurements": [
+        {"claim": "latency stays under budget", "deviation": 0.0, "tolerance": 0.1,
+         "method": "bench", "recheck": {"oracle": "bench", "argv": ["bench", "--latency"]}},
+        {"claim": "quality stays above floor", "deviation": 1.0, "tolerance": 0.1, "method": "bench"},
+    ]})
+    assert main(["assess", _thesis_file(tmp_path), "--measurements", measurements,
+                 "--registry", reg]) == 0
+    capsys.readouterr()
+
+    assert main(["registry", "stats", reg, "--require-witnessed-match", "--json"]) == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["match_provenance"] == {"witnessed": 1, "asserted": 0, "asserted_zero": 0}
+
+
+def test_assess_rejects_a_non_object_recheck_descriptor(tmp_path, capsys):
+    measurements = _write(tmp_path / "bad.json", {"measurements": [
+        {"claim": "latency stays under budget", "deviation": 0.0, "tolerance": 0.1,
+         "method": "bench", "recheck": "trust me"},
+    ]})
+
+    assert main(["assess", _thesis_file(tmp_path), "--measurements", measurements]) == 1
+    assert "recheck" in capsys.readouterr().err
+
+
 def test_registry_search_json_filters_by_scope_and_verdict(tmp_path, capsys):
     reg = str(tmp_path / "reg")
     assert main(["assess", _thesis_file(tmp_path), "--measurements", _measurements_file(tmp_path),

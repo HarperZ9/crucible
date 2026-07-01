@@ -110,9 +110,12 @@ def _load_measurements(thesis: Thesis, path: str | None) -> list[Measurement]:
         ref = m.get("claim", "")
         claim = _resolve_claim_ref(ref, by_id, by_text, "measurement")
         evidence = _evidence(m.get("evidence", ()), f"measurement {i} evidence")
+        recheck = m.get("recheck")
+        if recheck is not None and not isinstance(recheck, dict):
+            raise ValueError(f"measurement {i} recheck must be an object naming its oracle")
         out.append(Measurement(claim.id, claim.sha256, _as_float_or_none(m.get("deviation")),
                                _as_float(m.get("tolerance"), 0.0), m.get("method", "manual"),
-                               time.time(), evidence))
+                               time.time(), evidence, recheck))
     return out
 
 

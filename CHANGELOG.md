@@ -5,6 +5,16 @@ behind a feature branch and reviewed before merge.
 
 ## Unreleased
 
+- MATCH provenance: `crucible registry stats` now reports `match_provenance`
+  (`witnessed` / `asserted` / `asserted_zero`), splitting each latest MATCH verdict by whether its
+  measurement carries a replayable `recheck` descriptor or rests on an author-supplied deviation
+  alone. `--require-witnessed-match` turns the split into a gate: exit 1 when any MATCH is
+  asserted-only, so a registry showing 100 percent MATCH with zero executable refutations can no
+  longer be cited as verification.
+- Witnessed measurements from the CLI: `crucible assess --measurements FILE` now carries a
+  per-row `recheck` descriptor through to the sealed measurement record (previously silently
+  dropped), so the manual-measurements path can author witnessed MATCH verdicts; a non-object
+  `recheck` is rejected.
 - CLI compatibility: `python -m crucible` now dispatches the normal Crucible CLI, so source
   checkouts, MCP hosts, IDE harnesses, and automation runners can use the same command surface as
   the installed `crucible` script.

@@ -343,6 +343,9 @@ Shipped:
 - Registry operations: `registry_stats`, `search_theses`, `prune_objects`, and
   `crucible registry stats|search|prune` summarize the corpus, recall theses by scope/status/latest
   verdict, and prune orphan claim bodies only when explicitly applied after registry path guards pass.
+  Stats include `match_provenance` (witnessed / asserted / asserted_zero MATCH verdicts), and
+  `crucible registry stats DIR --require-witnessed-match` exits 1 when any latest MATCH rests on an
+  asserted measurement with no replayable `recheck` descriptor.
 - Optional subprocess edges: `SubprocessSteelman` and `SubprocessMeasure` run configured commands
   through bounded JSON stdin/stdout, reject shell strings, enforce timeouts, and stamp claim identity
   locally. By default they pass only a minimal environment, discard stderr, and actively terminate
