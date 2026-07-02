@@ -66,6 +66,8 @@ def status_payload() -> dict:
                 "oracle_rechecks",
                 "cleanroom_review",
                 "creative_measurement_gate",
+                "unverifiable_explanations",
+                "measurement_wellposedness_warnings",
             ],
             "operator_commands": ["status", "doctor", "demo", "mcp"],
             "mcp_tools": [

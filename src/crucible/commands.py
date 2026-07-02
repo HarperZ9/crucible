@@ -189,32 +189,6 @@ def cmd_export(args) -> int:
     return 0
 
 
-def cmd_assess(args) -> int:
-    try:
-        thesis = _resolve_thesis(args.thesis, args.registry)
-        measurements = _load_measurements(thesis, args.measurements)
-    except _INPUT_ERRORS as exc:
-        print(f"assess failed: {exc}", file=sys.stderr)
-        return 1
-    registry = Registry(args.registry) if args.registry else None
-    assessment, verdicts = assess(thesis, measurements, clock=time.time, registry=registry)
-    if args.json:
-        print(json.dumps({"assessment": assessment.to_dict(),
-                          "verdicts": [_verdict_dict(v) for v in verdicts]}, indent=2, ensure_ascii=False))
-        return 0
-    print(f'assessed thesis {assessment.thesis_id} "{thesis.title}": {assessment.claims} claim(s)')
-    print(f"  MATCH {assessment.match}  DRIFT {assessment.drift}  UNVERIFIABLE {assessment.unverifiable}")
-    for v in verdicts:
-        print(f"  {v.claim_id:<16} {v.status:<12} {v.grounds}")
-    print(f"assessment seal: {assessment.seal[:16]}... | self-consistent: {verify_assessment(assessment)}")
-    if args.registry:
-        check = _recheck_last(args.registry)
-        if check is not None:
-            print(f"re-derived from disk: {all(check.values())}  {check}")
-        print(f"recorded to {args.registry}")
-    return 0
-
-
 def _refutation_dict(r: Refutation) -> dict:
     return {"claim_id": r.claim_id, "claim_sha256": r.claim_sha256, "challenge": r.challenge,
             "measurable": r.measurable, "source": r.source}
