@@ -11,9 +11,9 @@ from __future__ import annotations
 import argparse
 
 from crucible import __version__
+from crucible.assess_cmd import STRICT_HELP, cmd_assess
 from crucible.batch_cmd import cmd_batch
 from crucible.commands import (
-    cmd_assess,
     cmd_export,
     cmd_measure,
     cmd_register,
@@ -82,6 +82,7 @@ def _add_core_commands(sub) -> None:
     ass.add_argument("thesis", help="path to a thesis JSON, or a thesis id when --registry is given")
     ass.add_argument("--measurements", default=None, metavar="FILE",
                      help="path to a measurements JSON; a claim with no measurement is UNVERIFIABLE")
+    ass.add_argument("--strict", action="store_true", help=STRICT_HELP)
     _add_common(ass)
     ass.set_defaults(func=cmd_assess)
 
@@ -115,6 +116,7 @@ def _add_core_commands(sub) -> None:
                      help="write the JSON run record to FILE")
     run.add_argument("--bundle", default=None, metavar="DIR",
                      help="create DIR with spec.json, run.json, report.md, and review.md")
+    run.add_argument("--strict", action="store_true", help=STRICT_HELP)
     run.add_argument("--json", action="store_true", help="emit JSON instead of human text")
     run.set_defaults(func=cmd_run)
 

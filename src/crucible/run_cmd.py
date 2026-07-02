@@ -7,6 +7,7 @@ import sys
 import time
 
 from crucible.assess import assess
+from crucible.assess_cmd import emit_warnings, measurement_warning_rows, strict_error
 from crucible.commands import (
     _load_measurements,
     _load_substrate,
@@ -44,6 +45,10 @@ def _run_once(args) -> dict:
         raise ValueError("run needs exactly one of --measurements or --substrate")
     paths = _output_paths(args)
     thesis = _resolve_thesis(args.thesis, args.registry)
+    warnings = measurement_warning_rows(thesis, args.measurements)
+    emit_warnings(warnings)
+    if args.strict and warnings:
+        raise strict_error(warnings)
     refutations = steelman_thesis(NullSteelman(), thesis)
     measurements = _measurements(thesis, args)
     assessment, verdicts = assess(thesis, measurements, clock=time.time, registry=Registry(args.registry))
@@ -57,6 +62,7 @@ def _run_once(args) -> dict:
         "refutations": [_refutation_dict(r) for r in refutations],
         "assessment": assessment.to_dict(),
         "verdicts": [_verdict_dict(v) for v in verdicts],
+        "measurement_warnings": warnings,
         "checks": checks,
         "report": refs["report"],
         "record": refs["record"],

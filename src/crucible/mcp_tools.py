@@ -6,6 +6,7 @@ from contextlib import redirect_stderr, redirect_stdout
 from io import StringIO
 
 from crucible.assess import assess
+from crucible.assess_cmd import explanation_rows, measurement_warning_rows, strict_error
 from crucible.commands import (
     _load_measurements,
     _read_json,
@@ -43,10 +44,14 @@ def tool_defs() -> list[dict]:
         },
         {
             "name": "crucible.assess",
-            "description": "Assess falsifiable claims against optional measurements and emit witnessed verdicts.",
+            "description": "Assess falsifiable claims against optional measurements and emit witnessed "
+                           "verdicts, ill-posed measurement warnings, and missing-evidence explanations "
+                           "for UNVERIFIABLE claims.",
             "inputSchema": _obj({
                 "thesis": _path("path to a thesis JSON file"),
                 "measurements": _path("optional path to a measurements JSON file"),
+                "strict": {"type": "boolean",
+                           "description": "error when measurement rows are ill-posed"},
             }, ["thesis"]),
         },
         {
@@ -183,13 +188,18 @@ def _invoke_cli(argv: list[str]) -> str:
     return text or json.dumps({"ok": code == 0, "stderr": errors}, indent=2)
 
 
-def _assess_from_files(thesis_path: str, measurements_path: str | None) -> dict:
+def _assess_from_files(thesis_path: str, measurements_path: str | None, *, strict: bool = False) -> dict:
     thesis = _thesis_from_data(_read_json(thesis_path), clock=time.time)
+    warnings = measurement_warning_rows(thesis, measurements_path)
+    if strict and warnings:
+        raise strict_error(warnings)
     measurements = _load_measurements(thesis, measurements_path)
     assessment, verdicts = assess(thesis, measurements, clock=time.time)
     return {
         "assessment": assessment.to_dict(),
         "verdicts": [_verdict_dict(verdict) for verdict in verdicts],
+        "measurement_warnings": warnings,
+        "explanations": explanation_rows(thesis, measurements),
     }
 
 
@@ -239,7 +249,8 @@ def call_tool(name: str, args: dict) -> str:
     if name == "crucible.assess":
         thesis = _require_str(args, "thesis")
         measurements = _optional_str(args, "measurements")
-        return json.dumps(_assess_from_files(thesis, measurements), indent=2, ensure_ascii=False)
+        payload = _assess_from_files(thesis, measurements, strict=args.get("strict") is True)
+        return json.dumps(payload, indent=2, ensure_ascii=False)
     if name == "crucible.recheck":
         index_value = args.get("index", -1)
         try:

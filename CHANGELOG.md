@@ -5,6 +5,23 @@ behind a feature branch and reviewed before merge.
 
 ## Unreleased
 
+- Missing-evidence explanations: every UNVERIFIABLE verdict now arrives with a typed
+  `{claim_id, missing, needed}` explanation naming the exact evidence class it lacks
+  (`falsification_condition`, `measurement`, `claim_binding`, `trusted_deviation`, or
+  `positive_tolerance`) and the one-line concrete action that would supply it. `crucible assess`
+  prints an `evidence needed` section whenever UNVERIFIABLE > 0 and carries `explanations` in
+  `--json`. The pure layer (`crucible.explain`) is gated on `verdict_for` itself, so an
+  explanation exists exactly when the verdict is UNVERIFIABLE and is never emitted for a claim
+  that verifies.
+- Ill-posed measurement warnings: a pre-assessment validation pass (`crucible.wellposed`) emits
+  typed, non-fatal warnings before assessment when measurement rows are ill-posed:
+  `non_positive_tolerance`, `untrusted_deviation` (negative, non-finite, or non-numeric),
+  `boolean_value` (a boolean that would silently coerce), `unbound_claim`, and
+  `duplicate_claim_binding`. `crucible assess` and `crucible run` print the warnings to stderr,
+  carry them in JSON output (`measurement_warnings`, including the run record), and accept
+  `--strict` to turn any warning into exit 1. Warnings never change a verdict.
+- MCP parity: `crucible.assess` now returns `measurement_warnings` and `explanations` alongside
+  the witnessed verdicts and accepts a `strict` flag that refuses ill-posed measurement files.
 - MATCH provenance: `crucible registry stats` now reports `match_provenance`
   (`witnessed` / `asserted` / `asserted_zero`), splitting each latest MATCH verdict by whether its
   measurement carries a replayable `recheck` descriptor or rests on an author-supplied deviation

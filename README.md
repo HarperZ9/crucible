@@ -219,6 +219,21 @@ Before handing the packet to a verifier, validate the cleanroom boundary:
 crucible review reports/binary-search-run --json
 ```
 
+## Evidence requests and measurement warnings
+
+An UNVERIFIABLE verdict names what is missing, not just that verification failed. When an
+assessment contains UNVERIFIABLE claims, `crucible assess` adds an `evidence needed` section (an
+`explanations` list under `--json`) with one typed row per claim: which evidence class is missing
+(`falsification_condition`, `measurement`, `claim_binding`, `trusted_deviation`, or
+`positive_tolerance`) and the concrete next action, such as the exact sha256 a measurement row
+must bind. A claim that verifies gets no explanation row.
+
+Before assessment runs, `crucible assess` and `crucible run` validate the measurements file and
+warn about rows that cannot produce a trustworthy verdict: non-positive tolerances, negative or
+non-finite deviations, boolean values that would silently coerce, rows bound to no claim in the
+thesis, and duplicate claim bindings. The warnings are typed, printed to stderr, carried in JSON
+output, and never change a verdict. Add `--strict` to make any warning exit nonzero.
+
 The review check fails closed if the bundle is missing required files, carries extra context such as
 notes or chat logs, omits the cleanroom verifier boundary, has a `spec.json` that no longer
 matches the run record, has a `report.md` that does not render from `run.json`, has failed
@@ -362,6 +377,12 @@ Shipped:
 - Readiness coverage: the bundled examples run through the public CLI under test, help output covers
   the shipped command surface, and `docs/RELEASE-READINESS.md` records the 1.0 gate checklist,
   including the spec-plus-artifact-only verifier rule.
+- Missing-evidence explanations: `crucible assess` presents each UNVERIFIABLE claim with a typed
+  explanation of the exact missing evidence class and the concrete next action, derived from the
+  same pure ladder as `verdict_for`, so the explanation can never disagree with the verdict.
+- Pre-assessment measurement validation: typed, non-fatal warnings for ill-posed measurement rows
+  (non-positive tolerance, untrusted deviation, boolean values, unbound or duplicate claim
+  bindings) on `crucible assess` and `crucible run`, with `--strict` to fail closed.
 - The `crucible` CLI: `register`, `assess`, `steelman`, `measure`,
   `run`, `measurement-gate`, `recheck`, `review`, `registry list|verify|stats|search|prune`, `refine`, `drift`,
   `report`, `batch`, `export`, `verdicts [--verify]`.
