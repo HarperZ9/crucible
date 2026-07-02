@@ -9,6 +9,7 @@ edges live behind Protocol seams with a Null default, so crucible stands alone a
 """
 from __future__ import annotations
 
+from crucible.artifact_store import ArtifactStore, artifact_sha
 from crucible.assess import (
     Assessment,
     assess,
@@ -33,6 +34,12 @@ from crucible.ecosystem_measure import (
     verify_index_verification,
 )
 from crucible.gate import export_guard, export_thesis, gate_check
+from crucible.judge import (
+    JudgeMeasure,
+    LLMJudgeFunc,
+    make_null_judge,
+    rubric_sha,
+)
 from crucible.measure import (
     Measure,
     MetricSpec,
@@ -82,13 +89,16 @@ from crucible.verdict import (
 __version__ = "1.1.0"
 
 __all__ = [
-    "Assessment", "Claim", "DriftReport", "DriftRow", "GatherDigestMeasure", "GradedCriterion",
-    "IndexMeasure", "Measure", "Measurement", "MetricSpec", "NullMeasure", "NullSteelman",
+    "ArtifactStore", "Assessment", "Claim", "DriftReport", "DriftRow", "GatherDigestMeasure",
+    "GradedCriterion",
+    "IndexMeasure", "JudgeMeasure", "LLMJudgeFunc", "Measure", "Measurement", "MetricSpec",
+    "NullMeasure", "NullSteelman",
     "RefineOutcome", "RefineReport", "Reflection", "Refutation", "Registry", "Steelman",
     "SubprocessMeasure", "SubprocessSteelman", "TableMeasure",
     "TelosMeasure", "Thesis", "Verdict",
     "DRIFT", "FENCED", "MATCH", "PUBLISHABLE", "UNVERIFIABLE",
-    "assess", "claim_body", "claim_hash", "cohesion", "content_hash", "make_claim", "make_thesis",
+    "artifact_sha", "assess", "claim_body", "claim_hash", "cohesion", "content_hash", "make_claim",
+    "make_null_judge", "make_thesis", "rubric_sha",
     "canonical_sha", "check_content", "drift_track", "export_guard", "export_thesis", "gate_check",
     "is_telos_artifact", "measure_thesis", "receipt_matches",
     "recheck_assessment", "recheck_measurements", "refine", "refine_thesis", "render_assessment_report",
