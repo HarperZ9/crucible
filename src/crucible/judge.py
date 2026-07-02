@@ -20,9 +20,11 @@ from crucible.artifact_store import ArtifactStore, artifact_sha
 from crucible.claim import Claim
 from crucible.verdict import Measurement
 
-# A judge takes (claim_text, artifact) and returns a scored assessment:
+# A judge takes (claim_text, artifact, rubric) and returns a scored assessment:
 #   {"deviation": float | None, "evidence": [str, ...], "recheck"?: {...}}
-JudgeFunc = Callable[[str, str], "Mapping[str, object]"]
+# The rubric is passed in (not closed over) so the sealed rubric_sha names the exact criteria the
+# judge scored against, and a live backend can put the real rubric into its prompt.
+JudgeFunc = Callable[[str, str, str], "Mapping[str, object]"]
 
 METHOD = "judge:llm"
 
@@ -30,10 +32,6 @@ METHOD = "judge:llm"
 def rubric_sha(rubric: str) -> str:
     """The first 16 hex of SHA-256(rubric), so the exact rubric can be verified on replay."""
     return hashlib.sha256(rubric.encode("utf-8")).hexdigest()[:16]
-
-
-def _template_sha(template: str) -> str:
-    return hashlib.sha256(template.encode("utf-8")).hexdigest()[:16]
 
 
 def make_null_judge() -> JudgeFunc:
@@ -44,7 +42,7 @@ def make_null_judge() -> JudgeFunc:
     decide a claim.
     """
 
-    def null_judge(claim_text: str, artifact: str) -> Mapping[str, object]:
+    def null_judge(claim_text: str, artifact: str, rubric: str) -> Mapping[str, object]:
         return {"deviation": None, "evidence": ("null judge: no score produced",)}
 
     null_judge.__name__ = "null_judge"
@@ -57,8 +55,9 @@ class LLMJudgeFunc:
     ``backend`` is any callable taking one prompt string and returning the judge's raw reply; it is
     the only impure edge and defaults to None, so nothing calls a model until a caller supplies one.
     ``parse`` turns the reply into ``{"deviation": float, "evidence": [...]}``. The prompt is built
-    from the rubric, the claim, and the artifact via ``prompt_template.format(...)``. This keeps the
-    live-LLM dependency behind the seam: tests pass a deterministic ``backend`` and never hit a model.
+    from the rubric (passed in at call time by ``JudgeMeasure``, so it is the exact sealed rubric), the
+    claim, and the artifact via ``prompt_template.format(...)``. This keeps the live-LLM dependency
+    behind the seam: tests pass a deterministic ``backend`` and never hit a model.
     """
 
     DEFAULT_TEMPLATE = (
@@ -80,10 +79,10 @@ class LLMJudgeFunc:
         self._template = prompt_template
         self.__name__ = name
 
-    def __call__(self, claim_text: str, artifact: str) -> Mapping[str, object]:
+    def __call__(self, claim_text: str, artifact: str, rubric: str) -> Mapping[str, object]:
         if self._backend is None:
             return {"deviation": None, "evidence": ("no LLM backend supplied",)}
-        prompt = self._template.format(rubric="", claim=claim_text, artifact=artifact)
+        prompt = self._template.format(rubric=rubric, claim=claim_text, artifact=artifact)
         return self._parse(self._backend(prompt))
 
 
@@ -109,14 +108,12 @@ class JudgeMeasure:
         artifacts: Mapping[str, str],
         *,
         artifact_store: ArtifactStore | None = None,
-        prompt_template: str | None = None,
         clock: Callable[[], float] = time.time,
     ) -> None:
         self._judge = judge
         self._rubric = rubric
         self._artifacts = dict(artifacts)
         self._store = artifact_store
-        self._template = prompt_template
         self._clock = clock
 
     def measure(self, claim: Claim) -> Measurement:
@@ -125,7 +122,7 @@ class JudgeMeasure:
             return self._measurement(claim, None, ("no artifact for claim",), None)
         recheck = self._recheck(artifact)
         try:
-            scored = self._judge(claim.text, artifact)
+            scored = self._judge(claim.text, artifact, self._rubric)
         except Exception as exc:  # noqa: BLE001 - the judge is an impure edge; a failure is fail-closed evidence.
             return self._measurement(claim, None, (f"judge raised: {exc}",), recheck)
         deviation = _trusted_deviation(scored)
@@ -146,15 +143,12 @@ class JudgeMeasure:
         return ref
 
     def _recheck(self, artifact: str) -> dict[str, object]:
-        recheck: dict[str, object] = {
+        return {
             "oracle": METHOD,
             "judge": _judge_name(self._judge),
             "rubric_sha": rubric_sha(self._rubric),
             "artifact_sha": artifact_sha(artifact),
         }
-        if self._template is not None:
-            recheck["prompt_template_sha"] = _template_sha(self._template)
-        return recheck
 
     def _measurement(self, claim: Claim, deviation: float | None, evidence: tuple[str, ...],
                      recheck: Mapping[str, object] | None) -> Measurement:

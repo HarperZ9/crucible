@@ -22,7 +22,7 @@ RUBRIC = "The answer must be factually accurate and cite sources."
 def stub_judge(deviation):
     """A deterministic stub judge: returns a fixed deviation independent of the artifact content."""
 
-    def judge(claim_text: str, artifact: str) -> dict:
+    def judge(claim_text: str, artifact: str, rubric: str) -> dict:
         return {
             "deviation": deviation,
             "evidence": [f"artifact length {len(artifact)} chars"],
@@ -126,9 +126,34 @@ def test_llm_judge_func_puts_the_live_backend_behind_the_seam():
     m = measure.measure(claim)
 
     assert len(calls) == 1  # the backend was called exactly once, at the impure seam
+    assert RUBRIC in calls[0]  # the rubric actually reaches the backend prompt, not an empty string
+    assert "grounded answer" in calls[0]  # the artifact reaches the prompt too
     assert m.deviation == 0.2
     assert m.recheck["judge"] == "fake-llm-v1"
     assert verdict_for(claim, m).status == MATCH
+
+
+def test_llm_judge_func_uses_the_measures_rubric_in_the_prompt():
+    """The rubric supplied to JudgeMeasure (and sealed) is the rubric the backend actually sees."""
+    claim = make_claim("the answer is grounded", "the judge scores it below the bar")
+    seen: list[str] = []
+
+    def fake_backend(prompt: str) -> str:
+        seen.append(prompt)
+        return "score: 0.1"
+
+    def parse(reply: object) -> dict:
+        return {"deviation": float(str(reply).split(":")[1]), "evidence": ["ok"]}
+
+    judge = LLMJudgeFunc(fake_backend, parse=parse, name="llm")
+    other_rubric = "The answer must be concise and never speculate."
+    measure = JudgeMeasure(judge=judge, rubric=other_rubric,
+                           artifacts={claim.id: "grounded answer"}, clock=CLOCK)
+
+    measure.measure(claim)
+
+    assert other_rubric in seen[0]
+    assert RUBRIC not in seen[0]
 
 
 def test_llm_judge_func_without_a_backend_is_unverifiable():
@@ -167,7 +192,7 @@ def test_judge_measure_no_artifact_is_unverifiable():
 def test_judge_measure_non_numeric_deviation_fails_closed():
     claim = make_claim("the answer is grounded", "the judge scores it below the bar")
 
-    def bad_judge(claim_text: str, artifact: str) -> dict:
+    def bad_judge(claim_text: str, artifact: str, rubric: str) -> dict:
         return {"deviation": "not a number", "evidence": ["oops"]}
 
     measure = JudgeMeasure(judge=bad_judge, rubric=RUBRIC,
@@ -182,7 +207,7 @@ def test_judge_measure_non_numeric_deviation_fails_closed():
 def test_judge_that_raises_is_unverifiable_not_a_crash():
     claim = make_claim("the answer is grounded", "the judge scores it below the bar")
 
-    def throwing_judge(claim_text: str, artifact: str) -> dict:
+    def throwing_judge(claim_text: str, artifact: str, rubric: str) -> dict:
         raise RuntimeError("live judge backend is down")
 
     measure = JudgeMeasure(judge=throwing_judge, rubric=RUBRIC,

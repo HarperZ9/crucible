@@ -156,13 +156,14 @@ or trust the carried verdict without replaying the pack.
 natural-language rubric, the way DeepEval and Ragas do, but WITHOUT putting a model in the verdict. A
 judge function is injected at the impure Measure seam and runs once to produce a grounded numeric
 deviation; `verdict_for` then decides from the stored `Measurement` like any other. The judge is
-`Callable[[claim_text, artifact], {"deviation", "evidence", ...}]`, so tests pass a deterministic stub
-and a live LLM stays behind the seam (`LLMJudgeFunc` wraps an injectable backend; `make_null_judge`
+`Callable[[claim_text, artifact, rubric], {"deviation", "evidence", ...}]`, so tests pass a
+deterministic stub and a live LLM stays behind the seam (`LLMJudgeFunc` wraps an injectable backend
+and puts the passed rubric into its prompt; `make_null_judge`
 is the standing UNVERIFIABLE default that keeps crucible standing alone). A trustworthy numeric score
 becomes that deviation against tolerance 1.0; a missing artifact, a non-numeric score, or a judge
 that raises all fail closed to UNVERIFIABLE, never an asserted MATCH. The produced Measurement
 persists a `judge:llm` recheck descriptor naming the judge identity and sealing the rubric and
-artifact (`rubric_sha`, `artifact_sha`, optional `prompt_template_sha`), so a later assessment replay
+artifact (`rubric_sha`, `artifact_sha`), so a later assessment replay
 re-runs the same judge from the stored row: a silently flipped deviation is caught when the honest
 score is reproduced and the sealed measurement inputs no longer match. Large artifacts can live in an
 `ArtifactStore` keyed by SHA-256 so descriptors carry only the hash. The score is witnessed and
