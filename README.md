@@ -374,6 +374,13 @@ Shipped:
   claim's expected evidence receipt exists; `IndexMeasure` consumes `index.verification/1` records
   and replays their structural claims against supplied graph packs. Both map into the same normal
   `Measurement` -> `verdict_for` spine.
+- LLM-as-judge: `JudgeMeasure` scores freeform outputs (a model answer, a RAG response, a document)
+  against a natural-language rubric the way DeepEval and Ragas do, but keeps the model out of the
+  verdict. An injected judge runs once at the impure seam to produce a grounded deviation; a live LLM
+  stays behind an injectable backend (`LLMJudgeFunc`), tests use a deterministic stub, and the default
+  is `make_null_judge` (UNVERIFIABLE). A non-numeric score or a judge that raises fails closed. The
+  Measurement stores a `judge:llm` descriptor that names the judge and seals the rubric and artifact,
+  so the score is re-runnable and a silently flipped deviation is caught on recheck.
 - Readiness coverage: the bundled examples run through the public CLI under test, help output covers
   the shipped command surface, and `docs/RELEASE-READINESS.md` records the 1.0 gate checklist,
   including the spec-plus-artifact-only verifier rule.
