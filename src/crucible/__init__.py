@@ -19,6 +19,17 @@ from crucible.assess import (
     verify_assessment,
 )
 from crucible.browser_evidence import verify_browser_evidence
+from crucible.ci_gate import (
+    Cell,
+    GateReport,
+    GateRow,
+    Snapshot,
+    cells_from_latest,
+    gate,
+    make_snapshot,
+    snapshot_seal,
+)
+from crucible.ci_report import render_gate_markdown
 from crucible.claim import Claim, claim_body, claim_hash, content_hash, make_claim
 from crucible.drift import (
     DriftReport,
@@ -89,18 +100,21 @@ from crucible.verdict import (
 __version__ = "1.1.0"
 
 __all__ = [
-    "ArtifactStore", "Assessment", "Claim", "DriftReport", "DriftRow", "GatherDigestMeasure",
+    "ArtifactStore", "Assessment", "Cell", "Claim", "DriftReport", "DriftRow", "GateReport", "GateRow",
+    "GatherDigestMeasure",
     "GradedCriterion",
     "IndexMeasure", "JudgeMeasure", "LLMJudgeFunc", "Measure", "Measurement", "MetricSpec",
     "NullMeasure", "NullSteelman",
-    "RefineOutcome", "RefineReport", "Reflection", "Refutation", "Registry", "Steelman",
+    "RefineOutcome", "RefineReport", "Reflection", "Refutation", "Registry", "Snapshot", "Steelman",
     "SubprocessMeasure", "SubprocessSteelman", "TableMeasure",
     "TelosMeasure", "Thesis", "Verdict",
     "DRIFT", "FENCED", "MATCH", "PUBLISHABLE", "UNVERIFIABLE",
     "artifact_sha", "assess", "claim_body", "claim_hash", "cohesion", "content_hash", "make_claim",
     "make_null_judge", "make_thesis", "rubric_sha",
-    "canonical_sha", "check_content", "drift_track", "export_guard", "export_thesis", "gate_check",
-    "is_telos_artifact", "measure_thesis", "receipt_matches",
+    "canonical_sha", "cells_from_latest", "check_content", "drift_track", "export_guard",
+    "export_thesis", "gate", "gate_check",
+    "is_telos_artifact", "make_snapshot", "measure_thesis", "receipt_matches", "render_gate_markdown",
+    "snapshot_seal",
     "recheck_assessment", "recheck_measurements", "refine", "refine_thesis", "render_assessment_report",
     "steelman_thesis", "margin", "verify_measurement_packet",
     "prune_objects", "registry_stats", "search_theses", "thesis_seal", "verdict_for", "verdict_seal",

@@ -13,6 +13,7 @@ import argparse
 from crucible import __version__
 from crucible.assess_cmd import STRICT_HELP, cmd_assess
 from crucible.batch_cmd import cmd_batch
+from crucible.ci_cmd import cmd_ci
 from crucible.commands import (
     cmd_export,
     cmd_measure,
@@ -204,6 +205,19 @@ def _add_artifact_commands(sub) -> None:
     dr.add_argument("dir", help="the registry directory")
     dr.add_argument("--json", action="store_true", help="emit JSON instead of human text")
     dr.set_defaults(func=cmd_drift)
+
+    ci = sub.add_parser("ci",
+                        help="CI regression gate: compare a registry's verdicts against a baseline, "
+                             "fail on regression, emit a PR-comment Markdown summary")
+    ci.add_argument("dir", help="the registry directory")
+    ci.add_argument("--baseline", default=None, metavar="FILE",
+                    help="baseline snapshot to gate against (written by --write-baseline)")
+    ci.add_argument("--write-baseline", default=None, metavar="FILE",
+                    help="capture the current verified-latest verdicts as a baseline and exit")
+    ci.add_argument("--out", default=None, metavar="FILE",
+                    help="write the Markdown gate summary to FILE (the exit code still signals regressions)")
+    ci.add_argument("--json", action="store_true", help="emit the gate report as JSON instead of Markdown")
+    ci.set_defaults(func=cmd_ci)
 
 
 def main(argv: list[str] | None = None) -> int:

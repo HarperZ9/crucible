@@ -219,6 +219,85 @@ Before handing the packet to a verifier, validate the cleanroom boundary:
 crucible review reports/binary-search-run --json
 ```
 
+## CI regression gate
+
+`crucible ci` turns a registry into a pull-request gate. It never re-judges the thesis: it reads the
+verified-latest verdict per (thesis, claim) that already re-derives from the record, compares it to a
+baseline captured on a known-good commit, and fails the build only when a claim loses standing.
+
+Capture a baseline on your main branch (or whenever you accept the current posture):
+
+```bash
+crucible ci .crucible-registry --write-baseline crucible-baseline.json
+```
+
+Then gate a change against it. The command prints a PR-comment-ready Markdown summary and exits
+nonzero when any claim regressed:
+
+```bash
+crucible ci .crucible-registry --baseline crucible-baseline.json --out crucible-ci.md
+```
+
+A regression is a claim moving `MATCH -> DRIFT`, becoming `UNVERIFIABLE`, or dropping out of the
+verified-latest set (fail-closed: a claim that lost its witnessed standing is never read as held). A
+newly appearing claim or an improvement does not fail the gate. Every cell in the matrix references
+the assessment seal it was read from, so a reviewer re-derives any packet with
+`crucible verdicts .crucible-registry --verify`. The baseline file carries its own seal over its
+cells, so a hand-edited baseline (a downgraded status) is rejected on load.
+
+The summary is a pure function of the registry state, so it is byte-for-byte deterministic across
+runs. Add `--json` for the full gate report (rows, movement counts, and the regression list).
+
+### GitHub Action
+
+The gate is one CLI call, so a workflow is short. This job assesses the theses, gates against a
+committed baseline, and posts the Markdown summary as a PR comment. The baseline
+(`crucible-baseline.json`) is committed to the repository and refreshed by a maintainer when the
+posture legitimately moves forward.
+
+```yaml
+name: crucible-ci
+on: [pull_request]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install crucible-bench
+      # Build the registry for this commit however your repo assesses its theses, e.g.:
+      #   crucible run theses/thesis.json --registry .crucible-registry --measurements measurements.json
+      - name: Gate against the baseline
+        run: |
+          crucible ci .crucible-registry \
+            --baseline crucible-baseline.json \
+            --out crucible-ci.md
+      - name: Post the gate summary
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('crucible-ci.md', 'utf8');
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });
+```
+
+The `crucible ci` step exits nonzero on regression, which fails the job. The comment step runs with
+`if: always()` so the summary is posted whether the gate passed or failed. Writing the summary to a
+file with `--out` keeps the exit code intact for the gate step.
+
 ## Evidence requests and measurement warnings
 
 An UNVERIFIABLE verdict names what is missing, not just that verification failed. When an
@@ -334,6 +413,12 @@ Shipped:
 - Drift tracking across witnessed assessments: `drift_track(previous, current)` and
   `crucible drift REGISTRY` compare the latest two rounds and classify each claim as held, moved,
   improved, or regressed from the recorded margins.
+- CI regression gate: `crucible ci REGISTRY --write-baseline FILE` captures the current verified-latest
+  verdict per (thesis, claim) as a sealed baseline, and `crucible ci REGISTRY --baseline FILE` re-derives
+  the current verdicts, exits nonzero on regression (a claim moving MATCH -> DRIFT, becoming
+  UNVERIFIABLE, or dropping out of the verified-latest set), and emits a deterministic PR-comment-ready
+  Markdown matrix whose every cell references the re-derivable assessment packet. See
+  [CI regression gate](#ci-regression-gate) for the command and a GitHub Action snippet.
 - Assessment reports: `render_assessment_report` and `crucible report REGISTRY` render a deterministic
   Markdown artifact with counts, seals, integrity checks, verdict dispositions, measurement evidence,
   and recheck descriptors.
