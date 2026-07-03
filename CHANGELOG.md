@@ -5,6 +5,19 @@ behind a feature branch and reviewed before merge.
 
 ## Unreleased
 
+- CI regression gate: a new `crucible ci REGISTRY` command turns a registry into a pull-request gate.
+  `--write-baseline FILE` captures the current verified-latest verdict per (thesis, claim) as a sealed
+  baseline snapshot (`crucible.ci-baseline/v1`); `--baseline FILE` re-derives the current verdicts,
+  compares them against the baseline, and exits nonzero on regression (a claim moving `MATCH -> DRIFT`,
+  becoming `UNVERIFIABLE`, or dropping out of the verified-latest set, which is fail-closed). The pure
+  layer (`crucible.ci_gate`) ranks the recorded verdict statuses over two snapshots and the render layer
+  (`crucible.ci_report`) emits a deterministic PR-comment-ready Markdown matrix; every cell references
+  the assessment seal it was read from, so a reviewer re-derives any packet with
+  `crucible verdicts REGISTRY --verify`. The baseline file seals its own cells, so a hand-edited
+  baseline is rejected on load. `--out FILE` writes the summary while preserving the gate exit code, and
+  `--json` emits the full gate report. The gate rides on the existing witnessed assessments: it re-reads
+  the same verified-latest state `registry stats` uses and never opens a second verdict path. README
+  documents the command and ships a ready-to-copy GitHub Action snippet.
 - Missing-evidence explanations: every UNVERIFIABLE verdict now arrives with a typed
   `{claim_id, missing, needed}` explanation naming the exact evidence class it lacks
   (`falsification_condition`, `measurement`, `claim_binding`, `trusted_deviation`, or
