@@ -1,6 +1,5 @@
 from crucible.browser_evidence import verify_browser_evidence
 
-
 PACKET = {
     "schema": "project-telos.browser-evidence/v1",
     "mode": "research-capture",
