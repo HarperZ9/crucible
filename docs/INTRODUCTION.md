@@ -111,8 +111,7 @@ metadata, or a report that no longer renders from the run record.
 ## Where to go next
 
 - **Gate your CI on verdicts.** `crucible ci REGISTRY --write-baseline FILE` then
-  `--baseline FILE` fails a build when any claim loses standing. Merged to main after 1.1.0;
-  available today from a source checkout, on PyPI in the next release. The README has a
+  `--baseline FILE` fails a build when any claim loses standing. New in 1.2.0. The README has a
   ready-to-copy GitHub Action.
 - **Plug in your own oracle.** Start with `SubprocessMeasure` (a configured command over bounded
   JSON stdio) or the interop edges: `TelosMeasure`, `GatherDigestMeasure`, `IndexMeasure`,

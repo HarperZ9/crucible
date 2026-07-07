@@ -95,9 +95,9 @@ def status_payload() -> dict:
             "presentation": {
                 "readme": "current",
                 "changelog": "current",
-                "status_block": "1.1.0 operator floor",
+                "status_block": "1.2.0 operator floor",
             },
-            "current_status": "1.1.0 operator floor with run, review, recheck, and MCP parity",
+            "current_status": "1.2.0 operator floor with run, review, recheck, CI gate, judge oracle, and MCP parity",
             "telos_contracts": TELOS_CONTRACTS,
         },
         next_actions=[_next("telos", "workflow", "carry verified claims into the shared room")],
