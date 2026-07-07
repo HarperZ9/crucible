@@ -19,10 +19,15 @@ def test_flagship_brand_assets_exist_and_are_referenced():
     for rel in [
         "docs/brand/crucible-mark.svg",
         "docs/brand/crucible-hero.png",
+        ".github/assets/banner.svg",
         "examples/crucible-demo.html",
     ]:
         assert (root / rel).exists(), rel
-        assert rel in readme
+    for rel in [
+        ".github/assets/banner.svg",
+        "examples/crucible-demo.html",
+    ]:
+        assert rel in readme, rel
     assert "## Why it matters" in readme
     assert "## Work with it" in readme
     demo = (root / "examples/crucible-demo.html").read_text(encoding="utf-8")
