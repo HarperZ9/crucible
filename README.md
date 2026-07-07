@@ -17,13 +17,13 @@ crucible turns a thesis into a set of claims, each paired with the observation t
 
 - **Verdicts that recompute from the record.** `verdict_for(claim, measurement)` is a pure function: within tolerance is MATCH, outside is DRIFT, absent or unmeasurable is UNVERIFIABLE, fail-closed. No model sits in the verdict step, so a fluent assertion cannot move a rechecked result.
 - **One-command runs with cleanroom review packets.** `crucible run --bundle DIR` executes steelman, measurement, witnessed assessment, and disk recheck in one session, then writes a self-contained verifier packet (`spec.json`, `run.json`, `report.md`, `review.md`). `crucible review DIR` validates the packet boundary before handoff.
-- **A CI regression gate.** `crucible ci` compares a registry's verified-latest verdicts against a sealed baseline, exits nonzero when any claim loses standing, and emits a deterministic PR-comment Markdown matrix. In main now; ships in the release after 1.1.0.
+- **A CI regression gate.** `crucible ci` compares a registry's verified-latest verdicts against a sealed baseline, exits nonzero when any claim loses standing, and emits a deterministic PR-comment Markdown matrix. New in 1.2.0.
 - **A refine loop that names the weakest claim.** Grade each claim's measured margin, compute harmonic-mean cohesion, and re-measure across substrate rounds until the thesis is cohesively verified or the budget is spent. The loop reports the weakest axis instead of pretending a short thesis held.
 - **Drift tracking across rounds.** `crucible drift` compares the latest two witnessed assessments and classifies each claim as held, moved, improved, or regressed.
-- **LLM-as-judge with the model outside the verdict.** `JudgeMeasure` scores freeform outputs against a rubric; the judge produces a deviation once at the seam, the verdict still derives from `verdict_for`, and a judge that raises or returns garbage fails closed. In main now; ships in the release after 1.1.0.
+- **LLM-as-judge with the model outside the verdict.** `JudgeMeasure` scores freeform outputs against a rubric; the judge produces a deviation once at the seam, the verdict still derives from `verdict_for`, and a judge that raises or returns garbage fails closed. New in 1.2.0.
 - **Oracle recheck packs.** `crucible recheck` lists descriptor-bearing measurements, writes replay templates, and validates finished replay packs against the sealed rows without opening a second verdict path.
 - **A content-addressed registry with tamper detection.** Every claim carries a sha256 receipt; the registry re-verifies stored claims (MATCH / MISSING / CORRUPT), checks thesis seals, rejects duplicate ids with different seals, and refuses tampered theses.
-- **Typed missing-evidence explanations.** Every UNVERIFIABLE verdict names the exact evidence class it lacks and the concrete next action, derived from the same pure ladder as the verdict, so the explanation can never disagree with it. In main now; ships in the release after 1.1.0.
+- **Typed missing-evidence explanations.** Every UNVERIFIABLE verdict names the exact evidence class it lacks and the concrete next action, derived from the same pure ladder as the verdict, so the explanation can never disagree with it. New in 1.2.0.
 - **Batch manifests, Markdown reports, creative measurement gates, native MCP.** `crucible batch` runs a manifest of theses into one registry, `crucible report` renders deterministic Markdown, `crucible measurement-gate` verifies Telos creative measurement packets, and `crucible mcp` serves 13 tools over stdio.
 - **Zero third-party runtime dependencies.** The core is pure standard library, Python 3.11+.
 
@@ -108,7 +108,7 @@ crucible review reports/my-run
 
 The bundle gives a verifier only the spec and the artifact, with packet-relative paths. `review` fails closed on missing files, extra context, a `spec.json` that drifted from the run record, or a `report.md` that no longer renders from `run.json`.
 
-To gate pull requests on the registry (from a source checkout today, in the next PyPI release):
+To gate pull requests on the registry:
 
 ```bash
 crucible ci .crucible-registry --write-baseline crucible-baseline.json   # on a known-good commit
@@ -126,7 +126,7 @@ A regression is a claim moving MATCH to DRIFT, becoming UNVERIFIABLE, or droppin
 | `crucible review BUNDLE` | validate a cleanroom packet before verifier handoff |
 | `crucible refine CONFIG` | rounds of substrate refinement toward cohesive verification |
 | `crucible drift DIR` | classify claim movement between the latest two assessments |
-| `crucible ci DIR` | regression gate against a sealed baseline (post-1.1.0, in main) |
+| `crucible ci DIR` | regression gate against a sealed baseline |
 | `crucible recheck DIR` | inspect, template, or replay oracle measurement descriptors |
 | `crucible registry list\|verify\|stats\|search\|prune` | registry operations, including `--require-witnessed-match` |
 | `crucible verdicts DIR [--verify]` | list or re-derive witnessed assessments |
@@ -161,7 +161,7 @@ All edges map into the same `Measurement` to `verdict_for` spine. The verdict st
 
 ## Status
 
-`crucible-bench 1.1.0` is on PyPI: the full loop, one-command runs, cleanroom review packets, oracle replay, registry operations, creative measurement gates, and the MCP bridge. Merged to main since 1.1.0 and shipping in the next release: the CI regression gate, LLM-as-judge, missing-evidence explanations, and ill-posed measurement warnings. The test suite currently collects 330 tests. Within Project Telos, crucible is the measured-judgment layer: it consumes gather evidence and index context and emits verdict packets that telos can surface and replay.
+`crucible-bench 1.2.0` covers the full loop, one-command runs, cleanroom review packets, oracle replay, registry operations, creative measurement gates, and the MCP bridge, plus what landed since 1.1.0: the CI regression gate, LLM-as-judge, missing-evidence explanations, ill-posed measurement warnings, and the MATCH-provenance gate. The test suite currently collects 330 tests. Within Project Telos, crucible is the measured-judgment layer: it consumes gather evidence and index context and emits verdict packets that telos can surface and replay.
 
 ## Why it matters
 

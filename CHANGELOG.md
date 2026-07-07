@@ -3,7 +3,10 @@
 All notable changes to crucible. Versions follow semantic versioning; each minor release is built
 behind a feature branch and reviewed before merge.
 
-## Unreleased
+## 1.2.0 (2026-07-07)
+
+CI regression gate, LLM-as-judge on the Measure seam, provenance gates over witnessed MATCH
+verdicts, and a visual-identity and docs refresh.
 
 - CI regression gate: a new `crucible ci REGISTRY` command turns a registry into a pull-request gate.
   `--write-baseline FILE` captures the current verified-latest verdict per (thesis, claim) as a sealed
@@ -45,28 +48,24 @@ behind a feature branch and reviewed before merge.
   per-row `recheck` descriptor through to the sealed measurement record (previously silently
   dropped), so the manual-measurements path can author witnessed MATCH verdicts; a non-object
   `recheck` is rejected.
-- CLI compatibility: `python -m crucible` now dispatches the normal Crucible CLI, so source
-  checkouts, MCP hosts, IDE harnesses, and automation runners can use the same command surface as
-  the installed `crucible` script.
-- Creative measurement gate: adds `crucible measurement-gate PACKET [--criteria FILE]` and the
-  `crucible.measurement_gate` MCP tool for verifying Telos histogram, dither, Gaussian-splat,
-  clustered-lighting, and audio-spectral measurement packets without exporting raw pixels, assets,
-  prompts, tool arguments, or full payloads.
-- Gate verdicts: keeps `decision_outcome` (`allow`, `require_review`, `block`) separate from
-  `verification_verdict` (MATCH, DRIFT, UNVERIFIABLE) and emits normalized failure codes for operator
-  alerting, including raw payload leaks, cluster budget overruns, dither-pattern gaps, provenance
-  gaps, pixel-dimension mismatches, and audio-spectrum gaps.
-- MCP parity: expands the stdio MCP server beyond status/doctor/assess/recheck to host-call the run, review, report, batch, registry, drift, refine, and verdicts workflows through the existing CLI contract.
-
-- Enterprise readiness: adds `docs/ENTERPRISE-READINESS.md` for context envelopes, action receipts, readability gates, and host-neutral operation.
-- Operator surface: the status payload now advertises shared Project Telos CLI/MCP/plugin/IDE/TUI/app contracts for enterprise, research, creative, scientific, and education workflows.
-
-Presentation and operator-surface housekeeping for Project Telos parity.
-
-- README: brings Crucible up to the shared five-flagship presentation shape with title-case product naming, current CI badge, consistent navigation, and a current-status block.
-- Status copy: updates the visible status from the old 1.0 flagship floor to the 1.1 operator floor.
-- Status payload: exposes the primary workflow commands, current operator commands, integration surfaces, presentation freshness, MCP tool names, and the 1.1 operator-floor summary under `native`.
-- MCP tools: records native availability for `crucible.status`, `crucible.doctor`, `crucible.assess`, `crucible.measurement_gate`, `crucible.recheck`, `crucible.run`, `crucible.review`, `crucible.report`, `crucible.batch`, `crucible.registry`, `crucible.drift`, `crucible.refine`, and `crucible.verdicts`.
+- LLM-as-judge on the Measure seam: `JudgeMeasure` scores a freeform artifact (a model answer, a
+  RAG response, a document) against a natural-language rubric through an injected judge and emits
+  a grounded numeric deviation that flows through the same pure `verdict_for` spine, so no model
+  sits in the verdict step. The judge is injectable: a deterministic stub in tests, a live LLM
+  behind `LLMJudgeFunc`, and `make_null_judge` as the standing UNVERIFIABLE default. A missing
+  artifact, a non-numeric score, or a judge that raises fails closed. Each judged measurement
+  persists a `judge:llm` recheck descriptor sealing the rubric and the artifact hash, so a
+  silently flipped deviation is caught on assessment replay; `ArtifactStore` is a SHA-256-keyed
+  artifact cache so descriptors carry only the hash.
+- Browser evidence packets: `verify_browser_evidence` verifies Telos
+  `project-telos.browser-evidence/v1` packets locally over the packet shape, the carried verifier
+  verdict, artifact hashes, and the side-effect record. Raw DOM, screenshots, and session data
+  stay outside the model boundary unless a later tool explicitly dereferences them.
+- Visual identity refresh: the README leads with the Project Telos spectrum banner and a
+  feature-first header, and gains a live PyPI downloads badge.
+- Docs overhaul: a new `docs/INTRODUCTION.md` walks the core concepts and the first ten minutes,
+  the README body is rewritten feature-first around the highlights, and the delivery contract
+  follows the new visual identity.
 
 ## 1.1.0
 
@@ -99,6 +98,24 @@ Operator run surface.
   absolute, local, or renamed away from the packet-relative contract.
 - Cleanroom review now requires `run.json` to declare passing embedded integrity checks before
   verifier handoff.
+- CLI compatibility: `python -m crucible` now dispatches the normal Crucible CLI, so source
+  checkouts, MCP hosts, IDE harnesses, and automation runners can use the same command surface as
+  the installed `crucible` script.
+- Creative measurement gate: adds `crucible measurement-gate PACKET [--criteria FILE]` and the
+  `crucible.measurement_gate` MCP tool for verifying Telos histogram, dither, Gaussian-splat,
+  clustered-lighting, and audio-spectral measurement packets without exporting raw pixels, assets,
+  prompts, tool arguments, or full payloads.
+- Gate verdicts: keeps `decision_outcome` (`allow`, `require_review`, `block`) separate from
+  `verification_verdict` (MATCH, DRIFT, UNVERIFIABLE) and emits normalized failure codes for operator
+  alerting, including raw payload leaks, cluster budget overruns, dither-pattern gaps, provenance
+  gaps, pixel-dimension mismatches, and audio-spectrum gaps.
+- MCP parity: expands the stdio MCP server beyond status/doctor/assess/recheck to host-call the run, review, report, batch, registry, drift, refine, and verdicts workflows through the existing CLI contract.
+- Enterprise readiness: adds `docs/ENTERPRISE-READINESS.md` for context envelopes, action receipts, readability gates, and host-neutral operation.
+- Operator surface: the status payload now advertises shared Project Telos CLI/MCP/plugin/IDE/TUI/app contracts for enterprise, research, creative, scientific, and education workflows.
+- README: brings Crucible up to the shared five-flagship presentation shape with title-case product naming, current CI badge, consistent navigation, and a current-status block.
+- Status copy: updates the visible status from the old 1.0 flagship floor to the 1.1 operator floor.
+- Status payload: exposes the primary workflow commands, current operator commands, integration surfaces, presentation freshness, MCP tool names, and the 1.1 operator-floor summary under `native`.
+- MCP tools: records native availability for `crucible.status`, `crucible.doctor`, `crucible.assess`, `crucible.measurement_gate`, `crucible.recheck`, `crucible.run`, `crucible.review`, `crucible.report`, `crucible.batch`, `crucible.registry`, `crucible.drift`, `crucible.refine`, and `crucible.verdicts`.
 
 ## 1.0.0
 
