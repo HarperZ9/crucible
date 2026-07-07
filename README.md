@@ -1,20 +1,17 @@
-<p align="center">
-  <img src="docs/brand/crucible-hero.png" alt="Crucible, check claims against evidence">
-</p>
-<!-- Project mark: docs/brand/crucible-mark.svg -->
+<p align="center"><img src=".github/assets/banner.svg" alt="crucible: A judgment engine: register a thesis, steelman each claim, measure against a substrate, refine the weakest axis." width="100%"></p>
 
-# crucible
+**A judgment engine: register a thesis, steelman each claim, measure against a substrate, refine the weakest axis.**
 
-> Check claims against evidence and return a verdict.
+[![PyPI](https://img.shields.io/pypi/v/crucible-bench?style=flat-square&labelColor=14041b&color=9683ff)](https://pypi.org/project/crucible-bench/)
+![license: crucible Fair-Source](https://img.shields.io/badge/license-crucible%20Fair--Source-8f8095?style=flat-square&labelColor=14041b)
+[![CI](https://github.com/HarperZ9/crucible/actions/workflows/ci.yml/badge.svg)](https://github.com/HarperZ9/crucible/actions/workflows/ci.yml)
+[![downloads](https://img.shields.io/pypi/dm/crucible-bench?label=downloads&style=flat-square&labelColor=14041b)](https://pypi.org/project/crucible-bench/)
+![python: 3.11+](https://img.shields.io/badge/python-3.11%2B-blue?style=flat-square&labelColor=14041b)
+![deps: none (core)](https://img.shields.io/badge/core%20deps-none-success?style=flat-square&labelColor=14041b)
+
+crucible turns a thesis into a set of claims, each paired with the observation that would refute it. Independent adversaries steelman every claim by proposing the strongest test, the engine measures each one against a substrate oracle, and the weakest axis gets refined across rounds: strengthen the substrate, sharpen the measurement, or amend the thesis. The result is a verdict per claim, MATCH, DRIFT, or UNVERIFIABLE, grounded in the measurement rather than a judge's opinion. Every run writes a record you can re-check.
 
 [Project Telos](https://harperz9.github.io) | [gather](https://github.com/HarperZ9/gather) | [crucible](https://github.com/HarperZ9/crucible) | [index](https://github.com/HarperZ9/index) | [forum](https://github.com/HarperZ9/forum) | [telos](https://github.com/HarperZ9/telos) | [learn](https://github.com/HarperZ9/learn) | [emet](https://github.com/HarperZ9/emet) | [buildlang](https://github.com/HarperZ9/buildlang)
-
-[![CI](https://github.com/HarperZ9/crucible/actions/workflows/ci.yml/badge.svg)](https://github.com/HarperZ9/crucible/actions/workflows/ci.yml)
-[![PyPI](https://img.shields.io/pypi/v/crucible-bench.svg)](https://pypi.org/project/crucible-bench/)
-[![downloads](https://img.shields.io/pypi/dm/crucible-bench.svg?label=downloads)](https://pypi.org/project/crucible-bench/)
-![python: 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)
-![deps: none (core)](https://img.shields.io/badge/core%20deps-none-success.svg)
-![license: fair-source](https://img.shields.io/badge/license-fair--source-blue.svg)
 
 ## Try it
 
