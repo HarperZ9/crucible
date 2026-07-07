@@ -163,7 +163,7 @@ All edges map into the same `Measurement` to `verdict_for` spine. The verdict st
 
 `crucible-bench 1.1.0` is on PyPI: the full loop, one-command runs, cleanroom review packets, oracle replay, registry operations, creative measurement gates, and the MCP bridge. Merged to main since 1.1.0 and shipping in the next release: the CI regression gate, LLM-as-judge, missing-evidence explanations, and ill-posed measurement warnings. The test suite currently collects 330 tests. Within Project Telos, crucible is the measured-judgment layer: it consumes gather evidence and index context and emits verdict packets that telos can surface and replay.
 
-## The receipt
+## Why it matters
 
 Everything above reduces to one property: a verdict is a pure function of a sealed record, so anyone holding the record can recompute it, and a tampered claim, measurement, or baseline is caught by re-hashing rather than by trust.
 
@@ -171,7 +171,7 @@ Everything above reduces to one property: a verdict is a pure function of a seal
 
 crucible is fair-source: open to read, run, and build on, with commercial use reserved so the project can fund its own development. See [LICENSE](LICENSE) for the exact terms.
 
-## For developers
+## Work with it
 
 ```bash
 python -m pip install -e ".[dev]"
