@@ -1,0 +1,74 @@
+{
+  "organ": "crucible",
+  "invoke": {
+    "cli": "crucible",
+    "mcp_server": "crucible.mcp:serve",
+    "python_import": "crucible"
+  },
+  "emits": [
+    {
+      "capability": "project-telos.flagship-action/v1",
+      "title": "flagship-action envelope",
+      "module": "src/crucible/flagship.py:envelope",
+      "summary": "",
+      "consumable_as": []
+    },
+    {
+      "capability": "crucible.assessment/1",
+      "title": "witnessed assessment",
+      "module": "src/crucible/assess.py:Assessment.to_dict",
+      "summary": "",
+      "consumable_as": []
+    },
+    {
+      "capability": "project-telos.crucible.measurement-gate/v1",
+      "title": "measurement gate",
+      "module": "src/crucible/measurement_gate.py:_result",
+      "summary": "",
+      "consumable_as": []
+    },
+    {
+      "capability": "crucible.thesis-export/1",
+      "title": "public thesis contract",
+      "module": "src/crucible/gate.py:export_thesis",
+      "summary": "",
+      "consumable_as": []
+    }
+  ],
+  "consumes": [
+    {
+      "capability": "crucible.thesis/1",
+      "title": "thesis JSON",
+      "module": "src/crucible/commands.py:_thesis_from_data",
+      "summary": "",
+      "consumable_as": []
+    },
+    {
+      "capability": "crucible.measurements/1",
+      "title": "per-claim measurements",
+      "module": "src/crucible/commands.py:_load_measurements",
+      "summary": "",
+      "consumable_as": []
+    },
+    {
+      "capability": "gather.digest/1",
+      "title": "gather digest as evidence",
+      "module": "src/crucible/ecosystem_measure.py:GatherDigestMeasure",
+      "summary": "",
+      "consumable_as": []
+    },
+    {
+      "capability": "index.verification/1",
+      "title": "index structural verdict",
+      "module": "src/crucible/ecosystem_measure.py:verify_index_verification",
+      "summary": "",
+      "consumable_as": []
+    }
+  ],
+  "evidence": [
+    "src/crucible/ecosystem_measure.py",
+    "src/crucible/commands.py",
+    "src/crucible/assess.py",
+    "src/crucible/gate.py"
+  ]
+}
