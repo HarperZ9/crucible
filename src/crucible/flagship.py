@@ -32,9 +32,13 @@ TELOS_CONTRACTS = {
 }
 
 
-def envelope(command: str, *, status: str = "MATCH", native: dict | None = None,
+def envelope(command: str, *, status: str = "OK", native: dict | None = None,
              next_actions: list[dict] | None = None,
              diagnostics: list[dict] | None = None) -> dict:
+    # status defaults to the operational token "OK", never a verdict token. status/doctor/demo are
+    # informational: they measure nothing, so they must not render MATCH/DRIFT/UNVERIFIABLE, which
+    # is the vocabulary of a recomputed verdict. A verdict token is emitted only where a measurement
+    # was actually taken (assess, run, recheck, drift build their own payloads).
     return {
         "schema": SCHEMA,
         "tool": TOOL,
@@ -105,16 +109,32 @@ def status_payload() -> dict:
 
 
 def doctor_payload() -> dict:
+    # doctor reports which verification machinery is WIRED, by resolving each capability's live
+    # entry point. "available" means the callable is importable and present; it is NOT a verdict
+    # (doctor opens no registry and measures nothing). A missing entry point reports "absent", so
+    # this diagnostic can actually fail rather than asserting a hardcoded pass.
     checks = [
-        {"name": "thesis_seals", "status": "MATCH"},
-        {"name": "measurement_backed_assessments", "status": "MATCH"},
-        {"name": "recheckable_verdicts", "status": "MATCH"},
+        {"name": "thesis_seals", "status": _capability_status("crucible.claim", "make_claim")},
+        {"name": "measurement_backed_assessments",
+         "status": _capability_status("crucible.measure", "measure_thesis")},
+        {"name": "recheckable_verdicts", "status": _capability_status("crucible.verdict", "verdict_for")},
     ]
     return envelope(
         "doctor",
         native={"checks": checks},
         next_actions=[_next("gather", "docs", "refresh claim sources before reassessment")],
     )
+
+
+def _capability_status(module: str, attr: str) -> str:
+    """Resolve a capability's live entry point. 'available' when the callable is importable and
+    present, 'absent' when it is not. A diagnostic status, never a verdict token."""
+    try:
+        import importlib
+
+        return "available" if callable(getattr(importlib.import_module(module), attr, None)) else "absent"
+    except Exception:
+        return "absent"
 
 
 def demo_payload() -> dict:

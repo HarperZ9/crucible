@@ -219,13 +219,20 @@ class RefineReport:
     cohesions: tuple[float, ...]
 
 
-def _normalized_deviation(measurement) -> float:
+def _normalized_deviation(measurement, sealed_tolerance: float | None = None) -> float:
     """A claim's deviation normalized by its tolerance (so a grader of tolerance 1.0 reproduces
     verdict_for's margin). Unmeasurable (deviation None, non-finite, negative, or tolerance <= 0)
-    becomes +inf, which grade turns into margin -inf: an unmeasured claim never reads as healthy."""
+    becomes +inf, which grade turns into margin -inf: an unmeasured claim never reads as healthy.
+
+    A claim that sealed its tolerance is decided by that number and no other: a measurement carrying
+    a different tolerance is unmeasurable here (+inf), exactly as verdict_for refuses it as
+    UNVERIFIABLE, so refine can never report 'correct' by grading against a tolerance widened after
+    the seal (the grader's status and the recomputed verdicts stay consistent)."""
     dev, tol = measurement.deviation, measurement.tolerance
     if (dev is None or isinstance(dev, bool) or not isinstance(dev, (int, float))
             or not math.isfinite(dev) or dev < 0 or tol <= 0):
+        return float("inf")
+    if sealed_tolerance is not None and tol != sealed_tolerance:
         return float("inf")
     return dev / tol
 
@@ -233,16 +240,16 @@ def _normalized_deviation(measurement) -> float:
 def _claim_graders(thesis: Thesis) -> list[GradedCriterion]:
     graders: list[GradedCriterion] = []
 
-    def deviation_for(index: int) -> Callable[[Any], float]:
+    def deviation_for(index: int, sealed_tolerance: float | None) -> Callable[[Any], float]:
         def measure_deviation(measurements: Any) -> float:
-            return _normalized_deviation(measurements[index])
+            return _normalized_deviation(measurements[index], sealed_tolerance)
 
         return measure_deviation
 
     for i, claim in enumerate(thesis.claims):
         graders.append(GradedCriterion(
             name=claim.id, kind="objective", tolerance=1.0,
-            deviation=deviation_for(i),
+            deviation=deviation_for(i, claim.tolerance),
         ))
     return graders
 

@@ -2,6 +2,21 @@ import json
 
 from crucible.cli import main
 
+VERDICT_TOKENS = {"MATCH", "DRIFT", "UNVERIFIABLE"}
+
+
+def test_operator_commands_emit_no_verdict_token(capsys):
+    """status, doctor, and demo measure nothing, so they must not render a verdict token. Emitting
+    MATCH for a check that never opened a registry is a verdict without a measurement behind it
+    (no receipt, no accept). The envelope status and every doctor check status must be operational
+    tokens, never the MATCH/DRIFT/UNVERIFIABLE verdict vocabulary."""
+    for command in ("status", "doctor", "demo"):
+        assert main([command, "--json"]) == 0
+        payload = json.loads(capsys.readouterr().out)
+        assert payload["status"] not in VERDICT_TOKENS, command
+        for check in payload["native"].get("checks", []):
+            assert check["status"] not in VERDICT_TOKENS, (command, check)
+
 
 def test_status_json_is_action_envelope(capsys):
     assert main(["status", "--json"]) == 0
@@ -27,7 +42,7 @@ def test_status_json_is_action_envelope(capsys):
 def test_doctor_human_prints_next_action(capsys):
     assert main(["doctor"]) == 0
     out = capsys.readouterr().out
-    assert out.startswith("status=MATCH tool=crucible command=doctor")
+    assert out.startswith("status=OK tool=crucible command=doctor")
     assert "next: gather docs" in out
 
 
