@@ -7,6 +7,7 @@ from crucible.telos_measure import (
     TelosMeasure,
     check_content,
     content_hash,
+    content_sha256,
     verify_telos_artifact,
 )
 from crucible.thesis import make_thesis
@@ -107,6 +108,24 @@ def test_content_artifact_hash_matches_the_javascript_protocol_shape():
     assert content_hash("abc") == "1a47e90b"
     assert check_content(artifact, "abc") is True
     assert check_content(artifact, "abcd") is False
+
+
+def test_content_sha256_is_the_binding_check_when_present():
+    """The legacy 32-bit FNV hash is brute-forceable, so it can never be the sole content receipt.
+    When a descriptor carries a sha256 it is the binding check: content whose sha256 does not match
+    is refused even if the weak FNV hash still collides, and only content matching the sha256 passes."""
+    good = "the witnessed content"
+    # A descriptor that carries the correct FNV hash but a WRONG sha256 must be refused: the strong
+    # digest is load-bearing, not decorative. (Stands in for an FNV collision without brute-forcing.)
+    forged = _artifact("verified", {"verifier": "content",
+                                    "hash": content_hash(good), "sha256": content_sha256("something else")})
+    assert check_content(forged, good) is False
+
+    honest = _artifact("verified", {"verifier": "content",
+                                    "hash": content_hash(good), "sha256": content_sha256(good)})
+    assert check_content(honest, good) is True
+    assert check_content(honest, "tampered") is False
+    assert content_sha256(good) == __import__("hashlib").sha256(good.encode("utf-8")).hexdigest()
 
 
 def make_thesis_for_claim(claim):

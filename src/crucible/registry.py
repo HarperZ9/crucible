@@ -104,7 +104,7 @@ class Registry:
             raise ValueError(f"thesis id {thesis.id!r} already exists with a different seal")
         added = deduped = 0
         for c in thesis.claims:
-            _sha, is_new = self._write_object(claim_body(c.text, c.falsification))
+            _sha, is_new = self._write_object(claim_body(c.text, c.falsification, c.tolerance))
             added, deduped = (added + 1, deduped) if is_new else (added, deduped + 1)
         registered = not existing
         if registered:
@@ -138,7 +138,8 @@ class Registry:
             sha = _check_sha(_field(cr, "sha256", "claim"))
             data = json.loads(self.read_body(sha))
             claims.append(Claim(id=_field(cr, "id", "claim"), text=_field(data, "text", "claim body"),
-                                falsification=_field(data, "falsification", "claim body"), sha256=sha))
+                                falsification=_field(data, "falsification", "claim body"), sha256=sha,
+                                tolerance=data.get("tolerance")))
         return Thesis(id=_field(row, "id", "theses"), title=_field(row, "title", "theses"),
                       claims=tuple(claims), registered_at=row.get("registered_at", 0.0),
                       disposition=row.get("disposition", PUBLISHABLE), seal=_field(row, "seal", "theses"))

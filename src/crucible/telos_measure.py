@@ -51,7 +51,12 @@ def verify_telos_artifact(artifact: object, verifiers: Mapping[str, Verifier]) -
 
 
 def content_hash(value: object) -> str:
-    """The same small FNV-1a content hash used by Telos's JavaScript protocol helper."""
+    """The same small FNV-1a content hash used by Telos's JavaScript protocol helper.
+
+    This 32-bit digest is kept for parity with the JS protocol shape, but its 2^32 space is
+    brute-forceable, so it is tamper-evident against accident only, NEVER sufficient alone to accept
+    forged content. ``content_sha256`` is the binding digest; see ``check_content``.
+    """
     h = 0x811C9DC5
     for ch in str(value):
         h ^= ord(ch)
@@ -59,14 +64,33 @@ def content_hash(value: object) -> str:
     return f"{h:08x}"
 
 
+def content_sha256(value: object) -> str:
+    """The strong content digest: sha256 of the value's text, 64 hex chars. When a Telos content
+    descriptor carries this, it is the binding check a forged substitute cannot satisfy."""
+    import hashlib
+
+    return hashlib.sha256(str(value).encode("utf-8")).hexdigest()
+
+
 def check_content(artifact: object, content: object) -> bool:
-    """Re-check a Telos content artifact against content in hand."""
+    """Re-check a Telos content artifact against content in hand.
+
+    When the descriptor carries a ``sha256``, it is the binding check: the content's sha256 must
+    match (the weak FNV ``hash``, if present, is not sufficient and cannot rescue a sha256 mismatch).
+    A legacy descriptor with only the FNV ``hash`` falls back to that weak check, which is
+    tamper-evident against accident but must not be trusted against an adversary.
+    """
     if not is_telos_artifact(artifact):
         return False
     assert isinstance(artifact, Mapping)
     recheck = artifact["recheck"]
     assert isinstance(recheck, Mapping)
-    return recheck.get("verifier") == "content" and recheck.get("hash") == content_hash(content)
+    if recheck.get("verifier") != "content":
+        return False
+    sealed_sha = recheck.get("sha256")
+    if sealed_sha is not None:
+        return sealed_sha == content_sha256(content)
+    return recheck.get("hash") == content_hash(content)
 
 
 class TelosMeasure:

@@ -9,11 +9,16 @@ PACKET = {
 }
 
 
-def test_verify_browser_evidence_match():
-    assert verify_browser_evidence(PACKET) == {
-        "verdict": "MATCH",
-        "reason": "packet-shape-and-artifact-refs-present",
-    }
+def test_a_well_formed_packet_carrying_match_is_not_crucibles_match():
+    """crucible cannot re-run the browser verifier here (raw DOM/screenshots stay outside the
+    boundary), so a packet's self-declared MATCH must never become crucible's MATCH -- that would
+    mint the verdict token from a self-assertion. The strongest honest verdict for a well-formed
+    carried MATCH is UNVERIFIABLE, with the carried verdict preserved but clearly labelled as the
+    packet's own, not crucible's."""
+    result = verify_browser_evidence(PACKET)
+    assert result["verdict"] == "UNVERIFIABLE"
+    assert result["carried_verdict"] == "MATCH"
+    assert "not_reverified" in result["reason"]
 
 
 def test_verify_browser_evidence_unverifiable_for_malformed_packet():
