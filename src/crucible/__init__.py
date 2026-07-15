@@ -77,6 +77,7 @@ from crucible.subprocess_edges import SubprocessMeasure, SubprocessSteelman
 from crucible.telos_measure import (
     TelosMeasure,
     check_content,
+    content_sha256,
     is_telos_artifact,
     verify_telos_artifact,
 )
@@ -111,7 +112,7 @@ __all__ = [
     "DRIFT", "FENCED", "MATCH", "PUBLISHABLE", "UNVERIFIABLE",
     "artifact_sha", "assess", "claim_body", "claim_hash", "cohesion", "content_hash", "make_claim",
     "make_null_judge", "make_thesis", "rubric_sha",
-    "canonical_sha", "cells_from_latest", "check_content", "drift_track", "export_guard",
+    "canonical_sha", "cells_from_latest", "check_content", "content_sha256", "drift_track", "export_guard",
     "export_thesis", "gate", "gate_check",
     "is_telos_artifact", "make_snapshot", "measure_thesis", "receipt_matches", "render_gate_markdown",
     "snapshot_seal",
