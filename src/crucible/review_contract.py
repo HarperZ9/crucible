@@ -89,11 +89,18 @@ def thesis_from_spec(spec: Mapping, findings: list[str]) -> Thesis | None:
 
 
 def claim_from_spec(row: Mapping, index: int, findings: list[str]) -> Claim | None:
+    tolerance = row.get("tolerance")
+    if tolerance is not None and (isinstance(tolerance, bool) or not isinstance(tolerance, (int, float))):
+        findings.append(f"spec claim {index} tolerance must be a number")
+        return None
     claim = Claim(
         id=string(row, "id", f"spec claim {index} id", findings),
         text=string(row, "text", f"spec claim {index} text", findings),
         falsification=string(row, "falsification", f"spec claim {index} falsification", findings),
         sha256=string(row, "sha256", f"spec claim {index} sha256", findings),
+        # A sealed tolerance is part of the receipt: reconstruct it so claim.verify() re-hashes the
+        # same body. Absent for legacy/unsealed claims (None), keeping their receipts byte-identical.
+        tolerance=float(tolerance) if tolerance is not None else None,
     )
     if claim.verify():
         return claim

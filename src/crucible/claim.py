@@ -41,6 +41,22 @@ def claim_hash(text: str, falsification: str, tolerance: float | None = None) ->
     return content_hash(claim_body(text, falsification, tolerance))
 
 
+def claim_row(claim: "Claim") -> dict:
+    """The canonical export/spec serialization of a claim's receipt: id, text, falsification, sha256,
+    and the sealed tolerance WHEN sealed. The tolerance key is present only when a tolerance was
+    sealed, mirroring claim_body, so a stranger who reconstructs the claim re-hashes the same body
+    and the receipt verifies; unsealed claims stay byte-identical to their legacy rows."""
+    row = {
+        "id": claim.id,
+        "text": claim.text,
+        "falsification": claim.falsification,
+        "sha256": claim.sha256,
+    }
+    if claim.tolerance is not None:
+        row["tolerance"] = claim.tolerance
+    return row
+
+
 @dataclass(frozen=True, slots=True)
 class Claim:
     """An assertion (``text``) with the observation that would refute it (``falsification``), bound

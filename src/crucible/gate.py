@@ -6,6 +6,7 @@ also scans title, claim text, and falsification fields for explicit restricted m
 """
 from __future__ import annotations
 
+from crucible.claim import claim_row
 from crucible.thesis import FENCED, PUBLISHABLE, Thesis
 
 _FENCED_MARKERS = (
@@ -52,13 +53,5 @@ def export_thesis(thesis: Thesis) -> dict:
         "title": thesis.title,
         "disposition": thesis.disposition,
         "seal": thesis.seal,
-        "claims": [
-            {
-                "id": c.id,
-                "text": c.text,
-                "falsification": c.falsification,
-                "sha256": c.sha256,
-            }
-            for c in thesis.claims
-        ],
+        "claims": [claim_row(c) for c in thesis.claims],
     }

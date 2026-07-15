@@ -8,6 +8,7 @@ import time
 
 from crucible.assess import assess
 from crucible.assess_cmd import emit_warnings, measurement_warning_rows, strict_error
+from crucible.claim import claim_row
 from crucible.commands import (
     _load_measurements,
     _load_substrate,
@@ -142,10 +143,7 @@ def _write_spec(path: str, thesis) -> str:
         "title": thesis.title,
         "disposition": thesis.disposition,
         "seal": thesis.seal,
-        "claims": [
-            {"id": c.id, "text": c.text, "falsification": c.falsification, "sha256": c.sha256}
-            for c in thesis.claims
-        ],
+        "claims": [claim_row(c) for c in thesis.claims],
     }
     _write_json(path, payload)
     return path
