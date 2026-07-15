@@ -87,7 +87,10 @@ def verdict_for(claim: Claim, measurement: Measurement | None, *, disposition: s
     2. No measurement, or one that binds to a different claim: UNVERIFIABLE.
     3. A deviation or tolerance that cannot be trusted (None, non-finite, negative, or a non-positive
        tolerance): UNVERIFIABLE, fail-closed.
-    4. Otherwise margin = (tolerance - deviation) / tolerance: MATCH if within (margin >= 0), else DRIFT.
+    4. A claim that sealed its tolerance is decided by that number and no other: a measurement
+       carrying a different tolerance is UNVERIFIABLE, fail-closed, so a verdict cannot be rescued
+       by widening the tolerance after the seal.
+    5. Otherwise margin = (tolerance - deviation) / tolerance: MATCH if within (margin >= 0), else DRIFT.
     """
     cid, csha = claim.id, claim.sha256
     disp = _disposition(disposition)
@@ -103,6 +106,10 @@ def verdict_for(claim: Claim, measurement: Measurement | None, *, disposition: s
     if dev is None or tol is None or tol <= 0:
         return _unverifiable(cid, csha, dev, tol if tol is not None else 0.0, measurement.method,
                              "deviation or tolerance not measurable", disp)
+    if claim.tolerance is not None and tol != claim.tolerance:
+        return _unverifiable(cid, csha, dev, tol, measurement.method,
+                             f"measurement tolerance {tol:g} does not match the sealed "
+                             f"tolerance {claim.tolerance:g}", disp)
     margin = (tol - dev) / tol
     if margin >= 0.0:
         return Verdict(cid, csha, MATCH, dev, tol, margin, measurement.method,

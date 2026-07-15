@@ -44,7 +44,11 @@ def _thesis_from_data(data: dict, *, clock) -> Thesis:
 def _claim_from_row(row: dict, index: int):
     text = _string(row.get("text"), f"claim {index} text")
     falsification = _string(row.get("falsification", ""), f"claim {index} falsification")
-    return make_claim(text, falsification, id=_optional_string(row.get("id"), f"claim {index} id"))
+    tolerance = row.get("tolerance")
+    if tolerance is not None and (isinstance(tolerance, bool) or not isinstance(tolerance, (int, float))):
+        raise ValueError(f"claim {index} tolerance must be a number")
+    return make_claim(text, falsification, tolerance=tolerance,
+                      id=_optional_string(row.get("id"), f"claim {index} id"))
 
 
 def _string(value: object, field: str) -> str:
