@@ -147,6 +147,7 @@ The steelman and measure stages are seams with a stable API shape. Defaults are 
 - `TelosMeasure`: consumes `telos.witnessed-artifact/v1` envelopes and re-runs the named verifier rather than trusting the carried certificate.
 - `GatherDigestMeasure` / `IndexMeasure`: sealed [gather](https://github.com/HarperZ9/gather) digests as evidence, and `index.verification/1` records replayed against graph packs.
 - `JudgeMeasure`: rubric-scored LLM judging behind an injectable backend, deterministic stub in tests, null by default.
+- `ProofMeasure`: a proof or type checker (Lean, Coq, a type checker, any command) as the oracle for formal claims. It runs the checker over the claim's artifact: an accepted proof is MATCH, a rejected one DRIFTs, and a checker that is absent or errors is UNVERIFIABLE, fail-closed, so an unrun checker never reports a proof as holding. The measurement binds the exact command and the artifact hash, so a stranger replays the identical check. This is the oracle for the north star, verified discovery in math.
 
 All edges map into the same `Measurement` to `verdict_for` spine. The verdict step never changes.
 

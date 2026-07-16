@@ -59,6 +59,7 @@ from crucible.measure import (
     measure_thesis,
 )
 from crucible.measurement_gate import verify_measurement_packet
+from crucible.proof_measure import ProofMeasure
 from crucible.refine import (
     GradedCriterion,
     RefineOutcome,
@@ -105,7 +106,7 @@ __all__ = [
     "GatherDigestMeasure",
     "GradedCriterion",
     "IndexMeasure", "JudgeMeasure", "LLMJudgeFunc", "Measure", "Measurement", "MetricSpec",
-    "NullMeasure", "NullSteelman",
+    "NullMeasure", "NullSteelman", "ProofMeasure",
     "RefineOutcome", "RefineReport", "Reflection", "Refutation", "Registry", "Snapshot", "Steelman",
     "SubprocessMeasure", "SubprocessSteelman", "TableMeasure",
     "TelosMeasure", "Thesis", "Verdict",
