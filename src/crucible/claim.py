@@ -46,7 +46,7 @@ def claim_row(claim: "Claim") -> dict:
     and the sealed tolerance WHEN sealed. The tolerance key is present only when a tolerance was
     sealed, mirroring claim_body, so a stranger who reconstructs the claim re-hashes the same body
     and the receipt verifies; unsealed claims stay byte-identical to their legacy rows."""
-    row = {
+    row: dict[str, str | float] = {
         "id": claim.id,
         "text": claim.text,
         "falsification": claim.falsification,

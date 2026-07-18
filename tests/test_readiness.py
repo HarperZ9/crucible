@@ -19,12 +19,12 @@ def test_flagship_brand_assets_exist_and_are_referenced():
     for rel in [
         "docs/brand/crucible-mark.svg",
         "docs/brand/crucible-hero.png",
-        ".github/assets/banner.svg",
+        ".github/assets/zentropy-banner.png",
         "examples/crucible-demo.html",
     ]:
         assert (root / rel).exists(), rel
     for rel in [
-        ".github/assets/banner.svg",
+        ".github/assets/zentropy-banner.png",
         "examples/crucible-demo.html",
     ]:
         assert rel in readme, rel
