@@ -4,13 +4,12 @@ decides, the widened one is refused, and a hand-forged rescue fails re-derivatio
 from __future__ import annotations
 
 from crucible.assess import (
-    _MSEAL_FIELDS,
     _VSEAL_FIELDS,
+    Assessment,
     _measurement_seal,
     _record_fields,
     _seal_record,
     _seal_rows,
-    Assessment,
     assess,
     recheck_assessment,
 )

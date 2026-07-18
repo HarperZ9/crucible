@@ -60,10 +60,18 @@ class ProofMeasure:
         # measurement whose tolerance differs from the claim's sealed one)
         tol = claim.tolerance if claim.tolerance is not None else _DEFAULT_TOLERANCE
         now = float(self._clock())
-        if not isinstance(spec, Mapping) or not spec.get("cmd"):
+        if not isinstance(spec, Mapping):
             return Measurement(claim.id, claim.sha256, None, tol, METHOD, now,
                                ("no checker spec for claim",), None)
-        cmd = tuple(str(x) for x in spec["cmd"])
+        command_spec = spec.get("cmd")
+        if (
+            not isinstance(command_spec, (list, tuple))
+            or not command_spec
+            or not all(isinstance(item, str) and item.strip() for item in command_spec)
+        ):
+            return Measurement(claim.id, claim.sha256, None, tol, METHOD, now,
+                               ("no checker spec for claim",), None)
+        cmd = tuple(command_spec)
         recheck: dict = {"oracle": METHOD, "checker": str(spec.get("checker", "")), "cmd": cmd}
         artifact = spec.get("artifact")
         if isinstance(artifact, str):

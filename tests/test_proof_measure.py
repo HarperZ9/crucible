@@ -48,6 +48,27 @@ def test_no_spec_for_the_claim_is_unverifiable():
     assert m.deviation is None and verdict_for(c, m).status == UNVERIFIABLE
 
 
+def test_non_sequence_checker_command_is_unverifiable_without_running_it():
+    c = _claim()
+    calls = []
+    m = ProofMeasure({"c1": {"checker": "lean", "cmd": "lean proof.lean"}},
+                     runner=lambda cmd: (calls.append(cmd), (True, "ok"))[1]).measure(c)
+    assert m.deviation is None
+    assert verdict_for(c, m).status == UNVERIFIABLE
+    assert calls == []
+
+
+def test_invalid_checker_command_elements_are_unverifiable_without_running_them():
+    c = _claim()
+    for command in ([None], [""], ["   "], ["lean", None]):
+        calls = []
+        m = ProofMeasure({"c1": {"checker": "lean", "cmd": command}},
+                         runner=lambda cmd: (calls.append(cmd), (True, "ok"))[1]).measure(c)
+        assert m.deviation is None
+        assert verdict_for(c, m).status == UNVERIFIABLE
+        assert calls == []
+
+
 def test_recheck_binds_the_artifact_for_replay():
     c = _claim()
     m = ProofMeasure({"c1": {"checker": "coq", "cmd": ["coqc", "p.v"], "artifact": "Theorem p. Qed."}},
