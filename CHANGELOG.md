@@ -3,6 +3,17 @@
 All notable changes to crucible. Versions follow semantic versioning; each minor release is built
 behind a feature branch and reviewed before merge.
 
+## Unreleased
+
+- Security: CLI oracle replay packs must include the template's top-level assessment binding.
+  A missing, malformed, or mismatched thesis ID, assessment seal, or measurement seal now fails
+  closed before replay instead of allowing an unbound pack to run.
+- Replay interop: `crucible.replay-template/1` outputs now carry a privacy-bounded
+  `crucible.replay-set/1` binding over the canonical descriptor-bearing replay contracts, without
+  exporting descriptorless rows or their evidence. `crucible.replay-pack/1` inputs preserve that
+  binding; supplied bindings are checked exactly, while older bound packs may omit them. Present pack
+  schemas must be exactly `crucible.replay-pack/1`; schema-less legacy packs remain compatible.
+
 ## 1.2.0 (2026-07-07)
 
 CI regression gate, LLM-as-judge on the Measure seam, provenance gates over witnessed MATCH
