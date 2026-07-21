@@ -53,6 +53,22 @@ For public/developer delivery checks:
 python -m public_surface_sweeper . --workspace --json
 ```
 
+## Replay oracle measurements
+
+Create a replay template from a witnessed assessment, let the named oracle fill
+its measurement rows, and submit the completed pack against the same registry:
+
+```bash
+crucible recheck REGISTRY --template replay-template.json
+crucible recheck REGISTRY --pack replay-pack.json --json
+```
+
+Keep the template's top-level `assessment` object unchanged in the completed
+pack. The CLI requires its thesis ID (`thesis_id`), assessment seal
+(`assessment_seal`), and measurement seal (`measurement_seal`) to match the
+selected assessment; a missing, malformed, or mismatched binding is rejected
+before any measurement replay runs.
+
 ## Boundary
 
 Crucible should expose claim ids, criteria, verdicts, evidence hashes, and

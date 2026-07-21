@@ -46,8 +46,8 @@ def _seed_recheck_registry(tmp_path):
     return str(reg_dir), thesis, measured
 
 
-def _replay_pack(path, measurement, *, deviation=0.0):
-    return _write(path, {"replays": [{
+def _replay_pack(path, measurement, *, assessment, deviation=0.0):
+    return _write(path, {"assessment": assessment, "replays": [{
         "recheck": measurement.recheck,
         "measurement": {
             "claim_id": measurement.claim_id,
@@ -169,7 +169,9 @@ def test_recheck_tool_returns_cli_recheck_plan(tmp_path):
 
 def test_recheck_tool_replays_pack_with_cli_result_shape(tmp_path):
     reg, _thesis, measurement = _seed_recheck_registry(tmp_path)
-    pack = _replay_pack(tmp_path / "replay.json", measurement)
+    plan = _call("crucible.recheck", {"dir": reg})
+    assessment = json.loads(plan["result"]["content"][0]["text"])["assessment"]
+    pack = _replay_pack(tmp_path / "replay.json", measurement, assessment=assessment)
 
     resp = _call("crucible.recheck", {"dir": reg, "pack": pack})
     body = json.loads(resp["result"]["content"][0]["text"])
@@ -182,7 +184,11 @@ def test_recheck_tool_replays_pack_with_cli_result_shape(tmp_path):
 
 def test_recheck_tool_reports_replay_drift_as_false_not_error(tmp_path):
     reg, _thesis, measurement = _seed_recheck_registry(tmp_path)
-    pack = _replay_pack(tmp_path / "drifted.json", measurement, deviation=2.0)
+    plan = _call("crucible.recheck", {"dir": reg})
+    assessment = json.loads(plan["result"]["content"][0]["text"])["assessment"]
+    pack = _replay_pack(
+        tmp_path / "drifted.json", measurement, assessment=assessment, deviation=2.0
+    )
 
     resp = _call("crucible.recheck", {"dir": reg, "pack": pack})
     body = json.loads(resp["result"]["content"][0]["text"])

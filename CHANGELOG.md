@@ -3,6 +3,12 @@
 All notable changes to crucible. Versions follow semantic versioning; each minor release is built
 behind a feature branch and reviewed before merge.
 
+## Unreleased
+
+- Security: CLI oracle replay packs must include the template's top-level assessment binding.
+  A missing, malformed, or mismatched thesis ID, assessment seal, or measurement seal now fails
+  closed before replay instead of allowing an unbound pack to run.
+
 ## 1.2.0 (2026-07-07)
 
 CI regression gate, LLM-as-judge on the Measure seam, provenance gates over witnessed MATCH

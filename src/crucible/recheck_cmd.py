@@ -173,7 +173,9 @@ def _load_replay_pack(path: str, expected_assessment: Mapping[str, object] | Non
         data = json.load(f)
     if not isinstance(data, dict):
         raise ValueError("replay pack must be a JSON object")
-    if expected_assessment is not None and "assessment" in data:
+    if expected_assessment is not None:
+        if "assessment" not in data:
+            raise ValueError("replay pack assessment binding is required")
         _check_assessment_binding(data["assessment"], expected_assessment)
     rows = data.get("replays")
     if not isinstance(rows, list):

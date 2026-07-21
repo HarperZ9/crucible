@@ -85,7 +85,9 @@ def test_recheck_template_writes_replay_pack_skeleton(tmp_path, capsys):
 
 def test_recheck_pack_replays_descriptor_bearing_measurements(tmp_path, capsys):
     reg, _thesis, measurement = _seed_registry(tmp_path)
-    pack = _replay_pack(tmp_path / "replay.json", measurement)
+    assert main(["recheck", reg, "--json"]) == 0
+    assessment = json.loads(capsys.readouterr().out)["assessment"]
+    pack = _replay_pack(tmp_path / "replay.json", measurement, assessment=assessment)
 
     assert main(["recheck", reg, "--pack", pack, "--json"]) == 0
     payload = json.loads(capsys.readouterr().out)
@@ -110,9 +112,22 @@ def test_recheck_pack_accepts_matching_assessment_binding(tmp_path, capsys):
     assert payload["replay"]["checked"] == 1
 
 
+def test_recheck_pack_rejects_missing_assessment_binding(tmp_path, capsys):
+    reg, _thesis, measurement = _seed_registry(tmp_path)
+    pack = _replay_pack(tmp_path / "unbound-replay.json", measurement)
+
+    assert main(["recheck", reg, "--pack", pack]) == 1
+
+    assert "assessment binding" in capsys.readouterr().err
+
+
 def test_recheck_pack_reports_replayed_measurement_drift(tmp_path, capsys):
     reg, _thesis, measurement = _seed_registry(tmp_path)
-    pack = _replay_pack(tmp_path / "drifted.json", measurement, deviation=2.0)
+    assert main(["recheck", reg, "--json"]) == 0
+    assessment = json.loads(capsys.readouterr().out)["assessment"]
+    pack = _replay_pack(
+        tmp_path / "drifted.json", measurement, deviation=2.0, assessment=assessment
+    )
 
     assert main(["recheck", reg, "--pack", pack, "--json"]) == 1
     payload = json.loads(capsys.readouterr().out)
