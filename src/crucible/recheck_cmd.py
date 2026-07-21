@@ -1,6 +1,7 @@
 """CLI command for oracle-level measurement recheck descriptors."""
 from __future__ import annotations
 
+import hashlib
 import json
 import sys
 from collections.abc import Mapping
@@ -42,7 +43,7 @@ def recheck_payload(registry_dir: str, *, index: int = -1, pack: str | None = No
     plan = recheck_plan(thesis, assessment)
     if pack is None:
         return plan
-    replayers = _load_replay_pack(pack, plan["assessment"])
+    replayers = _load_replay_pack(pack, plan["assessment"], plan["replay_binding"])
     checks = recheck_assessment(thesis, assessment)
     replay = recheck_measurements(assessment, replayers)
     checks["measurements_rerun"] = replay["ok"]
@@ -70,12 +71,14 @@ def recheck_plan(thesis, assessment: Assessment) -> dict:
             "recheck": dict(recheck),
             "expected_measurement": _measurement_fields(row),
         })
+    replay_binding = _replay_binding(descriptors, skipped)
     return {
         "assessment": {
             "thesis_id": assessment.thesis_id,
             "assessment_seal": assessment.seal,
             "measurement_seal": assessment.measurement_seal,
         },
+        "replay_binding": replay_binding,
         "summary": {"descriptors": len(descriptors), "skipped": skipped},
         "descriptors": descriptors,
     }
@@ -90,10 +93,13 @@ def _assessment_at(reg: Registry, index: int) -> Assessment:
 
 def _write_template(path: str, plan: dict) -> None:
     payload = {
+        "schema": "crucible.replay-template/1",
         "assessment": plan["assessment"],
+        "replay_binding": plan["replay_binding"],
         "instructions": (
             "Fill each measurement object with the reproduced measurement row for its recheck "
-            "descriptor, then pass this file to crucible recheck --pack."
+            "descriptor, emit schema crucible.replay-pack/1, then pass the pack to "
+            "crucible recheck --pack."
         ),
         "replays": [_template_row(row) for row in plan["descriptors"]],
     }
@@ -147,6 +153,22 @@ def _evidence(value: object) -> list:
     return [] if value in (None, "") else [value]
 
 
+def _replay_binding(descriptors: list[dict], skipped: int) -> dict:
+    rows = [
+        {
+            "recheck": row["recheck"],
+            "expected_measurement": row["expected_measurement"],
+        }
+        for row in descriptors
+    ]
+    rows.sort(key=_canon)
+    digest = hashlib.sha256(_canon(rows).encode("utf-8")).hexdigest()
+    return {
+        "schema": "crucible.replay-set/1",
+        "descriptor_count": len(rows),
+        "skipped_count": skipped,
+        "sha256": digest,
+    }
 
 
 def _emit_plan(plan: dict, as_json: bool) -> None:
@@ -168,15 +190,24 @@ def _print_replay(result: dict) -> None:
           f"missing {replay['missing']}, mismatched {replay['mismatched']}, failed {replay['failed']}")
 
 
-def _load_replay_pack(path: str, expected_assessment: Mapping[str, object] | None = None) -> dict:
+def _load_replay_pack(
+    path: str,
+    expected_assessment: Mapping[str, object] | None = None,
+    expected_replay_binding: object | None = None,
+) -> dict:
     with open(path, encoding="utf-8") as f:
         data = json.load(f)
     if not isinstance(data, dict):
         raise ValueError("replay pack must be a JSON object")
+    if "schema" in data and data["schema"] != "crucible.replay-pack/1":
+        raise ValueError("replay pack schema must be crucible.replay-pack/1")
     if expected_assessment is not None:
         if "assessment" not in data:
             raise ValueError("replay pack assessment binding is required")
         _check_assessment_binding(data["assessment"], expected_assessment)
+    if expected_replay_binding is not None and "replay_binding" in data:
+        if _canon(data["replay_binding"]) != _canon(expected_replay_binding):
+            raise ValueError("replay binding mismatch")
     rows = data.get("replays")
     if not isinstance(rows, list):
         raise ValueError("replay pack needs a 'replays' list")
@@ -210,5 +241,5 @@ def _pack_replayer(rows_by_key: Mapping[str, dict]):
     return replay
 
 
-def _canon(value: Mapping[str, object]) -> str:
+def _canon(value: object) -> str:
     return json.dumps(value, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
