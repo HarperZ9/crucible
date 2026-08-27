@@ -8,7 +8,7 @@ version = "1.2.0"
 description = "Measurement-backed thesis evaluation with clean verifier packets and re-checkable verdicts."
 readme = "README.md"
 requires-python = ">=3.11"
-license = "LicenseRef-Fair-Source"
+license = "LicenseRef-FSL-1.1-MIT"
 license-files = ["LICENSE"]
 authors = [{ name = "Zain Dana Harper" }]
 keywords = [
