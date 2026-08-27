@@ -3,7 +3,7 @@
 **A judgment engine: register a thesis, steelman each claim, measure against a substrate, refine the weakest axis.**
 
 [![PyPI](https://img.shields.io/pypi/v/crucible-bench?style=flat-square&labelColor=14041b&color=9683ff)](https://pypi.org/project/crucible-bench/)
-![license: crucible Fair-Source](https://img.shields.io/badge/license-crucible%20Fair--Source-8f8095?style=flat-square&labelColor=14041b)
+![license: FSL-1.1-MIT](https://img.shields.io/badge/license-FSL--1.1--MIT-8f8095?style=flat-square&labelColor=14041b)
 [![CI](https://github.com/HarperZ9/crucible/actions/workflows/ci.yml/badge.svg)](https://github.com/HarperZ9/crucible/actions/workflows/ci.yml)
 [![downloads](https://img.shields.io/pypi/dm/crucible-bench?label=downloads&style=flat-square&labelColor=14041b)](https://pypi.org/project/crucible-bench/)
 ![python: 3.11+](https://img.shields.io/badge/python-3.11%2B-blue?style=flat-square&labelColor=14041b)
