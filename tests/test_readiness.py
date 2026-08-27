@@ -179,7 +179,7 @@ def test_release_docs_define_cleanroom_checkability_rules():
     normalized_readiness = " ".join(readiness.lower().split())
     license_text = (ROOT / "LICENSE").read_text(encoding="utf-8")
 
-    assert "crucible Fair-Source License" in license_text
+    assert "FSL-1.1-MIT" in license_text
     assert "Cru" + "cible" not in license_text
     assert "Cleanroom acceptance" in readiness
     assert "api[_-]?key|" + "to" + "ken|se" + "cret|pass" + "word" in readiness
