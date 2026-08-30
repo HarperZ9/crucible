@@ -5,6 +5,11 @@ behind a feature branch and reviewed before merge.
 
 ## Unreleased
 
+### Presentation parity
+
+- README now exposes the current source version and the operator commands for
+  status, doctor, MCP, and CI regression checks.
+
 - Security: CLI oracle replay packs must include the template's top-level assessment binding.
   A missing, malformed, or mismatched thesis ID, assessment seal, or measurement seal now fails
   closed before replay instead of allowing an unbound pack to run.
