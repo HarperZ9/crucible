@@ -113,6 +113,8 @@ A thesis is claims plus falsification conditions:
 }
 ```
 
+<p align="center"><img src="docs/art/verdict-ladder.svg" alt="The seven rungs of crucible's verdict function, in the order it checks them. A claim with no falsification condition, no measurement, a measurement bound to a different claim, a deviation that is not a number, or a tolerance that was widened after the claim sealed one all return UNVERIFIABLE. A deviation within tolerance returns MATCH, and that row carries the mark because it is the only rung on which a claim stands. A deviation over tolerance returns DRIFT." width="100%"></p>
+
 The first claim is measurable: a measurement row binds to it by content hash, records a deviation and a tolerance, and the verdict follows. The second claim states no falsification condition, so it is UNVERIFIABLE by construction, and the assessment says exactly which evidence class is missing. Run it, bundle it, and validate the packet:
 
 ```bash
