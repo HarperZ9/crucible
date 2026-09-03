@@ -1,4 +1,4 @@
-<p align="center"><img src=".github/assets/zentropy-banner.png" alt="crucible: A judgment engine: register a thesis, steelman each claim, measure against a substrate, refine the weakest axis." width="100%"></p>
+<p align="center"><img src="docs/art/crucible-header.svg" alt="crucible: register a thesis, measure each claim, name the weakest axis." width="100%"></p>
 
 **A judgment engine: register a thesis, steelman each claim, measure against a substrate, refine the weakest axis.**
 
@@ -26,6 +26,21 @@ crucible turns a thesis into a set of claims, each paired with the observation t
 - **Typed missing-evidence explanations.** Every UNVERIFIABLE verdict names the exact evidence class it lacks and the concrete next action, derived from the same pure ladder as the verdict, so the explanation can never disagree with it. New in 1.2.0.
 - **Batch manifests, Markdown reports, creative measurement gates, native MCP.** `crucible batch` runs a manifest of theses into one registry, `crucible report` renders deterministic Markdown, `crucible measurement-gate` verifies Telos creative measurement packets, and `crucible mcp` serves 13 tools over stdio.
 - **Zero third-party runtime dependencies.** The core is pure standard library, Python 3.11+.
+
+## How a thesis run works
+
+`crucible run` takes one thesis and produces a packet a reviewer can check
+without rerunning anything, and without trusting the run that made it.
+
+<p align="center"><img src="docs/art/thesis-lifecycle.svg" alt="Eight stages from a registered thesis to a self-contained review packet: thesis, steelman, measure, cohesion, verdict, registry, recheck, packet. A round that is not cohesive reflects on the weakest axis and re-measures it. The verdict is a pure function of the measurement and ends as match, drift or unverifiable." width="100%"></p>
+
+Two edges carry the design. The one that loops back is the refine step: grading
+every claim yields a margin, the harmonic mean of those margins is the cohesion,
+and a round that is not cohesive names its weakest axis and measures that axis
+again rather than reporting a thesis that only half held. The one that does not
+loop is `verdict_for`, which is a pure function of a deviation and a tolerance.
+No model sits in it, so a fluent assertion has no route into a rechecked result,
+and an axis that could not be measured reads UNVERIFIABLE instead of holding.
 
 ## Install
 
