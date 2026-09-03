@@ -4,7 +4,13 @@
     "name": "crucible",
     "role": "adversarial claim measurement",
     "tagline": "Register a thesis, measure each claim, name the weakest axis.",
-    "words": ["thesis", "steelman", "measure", "verdict", "refine"]
+    "words": [
+      "thesis",
+      "steelman",
+      "measure",
+      "verdict",
+      "refine"
+    ]
   },
   "flows": [
     {
@@ -14,23 +20,122 @@
       "alt": "Eight stages from a registered thesis to a self-contained review packet. Each claim is steelmanned, measured against a substrate, and graded; a round that is not cohesive reflects on the weakest axis and re-measures it. The verdict is a pure function of the measurement and ends as match, drift or unverifiable.",
       "footnote": "The verdict recomputes from the stored record, so a confident assertion cannot move it.",
       "stages": [
-        {"title": "Thesis", "note": "A claim set under one seal, each with what would refute it."},
-        {"title": "Steelman", "note": "The strongest test is proposed before anything is measured."},
-        {"title": "Measure", "note": "Each claim meets a substrate: a deviation, and its tolerance."},
-        {"title": "Cohesion", "note": "The harmonic mean of margins, so one weak axis drags it down."},
-        {"title": "Verdict", "note": "A pure function of deviation and tolerance. No model here."},
-        {"title": "Registry", "note": "The assessment is stored under a sha256 receipt with the seal."},
-        {"title": "Recheck", "note": "Rows are re-read from disk and the verdicts recompute."},
-        {"title": "Packet", "note": "A bundle that carries its own zero-import verifier."}
+        {
+          "title": "Thesis",
+          "note": "A claim set under one seal, each with what would refute it."
+        },
+        {
+          "title": "Steelman",
+          "note": "The strongest test is proposed before anything is measured."
+        },
+        {
+          "title": "Measure",
+          "note": "Each claim meets a substrate: a deviation, and its tolerance."
+        },
+        {
+          "title": "Cohesion",
+          "note": "The harmonic mean of margins, so one weak axis drags it down."
+        },
+        {
+          "title": "Verdict",
+          "note": "A pure function of deviation and tolerance. No model here."
+        },
+        {
+          "title": "Registry",
+          "note": "The assessment is stored under a sha256 receipt with the seal."
+        },
+        {
+          "title": "Recheck",
+          "note": "Rows are re-read from disk and the verdicts recompute."
+        },
+        {
+          "title": "Packet",
+          "note": "A bundle that carries its own zero-import verifier."
+        }
       ],
       "returns": [
-        {"from": 3, "to": 2, "label": "NOT COHESIVE: THE WEAKEST AXIS IS RE-MEASURED"}
+        {
+          "from": 3,
+          "to": 2,
+          "label": "NOT COHESIVE: THE WEAKEST AXIS IS RE-MEASURED"
+        }
       ],
       "outcomes": [
-        {"label": "MATCH", "note": "the measurement sits inside tolerance", "tone": "verified"},
-        {"label": "DRIFT", "note": "the measurement sits outside it", "tone": "drift"},
-        {"label": "UNVERIFIABLE", "note": "the axis could not be measured at all", "tone": "none"}
+        {
+          "label": "MATCH",
+          "note": "the measurement sits inside tolerance",
+          "tone": "verified"
+        },
+        {
+          "label": "DRIFT",
+          "note": "the measurement sits outside it",
+          "tone": "drift"
+        },
+        {
+          "label": "UNVERIFIABLE",
+          "note": "the axis could not be measured at all",
+          "tone": "none"
+        }
       ]
+    }
+  ],
+  "cards": [
+    {
+      "file": "verdict-ladder.svg",
+      "kicker": "one pure function, no model in it",
+      "title": "The order the checks run in, and where a claim stops",
+      "source": "python -c \"import crucible.verdict as v; print(v.verdict_for.__doc__)\"",
+      "alt": "The seven rungs of crucible's verdict function, in the order it checks them. A claim with no falsification condition, no measurement, a measurement bound to a different claim, a deviation that is not a number, or a tolerance that was widened after the claim sealed one all return UNVERIFIABLE. A deviation within tolerance returns MATCH, and that row carries the mark because it is the only rung on which a claim stands. A deviation over tolerance returns DRIFT.",
+      "heads": [
+        "what came back",
+        "verdict",
+        "why it stops there"
+      ],
+      "fields": [
+        {
+          "key": "no falsification",
+          "value": "UNVERIFIABLE",
+          "tone": "none",
+          "note": "A claim nothing could refute predicts nothing, so there is no observation to hold it against."
+        },
+        {
+          "key": "no measurement",
+          "value": "UNVERIFIABLE",
+          "tone": "none",
+          "note": "An unmeasured claim never reads as holding. Silence is not evidence in its favour."
+        },
+        {
+          "key": "binds to another claim",
+          "value": "UNVERIFIABLE",
+          "tone": "none",
+          "note": "The measurement carries the claim's content hash. A hash that differs means something else was measured."
+        },
+        {
+          "key": "deviation not a number",
+          "value": "UNVERIFIABLE",
+          "tone": "none",
+          "note": "None, infinite, negative, or a tolerance at zero. Nothing here can be compared, so nothing is."
+        },
+        {
+          "key": "tolerance widened",
+          "value": "UNVERIFIABLE",
+          "tone": "none",
+          "note": "A claim that sealed a tolerance is decided by that number and no other. A looser one is refused, not accepted."
+        },
+        {
+          "key": "within tolerance",
+          "value": "MATCH",
+          "tone": "verified",
+          "note": "The only rung a claim stands on, and the reason the other six are worth drawing. Margin comes back with it."
+        },
+        {
+          "key": "over tolerance",
+          "value": "DRIFT",
+          "tone": "none",
+          "note": "Measured, compared, and broken. This is the rung that says so, with the deviation and the tolerance in the grounds."
+        }
+      ],
+      "footnote": "verdict_for is pure and holds no model, so a verdict recomputes from the stored record and asserting one confidently changes nothing. The rungs are ordered and the first that applies decides. Five of the seven return UNVERIFIABLE, which is fail-closed: an axis that cannot be measured is never read as holding. The widened-tolerance rung is the one that stops a verdict being rescued after the fact."
     }
   ]
 }
