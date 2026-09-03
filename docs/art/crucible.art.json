@@ -1,0 +1,36 @@
+{
+  "$comment": "Source of truth for the artwork on this repository's front page. Edit a sentence here and re-run scripts/render_repo_art.py; tests/test_repo_art.py fails if the committed SVG stops matching.",
+  "header": {
+    "name": "crucible",
+    "role": "adversarial claim measurement",
+    "tagline": "Register a thesis, measure each claim, name the weakest axis.",
+    "words": ["thesis", "steelman", "measure", "verdict", "refine"]
+  },
+  "flows": [
+    {
+      "file": "thesis-lifecycle.svg",
+      "kicker": "one thesis, end to end",
+      "title": "How a claim earns its standing, and how it loses it",
+      "alt": "Eight stages from a registered thesis to a self-contained review packet. Each claim is steelmanned, measured against a substrate, and graded; a round that is not cohesive reflects on the weakest axis and re-measures it. The verdict is a pure function of the measurement and ends as match, drift or unverifiable.",
+      "footnote": "The verdict recomputes from the stored record, so a confident assertion cannot move it.",
+      "stages": [
+        {"title": "Thesis", "note": "A claim set under one seal, each with what would refute it."},
+        {"title": "Steelman", "note": "The strongest test is proposed before anything is measured."},
+        {"title": "Measure", "note": "Each claim meets a substrate: a deviation, and its tolerance."},
+        {"title": "Cohesion", "note": "The harmonic mean of margins, so one weak axis drags it down."},
+        {"title": "Verdict", "note": "A pure function of deviation and tolerance. No model here."},
+        {"title": "Registry", "note": "The assessment is stored under a sha256 receipt with the seal."},
+        {"title": "Recheck", "note": "Rows are re-read from disk and the verdicts recompute."},
+        {"title": "Packet", "note": "A bundle that carries its own zero-import verifier."}
+      ],
+      "returns": [
+        {"from": 3, "to": 2, "label": "NOT COHESIVE: THE WEAKEST AXIS IS RE-MEASURED"}
+      ],
+      "outcomes": [
+        {"label": "MATCH", "note": "the measurement sits inside tolerance", "tone": "verified"},
+        {"label": "DRIFT", "note": "the measurement sits outside it", "tone": "drift"},
+        {"label": "UNVERIFIABLE", "note": "the axis could not be measured at all", "tone": "none"}
+      ]
+    }
+  ]
+}
