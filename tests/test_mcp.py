@@ -75,6 +75,7 @@ def test_tools_list_uses_catalog_names():
         "crucible.doctor",
         "crucible.assess",
         "crucible.recheck",
+        "crucible.recheck_template",
         "crucible.run",
         "crucible.review",
         "crucible.report",
@@ -165,6 +166,65 @@ def test_recheck_tool_returns_cli_recheck_plan(tmp_path):
     assert body["descriptors"][0]["claim_text"] == "energy is conserved"
     assert body["descriptors"][0]["oracle"] == "telos:conservation"
     assert body["descriptors"][0]["recheck"]["expr"] == "energy"
+
+
+
+
+def test_recheck_template_tool_returns_cli_template_shape(tmp_path):
+    reg, thesis, measurement = _seed_recheck_registry(tmp_path)
+
+    resp = _call("crucible.recheck_template", {"dir": reg})
+    body = json.loads(resp["result"]["content"][0]["text"])
+
+    assert resp["result"].get("isError") is not True
+    assert body["schema"] == "crucible.replay-template/1"
+    assert body["assessment"]["thesis_id"] == thesis.id
+    assert body["replay_binding"]["schema"] == "crucible.replay-set/1"
+    assert body["replay_binding"]["descriptor_count"] == 1
+    assert body["replay_binding"]["skipped_count"] == 1
+    assert "Fill each measurement" in body["instructions"]
+    assert body["replays"][0]["claim"]["text"] == "energy is conserved"
+    assert body["replays"][0]["recheck"] == measurement.recheck
+    assert body["replays"][0]["expected_measurement"]["deviation"] == 0.0
+    assert body["replays"][0]["measurement"]["deviation"] is None
+    assert "measurement_seal_rows" not in body
+
+
+def test_recheck_tool_template_argument_returns_template_without_file_write(tmp_path):
+    reg, thesis, measurement = _seed_recheck_registry(tmp_path)
+    forbidden = tmp_path / "must-not-be-written.json"
+
+    resp = _call("crucible.recheck", {"dir": reg, "template": True, "out": str(forbidden)})
+    body = json.loads(resp["result"]["content"][0]["text"])
+
+    assert resp["result"].get("isError") is not True
+    assert body["schema"] == "crucible.replay-template/1"
+    assert body["assessment"]["thesis_id"] == thesis.id
+    assert body["replays"][0]["recheck"] == measurement.recheck
+    assert not forbidden.exists()
+
+
+def test_recheck_tool_rejects_pack_and_template_together_as_tool_error(tmp_path):
+    reg, _thesis, measurement = _seed_recheck_registry(tmp_path)
+    plan = _call("crucible.recheck", {"dir": reg})
+    assessment = json.loads(plan["result"]["content"][0]["text"])["assessment"]
+    pack = _replay_pack(tmp_path / "replay.json", measurement, assessment=assessment)
+
+    resp = _call("crucible.recheck", {"dir": reg, "pack": pack, "template": True})
+
+    assert "error" not in resp
+    assert resp["result"]["isError"] is True
+    assert "template cannot be combined with pack" in resp["result"]["content"][0]["text"]
+
+
+def test_recheck_tool_rejects_non_boolean_template_as_tool_error(tmp_path):
+    reg, _thesis, _measurement = _seed_recheck_registry(tmp_path)
+
+    resp = _call("crucible.recheck", {"dir": reg, "template": "true"})
+
+    assert "error" not in resp
+    assert resp["result"]["isError"] is True
+    assert "template must be a boolean when provided" in resp["result"]["content"][0]["text"]
 
 
 def test_recheck_tool_replays_pack_with_cli_result_shape(tmp_path):

@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- MCP parity: `crucible.recheck_template` now returns `crucible.replay-template/1` over stdio, and `crucible.recheck` accepts `template: true` while keeping `pack` and `template` exclusive. Replay packs that recheck to `ok: false` remain normal tool results, not MCP transport errors.
+
 All notable changes to crucible. Versions follow semantic versioning; each minor release is built
 behind a feature branch and reviewed before merge.
 

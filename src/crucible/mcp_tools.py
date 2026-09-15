@@ -16,7 +16,7 @@ from crucible.commands import (
 from crucible.flagship import doctor_payload, status_payload
 from crucible.measurement_gate import verify_measurement_packet
 from crucible.measurement_gate_cmd import _criteria
-from crucible.recheck_cmd import recheck_payload
+from crucible.recheck_cmd import recheck_payload, replay_template_payload
 
 
 def _obj(properties: dict, required: list[str] | None = None) -> dict:
@@ -61,6 +61,16 @@ def tool_defs() -> list[dict]:
                 "dir": _path("path to a Crucible registry directory"),
                 "index": {"type": ["integer", "string"], "description": "assessment index, default -1"},
                 "pack": _path("optional JSON replay pack with reproduced measurements"),
+                "template": {"type": "boolean",
+                             "description": "return a crucible.replay-template/1 object instead of a plan"},
+            }, ["dir"]),
+        },
+        {
+            "name": "crucible.recheck_template",
+            "description": "Return a crucible.replay-template/1 object for descriptor-bearing rows in a registry assessment.",
+            "inputSchema": _obj({
+                "dir": _path("path to a Crucible registry directory"),
+                "index": {"type": ["integer", "string"], "description": "assessment index, default -1"},
             }, ["dir"]),
         },
         {
@@ -164,6 +174,15 @@ def _optional_str(args: dict, name: str) -> str | None:
     return value
 
 
+def _optional_bool(args: dict, name: str) -> bool | None:
+    value = args.get(name)
+    if value is None:
+        return None
+    if type(value) is not bool:
+        raise ValueError(f"{name} must be a boolean when provided")
+    return value
+
+
 def _append_optional(argv: list[str], args: dict, name: str, flag: str | None = None) -> None:
     value = _optional_str(args, name)
     if value is not None:
@@ -251,17 +270,26 @@ def call_tool(name: str, args: dict) -> str:
         measurements = _optional_str(args, "measurements")
         payload = _assess_from_files(thesis, measurements, strict=args.get("strict") is True)
         return json.dumps(payload, indent=2, ensure_ascii=False)
-    if name == "crucible.recheck":
+    if name in {"crucible.recheck", "crucible.recheck_template"}:
         index_value = args.get("index", -1)
         try:
             index = int(index_value)
         except (TypeError, ValueError) as exc:
             raise ValueError("index must be an integer") from exc
-        return json.dumps(
-            recheck_payload(_require_str(args, "dir"), index=index, pack=_optional_str(args, "pack")),
-            indent=2,
-            ensure_ascii=False,
-        )
+        template = _optional_bool(args, "template")
+        if name == "crucible.recheck_template" or template is True:
+            if _optional_str(args, "pack") is not None:
+                raise ValueError("template cannot be combined with pack")
+            payload = replay_template_payload(
+                recheck_payload(_require_str(args, "dir"), index=index)
+            )
+        else:
+            payload = recheck_payload(
+                _require_str(args, "dir"),
+                index=index,
+                pack=_optional_str(args, "pack"),
+            )
+        return json.dumps(payload, indent=2, ensure_ascii=False)
     if name == "crucible.run":
         return _run_tool(args)
     if name == "crucible.measurement_gate":
