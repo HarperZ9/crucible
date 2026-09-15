@@ -24,7 +24,7 @@ crucible turns a thesis into a set of claims, each paired with the observation t
 - **Oracle recheck packs.** `crucible recheck` lists descriptor-bearing measurements, writes `crucible.replay-template/1` templates, and validates `crucible.replay-pack/1` inputs against the sealed rows without opening a second verdict path. A privacy-bounded `crucible.replay-set/1` binding covers the descriptor-bearing replay contracts without exporting descriptorless rows or their evidence. CLI replay packs must preserve the template's assessment binding; a missing or mismatched thesis ID, assessment seal, or measurement seal fails closed before replay.
 - **A content-addressed registry with tamper detection.** Every claim carries a sha256 receipt; the registry re-verifies stored claims (MATCH / MISSING / CORRUPT), checks thesis seals, rejects duplicate ids with different seals, and refuses tampered theses.
 - **Typed missing-evidence explanations.** Every UNVERIFIABLE verdict names the exact evidence class it lacks and the concrete next action, derived from the same pure ladder as the verdict, so the explanation can never disagree with it. New in 1.2.0.
-- **Batch manifests, Markdown reports, creative measurement gates, native MCP.** `crucible batch` runs a manifest of theses into one registry, `crucible report` renders deterministic Markdown, `crucible measurement-gate` verifies Telos creative measurement packets, and `crucible mcp` serves 13 tools over stdio.
+- **Batch manifests, Markdown reports, creative measurement gates, native MCP.** `crucible batch` runs a manifest of theses into one registry, `crucible report` renders deterministic Markdown, `crucible measurement-gate` verifies Telos creative measurement packets, and `crucible mcp` serves 14 tools over stdio, including replay-template generation.
 - **Zero third-party runtime dependencies.** The core is pure standard library, Python 3.11+.
 
 ## How a thesis run works
@@ -151,7 +151,7 @@ A regression is a claim moving MATCH to DRIFT, becoming UNVERIFIABLE, or droppin
 | `crucible export THESIS` | publication-gated export; fenced material is refused at the edge |
 | `crucible measurement-gate PACKET` | verify a Telos creative measurement packet |
 | `crucible status / doctor / demo` | operator envelope, readiness checks, demo pointer (`--json`) |
-| `crucible mcp` | serve the 13 crucible tools over MCP stdio |
+| `crucible mcp` | serve the 14 crucible tools over MCP stdio, including `crucible.recheck_template` |
 
 Every command works identically from a source checkout via `python -m crucible`.
 
@@ -179,7 +179,7 @@ All edges map into the same `Measurement` to `verdict_for` spine. The verdict st
 
 ## Status
 
-`crucible-bench 1.2.0` covers the full loop, one-command runs, cleanroom review packets, oracle replay, registry operations, creative measurement gates, and the MCP bridge, plus what landed since 1.1.0: the CI regression gate, LLM-as-judge, missing-evidence explanations, ill-posed measurement warnings, and the MATCH-provenance gate. The test suite currently collects 330 tests. Within Project Telos, crucible is the measured-judgment layer: it consumes gather evidence and index context and emits verdict packets that telos can surface and replay.
+`crucible-bench 1.2.0` covers the full loop, one-command runs, cleanroom review packets, oracle replay, registry operations, creative measurement gates, and the MCP bridge, plus MCP replay-template parity, and what landed since 1.1.0: the CI regression gate, LLM-as-judge, missing-evidence explanations, ill-posed measurement warnings, and the MATCH-provenance gate. Within Project Telos, crucible is the measured-judgment layer: it consumes gather evidence and index context and emits verdict packets that telos can surface and replay.
 
 ## Why it matters
 
@@ -188,6 +188,10 @@ Everything above reduces to one property: a verdict is a pure function of a seal
 ## License
 
 crucible is fair-source: open to read, run, and build on, with commercial use reserved so the project can fund its own development. See [LICENSE](LICENSE) for the exact terms.
+
+## Development
+
+The local developer workflow is intentionally small.
 
 ## Work with it
 

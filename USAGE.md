@@ -34,7 +34,11 @@ python -m crucible --help
 ## MCP
 
 Use `crucible mcp` when a host needs the measurement and verdict tools over
-stdio.
+stdio. `crucible.recheck_template` returns the same `crucible.replay-template/1`
+object that `crucible recheck --template` writes, without writing a local file.
+`crucible.recheck` also accepts `template: true`; `pack` and `template` are
+exclusive. Replay results with `ok: false` are evaluation failures, not MCP
+transport errors.
 
 ```bash
 crucible mcp

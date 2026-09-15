@@ -91,8 +91,8 @@ def _assessment_at(reg: Registry, index: int) -> Assessment:
     return Assessment.from_dict(records[index])
 
 
-def _write_template(path: str, plan: dict) -> None:
-    payload = {
+def replay_template_payload(plan: dict) -> dict:
+    return {
         "schema": "crucible.replay-template/1",
         "assessment": plan["assessment"],
         "replay_binding": plan["replay_binding"],
@@ -103,6 +103,10 @@ def _write_template(path: str, plan: dict) -> None:
         ),
         "replays": [_template_row(row) for row in plan["descriptors"]],
     }
+
+
+def _write_template(path: str, plan: dict) -> None:
+    payload = replay_template_payload(plan)
     with open(path, "x", encoding="utf-8") as f:
         json.dump(payload, f, indent=2, ensure_ascii=False)
         f.write("\n")
