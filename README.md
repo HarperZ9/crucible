@@ -8,10 +8,25 @@
 [![downloads](https://img.shields.io/pypi/dm/crucible-bench?label=downloads&style=flat-square&labelColor=14041b)](https://pypi.org/project/crucible-bench/)
 ![python: 3.11+](https://img.shields.io/badge/python-3.11%2B-blue?style=flat-square&labelColor=14041b)
 ![deps: none (core)](https://img.shields.io/badge/core%20deps-none-success?style=flat-square&labelColor=14041b)
+![version: 1.2.0](https://img.shields.io/badge/version-1.2.0-26dfe8?style=flat-square&labelColor=14041b)
 
 crucible turns a thesis into a set of claims, each paired with the observation that would refute it. Independent adversaries steelman every claim by proposing the strongest test, the engine measures each one against a substrate oracle, and the weakest axis gets refined across rounds: strengthen the substrate, sharpen the measurement, or amend the thesis. The result is a verdict per claim, MATCH, DRIFT, or UNVERIFIABLE, grounded in the measurement rather than a judge's opinion. Every run writes a record you can re-check.
 
 [Project Telos](https://harperz9.github.io) | [gather](https://github.com/HarperZ9/gather) | [crucible](https://github.com/HarperZ9/crucible) | [index](https://github.com/HarperZ9/index) | [forum](https://github.com/HarperZ9/forum) | [telos](https://github.com/HarperZ9/telos) | [learn](https://github.com/HarperZ9/learn) | [emet](https://github.com/HarperZ9/emet) | [buildlang](https://github.com/HarperZ9/buildlang)
+
+## Current status
+
+`crucible-bench 1.2.0` is the current source version. The judgment loop,
+cleanroom review packets, sealed registry, drift and CI gates, measurement
+adapters, CLI, Python API, and MCP surface are present; verdicts remain
+UNVERIFIABLE when the required evidence is absent.
+
+## Operator surface
+
+Use `crucible status --json` and `crucible doctor --json` to inspect the local
+installation, then `crucible mcp` to expose assessment, review, registry, and
+measurement-gate operations to an MCP host. `crucible ci` is the regression
+entrypoint for a sealed baseline.
 
 ## Highlights
 
