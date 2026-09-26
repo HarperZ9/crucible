@@ -1,27 +1,89 @@
 # Changelog
 
-## Unreleased
-
-- MCP parity: `crucible.recheck_template` now returns `crucible.replay-template/1` over stdio, and `crucible.recheck` accepts `template: true` while keeping `pack` and `template` exclusive. Replay packs that recheck to `ok: false` remain normal tool results, not MCP transport errors.
-
 All notable changes to crucible. Versions follow semantic versioning; each minor release is built
 behind a feature branch and reviewed before merge.
 
-## Unreleased
+## 1.3.0 (2026-09-26)
 
-### Presentation parity
+Verdict-integrity fixes, a release that carries them, and the files a user needs after
+`pip install`. Upgrade from 1.2.0 or earlier: the fixes below change verdicts that 1.2.0 accepted.
 
-- README now exposes the current source version and the operator commands for
-  status, doctor, MCP, and CI regression checks.
+### Security and verdict integrity
 
-- Security: CLI oracle replay packs must include the template's top-level assessment binding.
-  A missing, malformed, or mismatched thesis ID, assessment seal, or measurement seal now fails
-  closed before replay instead of allowing an unbound pack to run.
-- Replay interop: `crucible.replay-template/1` outputs now carry a privacy-bounded
-  `crucible.replay-set/1` binding over the canonical descriptor-bearing replay contracts, without
-  exporting descriptorless rows or their evidence. `crucible.replay-pack/1` inputs preserve that
-  binding; supplied bindings are checked exactly, while older bound packs may omit them. Present pack
-  schemas must be exactly `crucible.replay-pack/1`; schema-less legacy packs remain compatible.
+Items marked "1.2.0 and earlier" shipped in a release; a GitHub security advisory for 1.2.0
+accompanies this release. Items marked "unreleased" were defects in code added after 1.2.0 and
+fixed before any release carried them.
+
+- HIGH, 1.2.0 and earlier. A measurement could widen the tolerance that decides MATCH or DRIFT and
+  still re-derive MATCH: the deciding number was bound by no seal, a `tolerance` on a thesis claim
+  was ignored, and `verify_assessment` and `recheck_assessment` recomputed from the stored
+  tolerance. A claim may now seal its tolerance (`"tolerance"` on a thesis claim, or
+  `make_claim(..., tolerance=)`), and `verdict_for` refuses a measurement carrying any other
+  tolerance with UNVERIFIABLE. A hand-forged MATCH with recomputed seals fails
+  `verdicts_rederive`. Reproduction: a claim that seals tolerance 0.5, a measured deviation of 8
+  and a measurement tolerance of 10 returned MATCH on 1.2.0 and returns UNVERIFIABLE now
+  (`tests/fixtures/sealed-tolerance/`). Claims without a sealed tolerance keep their hashes and the
+  old behavior; seal the tolerance on every new claim.
+- HIGH, 1.2.0 and earlier. `doctor` emitted MATCH for three checks it never ran, and the status and
+  demo envelopes defaulted to MATCH. Informational envelopes now use the operational token `OK`,
+  and `doctor` resolves each capability's entry point and reports `available` or `absent`.
+- MEDIUM, 1.2.0 and earlier. `verify_browser_evidence` turned a packet's own carried MATCH into
+  crucible's MATCH after a shape check. A well-formed packet carrying MATCH is now UNVERIFIABLE,
+  with the packet's claim kept under `carried_verdict`; a carried DRIFT or UNVERIFIABLE still
+  passes through.
+- MEDIUM, 1.2.0 and earlier. CLI oracle replay packs must carry the template's top-level
+  assessment binding. A missing, malformed or mismatched thesis ID, assessment seal or measurement
+  seal now fails closed before replay instead of letting an unbound pack run.
+- LOW, 1.2.0 and earlier. The Telos content check accepted content on a 32-bit FNV-1a match alone.
+  When a descriptor carries a SHA-256 (`content_sha256`), that digest decides and a mismatch is
+  refused; FNV stays for protocol parity and is documented as accident-evident only.
+- Unreleased. `refine` graded correctness against the measurement's tolerance instead of the
+  claim's sealed tolerance, so a widened tolerance read as "cohesively verified" while
+  `verdict_for` refused it. The grader now honors the seal the same way.
+- Unreleased. `export`, the bundle `spec.json` and the cleanroom review reconstruction dropped a
+  sealed tolerance, so a thesis with a sealed tolerance failed its own review. The tolerance is now
+  carried on all three surfaces when sealed; unsealed rows stay byte-identical.
+
+### Added
+
+- `ProofMeasure`: a proof or type checker (Lean, Coq, any command) as a measurement oracle. An
+  accepted proof is MATCH, a rejected one DRIFT, and an absent or failing checker UNVERIFIABLE. The
+  measurement carries a recheck descriptor with the command and the artifact's SHA-256. A checker
+  command must be a non-empty list of non-empty strings, or the claim is UNVERIFIABLE. Library
+  only; the CLI and MCP server do not start it.
+- MCP: `crucible.recheck_template` returns `crucible.replay-template/1` over stdio, and
+  `crucible.recheck` accepts `template: true` while keeping `pack` and `template` exclusive. Replay
+  packs that recheck to `ok: false` are normal tool results, not transport errors.
+- Replay interop: `crucible.replay-template/1` outputs carry a privacy-bounded
+  `crucible.replay-set/1` binding over the descriptor-bearing replay contracts, without exporting
+  descriptorless rows or their evidence. `crucible.replay-pack/1` inputs preserve that binding;
+  supplied bindings are checked exactly, while older bound packs may omit them. A present pack
+  schema must be exactly `crucible.replay-pack/1`; schema-less legacy packs stay compatible.
+- `crucible examples --out DIR` writes the quickstart inputs, which now ship inside the package, to
+  a new folder, so the README's first run works after `pip install` without a clone. The command
+  refuses a folder that already exists.
+- `verify_seals.py` at the repository root: a stdlib-only verifier that re-derives an assessment
+  artifact's three seals without importing crucible.
+- Organ-bundle interop (`crucible.interop`) and `crucible.interop.json`, the manifest plexus reads
+  to wire crucible into the tool mesh.
+
+### Changed
+
+- License: FSL-1.1-MIT (`LicenseRef-FSL-1.1-MIT`) replaces the crucible Fair-Source License 1.0
+  for this and later versions. Versions already published keep the license they shipped with.
+- `SECURITY.md` names the private reporting route and the supported versions.
+- One version, checked everywhere: `scripts/check_version_sites.py` fails when `pyproject.toml`,
+  `crucible.__version__`, the README or the latest changelog heading disagree, and the release
+  workflow runs it against the tag. `status` derives its version text from the package.
+- Release workflow: every action is pinned by commit. A read-only build job checks the tag and
+  version sites, builds, runs `twine check`, and smoke-tests the wheel in a fresh environment
+  (version, sealed-tolerance probe, packaged examples, MCP server). Only the upload job can mint a
+  publishing token, and its upload tolerates a re-run (`skip-existing`). A third job attaches the
+  wheel, the sdist and `SHA256SUMS.txt` to the GitHub Release, downloaded from PyPI and checked
+  against PyPI's digests and this run's build.
+- CI runs the version guard and the wheel smoke test.
+- README: the install section shows the packaged quickstart, and presentation surfaces carry the
+  status, doctor, MCP and CI commands.
 
 ## 1.2.0 (2026-07-07)
 

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "crucible-bench"
-version = "1.2.0"
+version = "1.3.0"
 description = "Measurement-backed thesis evaluation with clean verifier packets and re-checkable verdicts."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -29,6 +29,9 @@ Repository = "https://github.com/HarperZ9/crucible"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+"crucible.examples" = ["*.json"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

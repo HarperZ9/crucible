@@ -1,0 +1,11 @@
+{
+  "measurements": [
+    {
+      "claim": "bound-3",
+      "deviation": 8.0,
+      "tolerance": 0.5,
+      "method": "comparison-count",
+      "evidence": ["worst case is 11, claimed bound 3, excess 8"]
+    }
+  ]
+}
