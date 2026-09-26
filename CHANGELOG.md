@@ -3,7 +3,7 @@
 All notable changes to crucible. Versions follow semantic versioning; each minor release is built
 behind a feature branch and reviewed before merge.
 
-## Unreleased
+## 1.3.0 (2026-09-26)
 
 Verdict-integrity fixes, a release that carries them, and the files a user needs after
 `pip install`. Upgrade from 1.2.0 or earlier: the fixes below change verdicts that 1.2.0 accepted.

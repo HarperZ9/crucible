@@ -99,7 +99,7 @@ from crucible.verdict import (
     verdict_for,
 )
 
-__version__ = "1.2.0"
+__version__ = "1.3.0"
 
 __all__ = [
     "ArtifactStore", "Assessment", "Cell", "Claim", "DriftReport", "DriftRow", "GateReport", "GateRow",
