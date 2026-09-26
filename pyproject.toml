@@ -30,6 +30,9 @@ Repository = "https://github.com/HarperZ9/crucible"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+"crucible.examples" = ["*.json"]
+
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]

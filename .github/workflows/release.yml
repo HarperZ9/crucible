@@ -1,5 +1,8 @@
 name: Release
 
+# Publishes crucible-bench to PyPI through trusted publishing (OIDC); no token is stored anywhere.
+# Runs when a GitHub Release is published for a v* tag. Every action is pinned by commit.
+
 on:
   release:
     types: [published]
@@ -20,16 +23,82 @@ jobs:
     permissions:
       contents: read
       id-token: write
+    outputs:
+      digests: ${{ steps.digests.outputs.digests }}
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
           python-version: "3.12"
+      - name: Check the tag and every version site
+        run: python scripts/check_version_sites.py . --tag "$GITHUB_REF_NAME"
       - name: Install build tools
         run: python -m pip install --requirement requirements-release.txt
       - name: Build distributions
         run: python -m build --no-isolation
       - name: Check distributions
         run: python -m twine check dist/*
+      - name: Smoke-test the wheel in a fresh environment
+        run: python scripts/smoke_wheel.py dist/*.whl
+      - name: Record artifact digests
+        id: digests
+        run: |
+          sha256sum dist/* | sed 's#dist/##' | tee digests.txt
+          echo "digests=$(paste -sd';' digests.txt)" >> "$GITHUB_OUTPUT"
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b
+        with:
+          # A re-run after a partial upload must not fail on files PyPI already holds.
+          skip-existing: true
+
+  github-release:
+    name: Attach PyPI files and SHA256SUMS.txt to the GitHub Release
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      BUILT_DIGESTS: ${{ needs.publish.outputs.digests }}
+    steps:
+      - name: Download the published files from PyPI and check their digests
+        run: |
+          python - <<'PYEOF'
+          import hashlib, json, os, pathlib, time, urllib.request
+
+          version = os.environ["GITHUB_REF_NAME"].removeprefix("v")
+          url = f"https://pypi.org/pypi/crucible-bench/{version}/json"
+          headers = {"User-Agent": "crucible-release-workflow"}
+          files = []
+          for attempt in range(20):
+              try:
+                  with urllib.request.urlopen(urllib.request.Request(url, headers=headers)) as r:
+                      files = json.load(r)["urls"]
+              except OSError as exc:
+                  print(f"PyPI not ready ({exc}); retrying")
+              if {f["packagetype"] for f in files} >= {"bdist_wheel", "sdist"}:
+                  break
+              time.sleep(15)
+          else:
+              raise SystemExit(f"PyPI never listed a wheel and an sdist for {version}")
+          built = dict(line.split("  ")[::-1] for line in os.environ["BUILT_DIGESTS"].split(";") if line)
+          out = pathlib.Path("release-assets")
+          out.mkdir()
+          sums = []
+          for f in sorted(files, key=lambda f: f["filename"]):
+              req = urllib.request.Request(f["url"], headers=headers)
+              data = urllib.request.urlopen(req).read()
+              digest = hashlib.sha256(data).hexdigest()
+              if digest != f["digests"]["sha256"]:
+                  raise SystemExit(f"{f['filename']}: downloaded bytes do not match PyPI's digest")
+              if built.get(f["filename"]) != digest:
+                  print(f"::warning::{f['filename']} on PyPI differs from this run's build; "
+                        "PyPI holds files from an earlier run, and those are what users install")
+              (out / f["filename"]).write_bytes(data)
+              sums.append(f"{digest}  {f['filename']}\n")
+          (out / "SHA256SUMS.txt").write_bytes("".join(sums).encode("ascii"))
+          print("".join(sums), end="")
+          PYEOF
+      - name: Upload to the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "$GITHUB_REF_NAME" release-assets/* --clobber --repo "$GITHUB_REPOSITORY"

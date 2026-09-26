@@ -63,7 +63,14 @@ and an axis that could not be measured reads UNVERIFIABLE instead of holding.
 pip install crucible-bench
 ```
 
-The distribution is `crucible-bench`; it installs the `crucible` command and the `crucible` package (`import crucible`). For the examples and the newest commands, work from a clone:
+The distribution is `crucible-bench`; it installs the `crucible` command and the `crucible` package (`import crucible`). The quickstart inputs ship with the package. Write them to a new folder and run the first check:
+
+```bash
+crucible examples --out crucible-examples
+crucible run crucible-examples/thesis-binary-search.json   --measurements crucible-examples/measurements-binary-search.json   --registry .crucible-registry
+```
+
+For the scripted demo and the development tools, work from a clone:
 
 ```bash
 git clone https://github.com/HarperZ9/crucible
@@ -89,7 +96,7 @@ assessment seal 07dafef03f5c..., verified True
 after flipping a DRIFT to a MATCH, verified False  <- caught
 ```
 
-Then run the same thesis through the full loop into a registry:
+Then run the same thesis through the full loop into a registry. From an installed package, use the `crucible-examples/` folder that `crucible examples` wrote in place of `examples/`:
 
 ```bash
 crucible run examples/thesis-binary-search.json \
@@ -191,6 +198,7 @@ All edges map into the same `Measurement` to `verdict_for` spine. The verdict st
 - [docs/ENTERPRISE-READINESS.md](docs/ENTERPRISE-READINESS.md): the host-integration contract for unattended agent workflows.
 - [docs/RELEASE-READINESS.md](docs/RELEASE-READINESS.md): the 1.0 gate checklist.
 - [CHANGELOG.md](CHANGELOG.md): per-release detail, including what is merged but not yet on PyPI.
+- [SECURITY.md](SECURITY.md): how to report a vulnerability privately, and the supported versions.
 
 ## Status
 

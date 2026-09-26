@@ -25,6 +25,14 @@ crucible demo --json
 crucible --help
 ```
 
+The quickstart inputs ship with the package. `crucible examples --out DIR` writes them to a new
+folder (it refuses one that already exists), ready for `crucible run`:
+
+```bash
+crucible examples --out crucible-examples
+crucible run crucible-examples/thesis-binary-search.json   --measurements crucible-examples/measurements-binary-search.json   --registry .crucible-registry
+```
+
 The same package can be exercised from source with:
 
 ```bash
@@ -49,7 +57,13 @@ crucible mcp
 ```bash
 python -m pytest
 python examples/demo.py
+python scripts/check_version_sites.py .
+python -m build && python scripts/smoke_wheel.py dist/*.whl
 ```
+
+`check_version_sites.py` fails when any file states a different version from `pyproject.toml`.
+`smoke_wheel.py` installs a built wheel into a fresh environment and checks the version, the
+sealed-tolerance probe, the packaged examples and the MCP server.
 
 For public/developer delivery checks:
 

@@ -21,6 +21,7 @@ from crucible.commands import (
     cmd_steelman,
 )
 from crucible.drift_cmd import cmd_drift
+from crucible.examples_cmd import cmd_examples
 from crucible.flagship import cmd_demo, cmd_doctor, cmd_status
 from crucible.mcp import serve as serve_mcp
 from crucible.measurement_gate_cmd import cmd_measurement_gate
@@ -50,6 +51,11 @@ def _add_flagship_commands(sub) -> None:
     demo = sub.add_parser("demo", help="show Crucible's operator-spine demo command")
     demo.add_argument("--json", action="store_true", help="emit a Project Telos action envelope")
     demo.set_defaults(func=cmd_demo)
+
+    ex = sub.add_parser("examples", help="write the packaged quickstart inputs to a new folder")
+    ex.add_argument("--out", required=True, metavar="DIR", help="folder to create; must not exist yet")
+    ex.add_argument("--json", action="store_true", help="emit JSON instead of human text")
+    ex.set_defaults(func=cmd_examples)
 
 
 def build_parser() -> argparse.ArgumentParser:

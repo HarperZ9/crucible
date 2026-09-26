@@ -57,7 +57,7 @@ def test_examples_command_refuses_an_existing_folder(tmp_path, capsys):
     out = tmp_path / "taken"
     out.mkdir()
     (out / "keep.txt").write_text("mine", encoding="utf-8")
-    assert main(["examples", "--out", str(out)]) == 2
+    assert main(["examples", "--out", str(out)]) == 1
     assert "exists" in capsys.readouterr().err
     assert sorted(p.name for p in out.iterdir()) == ["keep.txt"]
 
@@ -73,7 +73,8 @@ def test_written_examples_run_the_documented_first_command(tmp_path, capsys):
     assert main(["examples", "--out", str(out)]) == 0
     capsys.readouterr()
     code = main(["run", str(out / "thesis-binary-search.json"),
-                 "--measurements", str(out / "measurements-binary-search.json"), "--json"])
+                 "--measurements", str(out / "measurements-binary-search.json"),
+                 "--registry", str(tmp_path / "reg"), "--json"])
     payload = json.loads(capsys.readouterr().out)
     assert code == 0
     counts = payload["assessment"]
