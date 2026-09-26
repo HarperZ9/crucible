@@ -75,10 +75,12 @@ fixed before any release carried them.
 - One version, checked everywhere: `scripts/check_version_sites.py` fails when `pyproject.toml`,
   `crucible.__version__`, the README or the latest changelog heading disagree, and the release
   workflow runs it against the tag. `status` derives its version text from the package.
-- Release workflow: every action is pinned by commit, the publish step tolerates a re-run
-  (`skip-existing`), a smoke test installs the built wheel in a fresh environment and checks the
-  sealed-tolerance probe and the MCP server before upload, and the GitHub Release gets the wheel,
-  the sdist and `SHA256SUMS.txt`, downloaded from PyPI and checked against PyPI's digests.
+- Release workflow: every action is pinned by commit. A read-only build job checks the tag and
+  version sites, builds, runs `twine check`, and smoke-tests the wheel in a fresh environment
+  (version, sealed-tolerance probe, packaged examples, MCP server). Only the upload job can mint a
+  publishing token, and its upload tolerates a re-run (`skip-existing`). A third job attaches the
+  wheel, the sdist and `SHA256SUMS.txt` to the GitHub Release, downloaded from PyPI and checked
+  against PyPI's digests and this run's build.
 - CI runs the version guard and the wheel smoke test.
 - README: the install section shows the packaged quickstart, and presentation surfaces carry the
   status, doctor, MCP and CI commands.

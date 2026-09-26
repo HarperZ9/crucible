@@ -73,3 +73,27 @@ def test_ci_runs_the_version_guard_and_the_wheel_smoke():
     workflow = _read(".github/workflows/ci.yml")
     assert "scripts/check_version_sites.py" in workflow
     assert "scripts/smoke_wheel.py" in workflow
+
+
+def _job(workflow: str, name: str) -> str:
+    """The text of one job in a workflow, from its key to the next top-level job key."""
+    body = workflow.split(f"\n  {name}:\n", 1)[1]
+    return re.split(r"\n  [a-z][a-z0-9-]*:\n", body, maxsplit=1)[0]
+
+
+def test_only_the_upload_job_can_mint_a_publishing_token():
+    workflow = _read(".github/workflows/release.yml")
+    build = _job(workflow, "build")
+    publish = _job(workflow, "publish")
+    assert "id-token: write" not in build
+    assert "python -m build" in build and "smoke_wheel.py" in build
+    assert "id-token: write" in publish
+    for step in ("python -m build", "smoke_wheel.py", "pip install", "run:"):
+        assert step not in publish, step
+    assert workflow.count("id-token: write") == 1
+
+
+def test_release_assets_fail_closed_on_a_first_attempt_mismatch():
+    job = _job(_read(".github/workflows/release.yml"), "github-release")
+    assert "GITHUB_RUN_ATTEMPT" in job
+    assert 'f"crucible_bench-{version}' in job  # only this release's files are written

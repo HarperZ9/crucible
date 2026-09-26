@@ -29,6 +29,20 @@ FIXTURES = ROOT / "tests" / "fixtures" / "sealed-tolerance"
 TIMEOUT = 120
 
 
+# Variables a child needs to start and for pip to find a temp folder. Everything else, including
+# any token the calling job holds, stays out of the children.
+_ENV_ALLOW = ("PATH", "SYSTEMROOT", "WINDIR", "COMSPEC", "PATHEXT", "TEMP", "TMP", "TMPDIR", "HOME",
+              "USERPROFILE", "LOCALAPPDATA", "APPDATA", "LANG", "LC_ALL")
+
+
+def child_env() -> dict[str, str]:
+    """The allowlisted environment every child of the smoke test gets."""
+    env = {k: os.environ[k] for k in _ENV_ALLOW if k in os.environ}
+    env.update({"PYTHONSAFEPATH": "1", "PYTHONUTF8": "1", "PIP_DISABLE_PIP_VERSION_CHECK": "1",
+                "PIP_NO_INPUT": "1"})
+    return env
+
+
 class Env:
     """A fresh virtual environment with the wheel installed, run from an empty folder."""
 
@@ -40,8 +54,7 @@ class Env:
         bindir = base / "venv" / ("Scripts" if os.name == "nt" else "bin")
         self.python = bindir / ("python.exe" if os.name == "nt" else "python")
         self.crucible = bindir / ("crucible.exe" if os.name == "nt" else "crucible")
-        self.env = {k: v for k, v in os.environ.items() if k not in ("PYTHONPATH", "PYTHONHOME")}
-        self.env["PYTHONSAFEPATH"] = "1"
+        self.env = child_env()
         self.run([str(self.python), "-m", "pip", "install", "--quiet", "--no-index", "--no-deps",
                   str(wheel)])
 

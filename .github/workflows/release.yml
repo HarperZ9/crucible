@@ -2,6 +2,13 @@ name: Release
 
 # Publishes crucible-bench to PyPI through trusted publishing (OIDC); no token is stored anywhere.
 # Runs when a GitHub Release is published for a v* tag. Every action is pinned by commit.
+#
+# Three jobs, each with the least access it needs:
+#   build           checks the tag and version sites, builds, runs twine check and the wheel smoke.
+#                   Read-only; it can never mint a publishing token.
+#   publish         downloads the checked files and uploads them. The only job with id-token.
+#   github-release  downloads the published files from PyPI, checks them against PyPI's digests
+#                   and this run's build, and attaches them with SHA256SUMS.txt to the Release.
 
 on:
   release:
@@ -11,22 +18,20 @@ permissions:
   contents: read
 
 jobs:
-  publish:
+  build:
     if: startsWith(github.ref, 'refs/tags/v')
-    name: Build and publish to PyPI
+    name: Build and check distributions
     runs-on: ubuntu-latest
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-    environment:
-      name: pypi
-      url: https://pypi.org/project/crucible-bench/
     permissions:
       contents: read
-      id-token: write
     outputs:
       digests: ${{ steps.digests.outputs.digests }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
           python-version: "3.12"
@@ -45,6 +50,29 @@ jobs:
         run: |
           sha256sum dist/* | sed 's#dist/##' | tee digests.txt
           echo "digests=$(paste -sd';' digests.txt)" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: dist
+          path: dist/
+          if-no-files-found: error
+
+  publish:
+    name: Publish to PyPI
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    environment:
+      name: pypi
+      url: https://pypi.org/project/crucible-bench/
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: dist
+          path: dist/
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b
         with:
@@ -53,12 +81,12 @@ jobs:
 
   github-release:
     name: Attach PyPI files and SHA256SUMS.txt to the GitHub Release
-    needs: publish
+    needs: [build, publish]
     runs-on: ubuntu-latest
     permissions:
       contents: write
     env:
-      BUILT_DIGESTS: ${{ needs.publish.outputs.digests }}
+      BUILT_DIGESTS: ${{ needs.build.outputs.digests }}
     steps:
       - name: Download the published files from PyPI and check their digests
         run: |
@@ -66,8 +94,10 @@ jobs:
           import hashlib, json, os, pathlib, time, urllib.request
 
           version = os.environ["GITHUB_REF_NAME"].removeprefix("v")
+          first_attempt = os.environ.get("GITHUB_RUN_ATTEMPT", "1") == "1"
           url = f"https://pypi.org/pypi/crucible-bench/{version}/json"
           headers = {"User-Agent": "crucible-release-workflow"}
+          expected = {f"crucible_bench-{version}-py3-none-any.whl", f"crucible_bench-{version}.tar.gz"}
           files = []
           for attempt in range(20):
               try:
@@ -75,24 +105,26 @@ jobs:
                       files = json.load(r)["urls"]
               except OSError as exc:
                   print(f"PyPI not ready ({exc}); retrying")
-              if {f["packagetype"] for f in files} >= {"bdist_wheel", "sdist"}:
+              if {f["filename"] for f in files} >= expected:
                   break
               time.sleep(15)
           else:
-              raise SystemExit(f"PyPI never listed a wheel and an sdist for {version}")
+              raise SystemExit(f"PyPI never listed {sorted(expected)}")
           built = dict(line.split("  ")[::-1] for line in os.environ["BUILT_DIGESTS"].split(";") if line)
           out = pathlib.Path("release-assets")
           out.mkdir()
           sums = []
-          for f in sorted(files, key=lambda f: f["filename"]):
+          for f in sorted((f for f in files if f["filename"] in expected), key=lambda f: f["filename"]):
               req = urllib.request.Request(f["url"], headers=headers)
               data = urllib.request.urlopen(req).read()
               digest = hashlib.sha256(data).hexdigest()
               if digest != f["digests"]["sha256"]:
                   raise SystemExit(f"{f['filename']}: downloaded bytes do not match PyPI's digest")
               if built.get(f["filename"]) != digest:
-                  print(f"::warning::{f['filename']} on PyPI differs from this run's build; "
-                        "PyPI holds files from an earlier run, and those are what users install")
+                  note = f"{f['filename']} on PyPI differs from this run's build"
+                  if first_attempt:
+                      raise SystemExit(f"{note}; PyPI must serve what this run uploaded")
+                  print(f"::warning::{note}; on a re-run PyPI keeps the first upload, which users install")
               (out / f["filename"]).write_bytes(data)
               sums.append(f"{digest}  {f['filename']}\n")
           (out / "SHA256SUMS.txt").write_bytes("".join(sums).encode("ascii"))

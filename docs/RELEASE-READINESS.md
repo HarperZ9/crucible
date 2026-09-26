@@ -44,10 +44,10 @@ now that crucible has reached its stable flagship floor.
   tightened before release.
 - Release workflow: PyPI publishing is tied to GitHub release publication on `v*` tags, uses trusted
   publishing, pins external GitHub Actions by commit SHA, and installs pinned build tooling plus the
-  pinned build backend from `requirements-release.txt`. Before upload it checks that the tag and every
-  version site agree and smoke-tests the wheel in a fresh environment; the upload uses
-  `skip-existing`, and a second job attaches the PyPI files and `SHA256SUMS.txt`, checked against
-  PyPI's digests, to the GitHub Release. The artifact can verify the workflow
+  pinned build backend from `requirements-release.txt`. A read-only build job checks that the tag and
+  every version site agree and smoke-tests the wheel in a fresh environment; only the upload job
+  holds `id-token: write`, and its upload uses `skip-existing`; a third job attaches the PyPI files
+  and `SHA256SUMS.txt`, checked against PyPI's digests and the build, to the GitHub Release. The artifact can verify the workflow
   declaration; PyPI trusted-publisher registration and GitHub environment protection settings are
   external provider configuration checked at release-operations time, not artifact-only acceptance
   criteria.
