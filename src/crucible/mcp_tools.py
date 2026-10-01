@@ -30,7 +30,44 @@ def _path(description: str) -> dict:
     return {"type": "string", "description": description}
 
 
+def _hints(title: str, *, read_only: bool, destructive: bool = False,
+           idempotent: bool = False, open_world: bool = False) -> dict:
+    return {"title": title, "readOnlyHint": read_only, "destructiveHint": destructive,
+            "idempotentHint": idempotent, "openWorldHint": open_world}
+
+
+# MCP tool annotations. A hint describes the tool to the client and is not a
+# permission; launch grants and path confinement do the refusing.
+ANNOTATIONS = {
+    "crucible.status": _hints("Crucible status", read_only=True, idempotent=True),
+    "crucible.doctor": _hints("Crucible readiness check", read_only=True, idempotent=True),
+    "crucible.assess": _hints("Assess claims against evidence", read_only=True, idempotent=True),
+    "crucible.recheck": _hints("Re-check recorded measurements", read_only=True, idempotent=True),
+    "crucible.recheck_template": _hints("Build a replay template", read_only=True, idempotent=True),
+    "crucible.run": _hints("Run and record an assessment", read_only=False),
+    "crucible.measurement_gate": _hints("Verify a measurement packet", read_only=True,
+                                        idempotent=True),
+    "crucible.review": _hints("Validate a review bundle", read_only=True, idempotent=True),
+    "crucible.report": _hints("Render an assessment report", read_only=False, idempotent=True),
+    "crucible.batch": _hints("Assess a batch into a registry", read_only=False),
+    "crucible.registry": _hints("List, verify or prune a registry", read_only=False,
+                                destructive=True),
+    "crucible.drift": _hints("Compare the latest assessments", read_only=True, idempotent=True),
+    "crucible.refine": _hints("Run the refine loop", read_only=False),
+    "crucible.verdicts": _hints("List or re-check verdicts", read_only=True, idempotent=True),
+}
+
+
+def annotate(tool: dict) -> dict:
+    notes = dict(ANNOTATIONS[tool["name"]])
+    return {**tool, "title": notes["title"], "annotations": notes}
+
+
 def tool_defs() -> list[dict]:
+    return [annotate(tool) for tool in _tool_defs()]
+
+
+def _tool_defs() -> list[dict]:
     return [
         {
             "name": "crucible.status",

@@ -1,6 +1,6 @@
 ---
 name: crucible-local
-description: Assess local claims and measurement evidence; optionally run a launch-approved oracle.
+description: Check claims against local evidence files and get a verdict for each claim.
 ---
 
 Use the crucible local tools only for files in the operator-selected workspace.

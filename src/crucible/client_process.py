@@ -32,7 +32,9 @@ def launch_command(allow_process: bool, raw: str | None) -> tuple[str, ...] | No
 
 
 def definition():
-    return {"name": "crucible.benchmark",
+    notes = {"title": "Measure claims with the approved oracle", "readOnlyHint": False,
+             "destructiveHint": False, "idempotentHint": False, "openWorldHint": True}
+    return {"name": "crucible.benchmark", "title": notes["title"], "annotations": notes,
             "description": "Measure up to 16 local claims using only the oracle approved at server launch. "
                            "Returns witnessed assessment; does not prove oracle correctness.",
             "inputSchema": {"type": "object", "properties": {"thesis": {

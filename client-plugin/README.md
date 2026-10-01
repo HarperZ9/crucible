@@ -1,5 +1,15 @@
 # crucible local client package
 
+Crucible checks claims against evidence files in a folder you choose and returns a verdict for each claim: MATCH, DRIFT or UNVERIFIABLE.
+
+## Try it
+
+- Assess the claims in thesis.json against measurements.json in my workspace.
+- Which claims came back UNVERIFIABLE, and what evidence is missing?
+- Verify the measurement packet packet.json against criteria.json.
+
+## Details
+
 Assess local claims and measurement evidence, with an optional launch-approved
 measurement command. The default profile is read-only.
 It requires an explicit workspace at launch and refuses other tools, path escapes,
