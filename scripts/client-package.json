@@ -1,0 +1,11 @@
+{
+  "pkg": "crucible",
+  "version": "1.4.0",
+  "desc": "Assess local claims and measurement evidence without executing a benchmark.",
+  "tool": "crucible.assess",
+  "args": {
+    "thesis": "thesis.json"
+  },
+  "danger": "crucible.run",
+  "name": "crucible"
+}
