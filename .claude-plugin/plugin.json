@@ -1,0 +1,18 @@
+{
+  "author": {
+    "name": "Zain Dana Harper"
+  },
+  "description": "Assess local claims and measurement evidence; optionally run a launch-approved oracle.",
+  "license": "FSL-1.1-MIT",
+  "name": "crucible-local",
+  "repository": "https://github.com/HarperZ9/crucible",
+  "userConfig": {
+    "workspace": {
+      "description": "Absolute path to an existing folder this plugin may read. No network or process permission is granted.",
+      "required": true,
+      "title": "Crucible workspace",
+      "type": "directory"
+    }
+  },
+  "version": "1.4.0"
+}

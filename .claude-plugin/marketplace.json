@@ -1,0 +1,14 @@
+{
+  "description": "Assess local claims and measurement evidence; optionally run a launch-approved oracle.",
+  "name": "crucible-local",
+  "owner": {
+    "name": "Zain Dana Harper"
+  },
+  "plugins": [
+    {
+      "description": "Assess local claims and measurement evidence; optionally run a launch-approved oracle.",
+      "name": "crucible-local",
+      "source": "./"
+    }
+  ]
+}
