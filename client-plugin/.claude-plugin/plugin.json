@@ -1,7 +1,7 @@
 {
   "name": "crucible-local",
   "version": "1.4.0",
-  "description": "Assess local claims and measurement evidence; optionally run a launch-approved oracle.",
+  "description": "Check claims against local evidence files and get a verdict for each claim.",
   "author": {
     "name": "Zain Dana Harper"
   },
