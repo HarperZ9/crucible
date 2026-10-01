@@ -10,7 +10,8 @@ Publication is held pending full-workflow and installed-client qualification.
 - Add a local MCP profile with an explicit readable workspace, typed permission refusals, and process/network denial at launch. The full CLI/MCP remains available separately.
 - Add portable source plugins for Claude/Codex-compatible clients and Windows x64 ZIP/MCPB packages containing the runtime, licenses, source hashes and checksums.
 - Check actual stdio behavior before packaging, reject untracked or credential-like release payloads, and attach checked client assets to the same product release.
-- Keep this profile explicitly limited to read-only workflows. Full retrieval, process-backed benchmarks and persistent-state workflows remain open qualification gates.
+- Add an explicit launch-time grant for one fixed measurement command. Reuse bounded subprocess measurement and witnessed assessment; tool arguments and ambient environment cannot grant execution. The approved child has OS user permissions, not sandboxed access.
+- Keep full retrieval, persistent-state workflows and installed-client acceptance as open qualification gates.
 
 ## 1.3.0 (2026-09-26)
 

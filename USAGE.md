@@ -112,8 +112,13 @@ internals, or full result payloads for interop.
 
 ## Local client package candidate
 
-The optional client bundle adds a bounded read-only MCP profile with an explicit
-workspace selected at launch. See [client package setup](client-plugin/README.md).
+The optional client bundle defaults to a read-only MCP profile with an explicit
+workspace selected at launch. An operator can grant one fixed measurement command
+with `--allow-process --measure-command '["/absolute/oracle", "fixed-argument"]'`.
+The `crucible.benchmark` tool then accepts a workspace-local `thesis` path and
+uses `SubprocessMeasure` plus witnessed assessment. The approved child is trusted
+code with OS user permissions, not sandboxed code. See
+[client package setup](client-plugin/README.md) for limits and configuration.
 Windows x64 MCPB and ZIP bundles include their runtime; source plugins require
 Python 3.11+. The full CLI/MCP retains advanced operations. This profile alone
 does not qualify the full product's mature workflows or marketplace acceptance.

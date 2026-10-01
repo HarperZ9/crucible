@@ -1,7 +1,7 @@
 {
   "pkg": "crucible",
   "version": "1.4.0",
-  "desc": "Assess local claims and measurement evidence without executing a benchmark.",
+  "desc": "Assess local claims and measurement evidence; optionally run a launch-approved oracle.",
   "tool": "crucible.assess",
   "args": {
     "thesis": "thesis.json"

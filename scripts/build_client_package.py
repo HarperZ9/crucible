@@ -83,6 +83,27 @@ def write_zip(path, payload):
 def checksums(payload):
     return "".join(f"{digest(data)}  {name}\n" for name, data in sorted(payload.items())).encode()
 
+def native_manifest(value, executable):
+    """MCPB setup forwards explicit values as argv, never ambient permissions."""
+    return {"manifest_version":"0.3", "name":SPEC["name"]+"-local",
+        "version":value, "display_name":SPEC["name"].title()+" Local",
+        "description":SPEC["desc"], "author":{"name":"Zain Dana Harper"}, "license":"FSL-1.1-MIT",
+        "server":{"type":"binary", "entry_point":"server/"+executable, "mcp_config":{
+            "command":"${__dirname}/server/"+executable,
+            "args":["--workspace", "${user_config.workspace}",
+                    "--process-consent", "${user_config.process_consent}",
+                    "--measure-command", "${user_config.measure_command}"], "env":{}}},
+        "user_config":{
+            "workspace":{"type":"directory", "title":"Readable workspace",
+                "description":"Local directory this profile may read. Choose only approved files.", "required":True},
+            "process_consent":{"type":"boolean", "title":"Allow this measurement command",
+                "description":"Optional. Approved code has your OS permissions, including file writes and network access. Not sandboxed.",
+                "default":False, "required":False},
+            "measure_command":{"type":"string", "title":"Fixed measurement command (JSON argv)",
+                "description":"Optional. JSON argv array with an absolute executable. Leave empty unless process consent is enabled.",
+                "default":"", "required":False}},
+        "compatibility":{"platforms":["win32"]}}
+
 def build(output, mode="release", native=False):
     qualified = qualify(mode)
     output = Path(output).absolute()
@@ -143,15 +164,7 @@ def build(output, mode="release", native=False):
         if len(copying) != 1:
             raise ValueError("PyInstaller license not found")
         native_payload["PYINSTALLER-LICENSE.txt"] = copying[0].read_bytes()
-        manifest = {"manifest_version":"0.3", "name":SPEC["name"]+"-local",
-            "version":qualified["version"], "display_name":SPEC["name"].title()+" Local",
-            "description":SPEC["desc"], "author":{"name":"Zain Dana Harper"}, "license":"FSL-1.1-MIT",
-            "server":{"type":"binary", "entry_point":"server/"+exe.name, "mcp_config":{
-                "command":"${__dirname}/server/"+exe.name,
-                "args":["--workspace", "${user_config.workspace}"], "env":{}}},
-            "user_config":{"workspace":{"type":"directory", "title":"Readable workspace",
-                "description":"Local directory this profile may read. Choose only approved files.", "required":True}},
-            "compatibility":{"platforms":["win32"]}}
+        manifest = native_manifest(qualified["version"], exe.name)
         native_payload["manifest.json"] = (json.dumps(manifest, indent=2)+"\n").encode()
         native_payload["QUALIFICATION.json"] = (json.dumps({"source":qualified,"validation":validation}, indent=2)+"\n").encode()
         native_payload["PAYLOAD-SHA256SUMS"] = checksums(native_payload)
