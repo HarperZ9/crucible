@@ -110,7 +110,7 @@ Crucible should expose claim ids, criteria, verdicts, evidence hashes, and
 redacted references. Do not require raw prompts, private evidence, verifier
 internals, or full result payloads for interop.
 
-## Local client package candidate
+## Local client packages
 
 The optional client bundle defaults to a read-only MCP profile with an explicit
 workspace selected at launch. An operator can grant one fixed measurement command
@@ -120,5 +120,5 @@ uses `SubprocessMeasure` plus witnessed assessment. The approved child is truste
 code with OS user permissions, not sandboxed code. See
 [client package setup](client-plugin/README.md) for limits and configuration.
 Windows x64 MCPB and ZIP bundles include their runtime; source plugins require
-Python 3.11+. The full CLI/MCP retains advanced operations. This profile alone
-does not qualify the full product's mature workflows or marketplace acceptance.
+Python 3.11+. The full CLI/MCP retains advanced operations. Client-specific
+installation and marketplace acceptance require separate verification.

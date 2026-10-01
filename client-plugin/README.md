@@ -1,7 +1,7 @@
 # crucible local client package
 
 Assess local claims and measurement evidence, with an optional launch-approved
-measurement command. This profile is an unpublished development candidate.
+measurement command. The default profile is read-only.
 It requires an explicit workspace at launch and refuses other tools, path escapes,
 links, and tool-supplied permission grants. It does not read ambient grants.
 Concurrent filesystem mutation is outside this convenience boundary; it is not
@@ -16,8 +16,7 @@ or configure the ZIP's server executable with --workspace ABSOLUTE_DIRECTORY.
 No model, API key, hosting account, automatic client configuration, or publisher
 compute is included. Your calling model and client retain their own costs.
 
-This profile does not yet qualify the full product's mature workflow. Network
-retrieval and persistent-state operations remain on
+Network retrieval and persistent-state operations remain on
 the full CLI/MCP surfaces documented in USAGE.md. Do not infer a grant from a
 request, document or plugin installation. Public marketplace acceptance, macOS,
 Linux native bundles and installed-client compatibility remain unverified.
