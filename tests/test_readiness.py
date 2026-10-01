@@ -19,7 +19,7 @@ def test_flagship_brand_assets_exist_and_are_referenced():
     for rel in [
         "docs/brand/crucible-mark.svg",
         "docs/brand/crucible-hero.png",
-        ".github/assets/zentropy-banner.png",
+        ".github/assets/banner.png",
         "examples/crucible-demo.html",
     ]:
         assert (root / rel).exists(), rel
