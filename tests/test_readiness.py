@@ -175,7 +175,13 @@ def test_release_workflow_uses_pinned_build_tool_requirements():
     assert "pip install --requirement requirements-release.txt" in workflow
     assert "python -m build --no-isolation" in workflow
     assert "pip install --upgrade " + "build twine" not in workflow
-    assert "workflow_" + "dispatch" not in workflow
+    # Recovery dispatch still builds only the validated immutable release tag.
+    assert "workflow_dispatch:" in workflow
+    assert "REQUESTED_TAG: ${{ inputs.release_tag || github.event.release.tag_name }}" in workflow
+    assert workflow.count("ref: ${{ needs.select-release.outputs.commit }}") == 2
+    assert "needs: [build, native-client]" in workflow
+    assert "--mode release --native" in workflow
+    assert 'GITHUB_REF_NAME="$RELEASE_TAG"' in workflow
 
 
 def test_release_docs_define_cleanroom_checkability_rules():
