@@ -3,6 +3,17 @@
 All notable changes to crucible. Versions follow semantic versioning; each minor release is built
 behind a feature branch and reviewed before merge.
 
+## 1.4.0 (2026-10-01)
+
+Adds local client packages with explicit launch permissions. Client-specific installation
+and marketplace acceptance remain separate qualification steps.
+
+- Add a local MCP profile with an explicit readable workspace, typed permission refusals, and process/network denial at launch. The full CLI/MCP remains available separately.
+- Add portable source plugins for Claude/Codex-compatible clients and Windows x64 ZIP/MCPB packages containing the runtime, licenses, source hashes and checksums.
+- Check actual stdio behavior before packaging, reject untracked or credential-like release payloads, and attach checked client assets to the same product release.
+- Add an explicit launch-time grant for one fixed measurement command. Reuse bounded subprocess measurement and witnessed assessment; tool arguments and ambient environment cannot grant execution. The approved child has OS user permissions, not sandboxed access.
+- Keep network retrieval and persistent-state operations on the full CLI/MCP. The client profile provides local assessment and explicitly approved measurement commands.
+
 ## 1.3.0 (2026-09-26)
 
 Verdict-integrity fixes, a release that carries them, and the files a user needs after
