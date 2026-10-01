@@ -13,17 +13,57 @@ name: Release
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing immutable release tag to rebuild and publish
+        required: true
+        type: string
 
 permissions:
   contents: read
 
 jobs:
+  select-release:
+    name: Validate and resolve the immutable release tag
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.resolve.outputs.tag }}
+      commit: ${{ steps.resolve.outputs.commit }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Resolve the requested tag without shell interpolation
+        id: resolve
+        env:
+          REQUESTED_TAG: ${{ inputs.release_tag || github.event.release.tag_name }}
+        run: |
+          python - <<'PYEOF'
+          import os, re, subprocess, tomllib
+          tag = os.environ["REQUESTED_TAG"]
+          if not re.fullmatch(r"v[0-9]+\.[0-9]+\.[0-9]+", tag):
+              raise SystemExit("release_tag must be an existing vMAJOR.MINOR.PATCH tag")
+          commit = subprocess.check_output(
+              ["git", "rev-parse", "--verify", f"refs/tags/{tag}^{{commit}}"], text=True).strip()
+          if not re.fullmatch(r"[0-9a-f]{40}", commit):
+              raise SystemExit("invalid tag commit")
+          project = tomllib.loads(subprocess.check_output(
+              ["git", "show", f"{commit}:pyproject.toml"], text=True))
+          if project["project"]["version"] != tag.removeprefix("v"):
+              raise SystemExit("requested tag does not match the tagged project version")
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write(f"tag={tag}\ncommit={commit}\n")
+          PYEOF
+
   build:
-    if: startsWith(github.ref, 'refs/tags/v')
+    needs: select-release
     name: Build and check distributions
     runs-on: ubuntu-latest
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+      RELEASE_TAG: ${{ needs.select-release.outputs.tag }}
     permissions:
       contents: read
     outputs:
@@ -32,11 +72,14 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          ref: ${{ needs.select-release.outputs.commit }}
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
           python-version: "3.12"
       - name: Check the tag and every version site
-        run: python scripts/check_version_sites.py . --tag "$GITHUB_REF_NAME"
+        run: |
+          GITHUB_REF_NAME="$RELEASE_TAG"
+          python scripts/check_version_sites.py . --tag "$GITHUB_REF_NAME"
       - name: Install build tools
         run: python -m pip install --requirement requirements-release.txt
       - name: Build distributions
@@ -81,19 +124,20 @@ jobs:
 
   github-release:
     name: Attach PyPI files and SHA256SUMS.txt to the GitHub Release
-    needs: [build, publish]
+    needs: [select-release, build, publish]
     runs-on: ubuntu-latest
     permissions:
       contents: write
     env:
       BUILT_DIGESTS: ${{ needs.build.outputs.digests }}
+      RELEASE_TAG: ${{ needs.select-release.outputs.tag }}
     steps:
       - name: Download the published files from PyPI and check their digests
         run: |
           python - <<'PYEOF'
           import hashlib, json, os, pathlib, time, urllib.request
 
-          version = os.environ["GITHUB_REF_NAME"].removeprefix("v")
+          version = os.environ["RELEASE_TAG"].removeprefix("v")
           first_attempt = os.environ.get("GITHUB_RUN_ATTEMPT", "1") == "1"
           url = f"https://pypi.org/pypi/crucible-bench/{version}/json"
           headers = {"User-Agent": "crucible-release-workflow"}
@@ -133,10 +177,13 @@ jobs:
       - name: Upload to the GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload "$GITHUB_REF_NAME" release-assets/* --clobber --repo "$GITHUB_REPOSITORY"
+        run: gh release upload "$RELEASE_TAG" release-assets/* --clobber --repo "$GITHUB_REPOSITORY"
   native-client:
     name: Qualify and bundle local Windows client tools
+    needs: select-release
     runs-on: windows-latest
+    env:
+      RELEASE_TAG: ${{ needs.select-release.outputs.tag }}
     permissions:
       contents: read
     steps:
@@ -144,9 +191,19 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
+          ref: ${{ needs.select-release.outputs.commit }}
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
         with:
           python-version: '3.12'
+      - name: Use a canonical local temporary directory
+        shell: pwsh
+        run: |
+          $nativeTemp = "D:\crucible-release-$env:GITHUB_RUN_ID-$env:GITHUB_RUN_ATTEMPT"
+          New-Item -ItemType Directory -Path $nativeTemp -Force | Out-Null
+          "TEMP=$nativeTemp" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "TMP=$nativeTemp" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+      - name: Check the selected tag and every version site
+        run: python scripts/check_version_sites.py . --tag $env:RELEASE_TAG
       - name: Install native build and test tools
         run: python -m pip install pyinstaller==6.21.0 pytest==8.4.2
       - name: Exercise local client boundaries
@@ -154,8 +211,8 @@ jobs:
       - name: Build native client and verify actual stdio
         shell: pwsh
         run: |
-          $mode = if ($env:GITHUB_REF.StartsWith('refs/tags/v')) { 'release' } else { 'dev' }
-          python scripts/build_client_package.py "$env:RUNNER_TEMP/client-package" --mode $mode --native
+          $env:GITHUB_REF = "refs/tags/$env:RELEASE_TAG"
+          python scripts/build_client_package.py "$env:RUNNER_TEMP/client-package" --mode release --native
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
@@ -165,8 +222,7 @@ jobs:
 
   attach-client:
     name: Attach checked client packages to the same product release
-    needs: [github-release, native-client]
-    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [select-release, github-release, native-client]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -179,6 +235,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ needs.select-release.outputs.tag }}
         run: |
           (cd client-assets && sha256sum -c CLIENT-SHA256SUMS.txt)
-          gh release upload "$GITHUB_REF_NAME" client-assets/*
+          gh release upload "$RELEASE_TAG" client-assets/*
