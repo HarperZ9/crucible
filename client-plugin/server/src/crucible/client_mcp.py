@@ -1,0 +1,182 @@
+"""Local client profile: launch-root confinement and explicit tool allowlist.
+
+This defaults to a read-only convenience boundary, not an OS sandbox. Concurrent local
+filesystem mutation is outside its threat model. Full CLI/MCP remains separate.
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import stat
+import sys
+from pathlib import Path
+
+MAX_FILE = 8_000_000
+MAX_ENTRIES = 20_000
+NAME = "crucible"
+PACKAGE = "crucible"
+
+
+class ClientRefusal(ValueError):
+    def __init__(self, detail, code="PATH_DENIED"):
+        super().__init__(detail)
+        self.code = code
+
+
+def confined(root: Path, value: object, *, tree=False) -> Path:
+    if not isinstance(value, str) or not value or chr(0) in value:
+        raise ClientRefusal("path must be a non-empty string")
+    # Reject Windows network/device/ADS paths before resolving or accessing them.
+    text = value.replace(chr(92), "/")
+    if text.startswith("//") or ":" in text[2:] or (":" in text and not (len(text) > 2 and text[1:3] == ":/")):
+        raise ClientRefusal("network, device and alternate-stream paths are not permitted")
+    candidate = Path(value)
+    if not candidate.is_absolute():
+        candidate = root / candidate
+    path = candidate.resolve(strict=True)
+    if path != root and root not in path.parents:
+        raise ClientRefusal("path is outside the launch workspace")
+    for part in [candidate, *candidate.parents]:
+        if part == root.parent:
+            break
+        info = part.lstat()
+        if stat.S_ISLNK(info.st_mode) or getattr(info, "st_file_attributes", 0) & 0x400:
+            raise ClientRefusal("links and reparse points are not permitted")
+    if path.is_file() and path.stat().st_size > MAX_FILE:
+        raise ClientRefusal("file exceeds local client limit")
+    if tree and path.is_dir():
+        count = 0
+        for folder, dirs, files in os.walk(path, followlinks=False):
+            dirs[:] = [d for d in dirs if d not in {".git", ".venv", "node_modules", "__pycache__"}]
+            for name in [*dirs, *files]:
+                count += 1
+                if count > MAX_ENTRIES:
+                    raise ClientRefusal("workspace exceeds local client entry limit")
+                confined(root, str(Path(folder) / name))
+    return path
+
+
+def handle(req, root, command=None):
+    if not isinstance(req, dict):
+        return {"jsonrpc": "2.0", "id": None, "error": {"code": -32600, "message": "invalid request"}}
+    if "id" not in req:
+        return None
+    response = {"jsonrpc": "2.0", "id": req["id"]}
+    method = req.get("method")
+    if method == "initialize":
+        from crucible import __version__
+        response["result"] = {"protocolVersion": "2025-06-18", "capabilities": {"tools": {}},
+                              "serverInfo": {"name": NAME + "-local", "version": __version__}}
+    elif method == "ping":
+        response["result"] = {}
+    elif method == "tools/list":
+        response["result"] = {"tools": definitions(command)}
+    elif method == "tools/call":
+        try:
+            params = req.get("params") or {}
+            args = params.get("arguments") or {}
+            name = params.get("name")
+            definition = next((d for d in definitions(command) if d["name"] == name), None)
+            if definition is None:
+                raise ClientRefusal("tool requires the separately configured full MCP surface", "TOOL_NOT_GRANTED")
+            if not isinstance(args, dict) or set(args) - set(definition["inputSchema"]["properties"]):
+                raise ClientRefusal("unsupported arguments cannot grant permissions", "ARGUMENTS_DENIED")
+            missing = set(definition["inputSchema"].get("required", [])) - set(args)
+            if missing:
+                raise ClientRefusal("missing required arguments", "ARGUMENTS_DENIED")
+            data = invoke(name, dict(args), root, command)
+            response["result"] = {"content": [{"type": "text", "text": data}], "isError": False}
+        except Exception as exc:
+            response["result"] = {"content": [{"type": "text", "text": json.dumps(
+                {"code": exc.code if isinstance(exc, ClientRefusal) else "LOCAL_PROFILE_ERROR",
+                 "detail": str(exc)})}], "isError": True}
+    else:
+        response["error"] = {"code": -32601, "message": "method not found"}
+    return response
+
+
+def install_process_boundary(command=None):
+    """Deny parent network and all process launches except exact startup argv.
+
+    An approved child has the operating system user's permissions; this audit
+    hook is not inherited by that child and is not an OS sandbox.
+    """
+    def audit(event, args):
+        if event == "subprocess.Popen" and command is not None:
+            if args[0] == command[0] and isinstance(args[1], (list, tuple)) and tuple(args[1]) == command:
+                return
+            # On Windows subprocess emits its converted command-line string.
+            if os.name == "nt":
+                import subprocess
+                if args[0] in (None, command[0]) and args[1] == subprocess.list2cmdline(command):
+                    return
+        if event.startswith("socket.") or event in {"subprocess.Popen", "os.system", "os.posix_spawn", "os.posix_spawnp",
+                     "os.exec", "os.spawn", "socket.connect", "socket.connect_ex",
+                     "socket.bind", "socket.getaddrinfo"}:
+            raise PermissionError("local client profile does not grant processes or network")
+    sys.addaudithook(audit)
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--workspace", required=True, help="explicit local directory this client may read")
+    parser.add_argument("--allow-process", action="store_true", help="allow only the fixed measurement command")
+    parser.add_argument("--process-consent", choices=("true", "false"),
+                        help="explicit MCPB setup consent; defaults to no process grant")
+    parser.add_argument("--measure-command", help="JSON argv array; absolute executable; requires --allow-process")
+    args = parser.parse_args(argv)
+    root_arg = Path(args.workspace).absolute()
+    root = confined(root_arg, str(root_arg))
+    if not root.is_dir():
+        parser.error("workspace must be a directory")
+    from crucible.client_process import launch_command
+    if args.process_consent == "false" and args.allow_process:
+        parser.error("--allow-process conflicts with false process consent")
+    try:
+        command = launch_command(args.allow_process or args.process_consent == "true",
+                                 args.measure_command if args.measure_command != "" else None)
+    except ValueError as exc:
+        parser.error(str(exc))
+    install_process_boundary(command)
+    # The local profile does not read permission grants from the environment.
+    for line in sys.stdin:
+        if len(line) > MAX_FILE:
+            return 2
+        try:
+            response = handle(json.loads(line), root, command)
+        except json.JSONDecodeError:
+            response = {"jsonrpc": "2.0", "id": None,
+                        "error": {"code": -32700, "message": "parse error"}}
+        if response is not None:
+            sys.stdout.write(json.dumps(response) + "\n")
+            sys.stdout.flush()
+    return 0
+
+def definitions(command=None):
+    from crucible.mcp_tools import tool_defs
+    tools = [d for d in tool_defs() if d["name"] in {"crucible.assess", "crucible.measurement_gate"}]
+    if command is not None:
+        from crucible.client_process import definition
+        tools.append(definition())
+    return tools
+
+
+def invoke(name, args, root, command=None):
+    from crucible.mcp_tools import call_tool
+    for key in ("thesis", "measurements", "packet", "criteria"):
+        if key in args:
+            path = confined(root, args[key])
+            if not path.is_file():
+                raise ClientRefusal("evidence must be a file")
+            args[key] = str(path)
+    if name == "crucible.benchmark":
+        if command is None:
+            raise ClientRefusal("process was not granted at launch", "TOOL_NOT_GRANTED")
+        from crucible.client_process import benchmark
+        return benchmark(args["thesis"], root, command)
+    return call_tool(name, args)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
