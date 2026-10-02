@@ -3,6 +3,16 @@
 All notable changes to crucible. Versions follow semantic versioning; each minor release is built
 behind a feature branch and reviewed before merge.
 
+## Unreleased
+
+- Claude plugin listing: the Claude manifest in `client-plugin/` gains a display name, keywords,
+  homepage, documentation, support, privacy and terms links, and a 1024 px icon. The workspace,
+  measurement-command consent and measurement command now come from `userConfig`, so Claude Code
+  asks for them when you enable the plugin and the launch arguments carry no placeholder. The
+  portable and Codex manifests are unchanged.
+- The client README gains a data and network table, and the client privacy note names the two
+  temporary files the optional measurement command uses.
+
 ## 1.4.0 (2026-10-01)
 
 Adds local client packages with explicit launch permissions. Client-specific installation

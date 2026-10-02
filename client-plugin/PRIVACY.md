@@ -10,8 +10,10 @@ workspace unless that client and model are authorized to receive it.
 
 This profile stores nothing on disk and opens no network connection; the launcher
 denies Python socket and process operations. The optional measurement oracle runs
-only when the person who installs the plugin approves its exact command at launch,
-and that oracle program may do whatever its own code does.
+only when the person who installs the plugin approves its exact command at launch.
+While it runs, Crucible passes the claims to it through two temporary files and
+deletes them when the call returns. That oracle program may do whatever its own
+code does, including network access.
 
 ## Retention and support
 

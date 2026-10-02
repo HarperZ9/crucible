@@ -18,11 +18,65 @@ def test_source_bundle_is_deterministic_and_contains_runtime_source(tmp_path):
     with zipfile.ZipFile(first[0]) as archive:
         names = archive.namelist()
         assert "server/src/" + package.SPEC["pkg"] + "/client_mcp.py" in names
-        assert {"plugin.json", ".claude-plugin/plugin.json", ".codex-plugin/plugin.json"} <= set(names)
+        assert {"plugin.json", ".claude-plugin/plugin.json", ".codex-plugin/plugin.json",
+                ".claude-plugin/icon.png"} <= set(names)
         assert all(".." not in Path(name).parts and not Path(name).is_absolute() for name in names)
         assert json.loads(archive.read("plugin.json"))["version"] == package.version()
     with pytest.raises(ValueError, match="new directory"):
         package.build(tmp_path/"one", "dev")
+
+PLUGIN = ROOT / "client-plugin"
+
+
+def test_claude_manifest_carries_directory_listing_and_prompts_for_bindings():
+    claude = json.loads((PLUGIN / ".claude-plugin/plugin.json").read_text(encoding="utf-8"))
+    portable = json.loads((PLUGIN / "plugin.json").read_text(encoding="utf-8"))
+    codex = json.loads((PLUGIN / ".codex-plugin/plugin.json").read_text(encoding="utf-8"))
+    for key in ("homepage", "documentationUrl", "supportUrl", "privacyPolicyUrl", "termsOfServiceUrl"):
+        assert claude[key].startswith("https://"), key
+    assert claude["repository"] == "https://github.com/HarperZ9/crucible"
+    assert claude["displayName"] == "Crucible" and 5 <= len(claude["keywords"]) <= 8
+    assert all(word == word.lower() for word in claude["keywords"])
+    assert claude["icon"] == "./.claude-plugin/icon.png"
+    for key in ("name", "version", "license", "author", "description"):
+        assert claude[key] == portable[key] == codex[key], key
+    for shared in (portable, codex):
+        assert not {"userConfig", "icon", "displayName", "keywords"} & set(shared)
+    config = claude["userConfig"]
+    assert set(config) == {"workspace", "process_consent", "measure_command"}
+    allowed = {"type", "title", "description", "required", "default", "sensitive"}
+    assert all(set(entry) <= allowed and entry["type"] in {"string", "number", "boolean", "directory", "file"}
+               for entry in config.values())
+    assert config["workspace"]["type"] == "directory" and config["workspace"]["required"] is True
+    assert config["process_consent"]["default"] is False and config["measure_command"]["default"] == ""
+    native = package.native_manifest("1.4.0", "crucible-local.exe")["user_config"]
+    for key, entry in native.items():
+        assert config[key]["type"] == entry["type"] and config[key].get("default") == entry.get("default"), key
+    args = json.loads((PLUGIN / ".mcp.json").read_text(encoding="utf-8"))["mcpServers"]["crucible"]["args"]
+    assert [a for a in args if "${" in a] == ["${CLAUDE_PLUGIN_ROOT}/server/serve.py", "${user_config.workspace}",
+        "--process-consent=${user_config.process_consent}", "--measure-command=${user_config.measure_command}"]
+    assert not any("REPLACE_WITH" in a for a in args)
+    assert "REPLACE_WITH_ABSOLUTE_WORKSPACE" in json.loads((PLUGIN / "mcp.json").read_text())["mcpServers"]["crucible"]["args"]
+    assert not (PLUGIN / "CLAUDE.md").exists()
+
+
+def test_claude_launch_values_parse_as_the_substituted_defaults(tmp_path):
+    import subprocess
+    wire = json.dumps({"jsonrpc": "2.0", "id": 1, "method": "tools/list"}) + "\n"
+    result = subprocess.run([sys.executable, "-I", "-S", "-B", str(PLUGIN / "server/serve.py"),
+                             "--workspace", str(tmp_path), "--process-consent=false", "--measure-command="],
+                            input=wire, capture_output=True, text=True, timeout=20, check=False)
+    assert result.returncode == 0, result.stderr
+    names = {tool["name"] for tool in json.loads(result.stdout)["result"]["tools"]}
+    assert names == {"crucible.assess", "crucible.measurement_gate"}
+
+
+def test_committed_icon_is_a_square_png_the_directory_accepts():
+    data = (PLUGIN / ".claude-plugin/icon.png").read_bytes()
+    assert data[:8] == bytes([137, 80, 78, 71, 13, 10, 26, 10]) and data[12:16] == b"IHDR"
+    width, height = int.from_bytes(data[16:20], "big"), int.from_bytes(data[20:24], "big")
+    assert width == height and 512 <= width <= 2048 and len(data) < 2 * 1024 * 1024
+
 
 def test_release_refuses_unqualified_working_source(monkeypatch):
     monkeypatch.setattr(package, "git", lambda *args: " M source.py" if args[0] == "status" else "a" * 40)
