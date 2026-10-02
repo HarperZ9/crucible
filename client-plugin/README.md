@@ -17,10 +17,12 @@ links, and tool-supplied permission grants. It does not read ambient grants.
 Concurrent filesystem mutation is outside this convenience boundary; it is not
 an operating-system sandbox.
 
-The source plugin requires Python 3.11 or later. Replace
-REPLACE_WITH_ABSOLUTE_WORKSPACE in the MCP configuration with the directory you
-want the client to read, and select your installed Python executable. Keep the
-complete extracted bundle. The Windows x64 binary MCPB and ZIP include Python;
+The source plugin requires Python 3.11 or later on your PATH as `python3`.
+Claude Code asks for the readable workspace when you enable the plugin, along
+with the two optional measurement-command settings described below. Other
+clients that read the portable `mcp.json` or `.codex-mcp.json` still need
+REPLACE_WITH_ABSOLUTE_WORKSPACE replaced with the directory you want the client
+to read. Keep the complete extracted bundle. The Windows x64 binary MCPB and ZIP include Python;
 open the MCPB in a compatible desktop client and choose a workspace directory,
 or configure the ZIP's server executable with --workspace ABSOLUTE_DIRECTORY.
 No model, API key, hosting account, automatic client configuration, or publisher
@@ -34,10 +36,21 @@ Linux native bundles and installed-client compatibility remain unverified.
 The local launcher denies Python process and socket operations by default. These
 controls are defense in depth for this bundled stdlib tool surface.
 
+## Data and network
+
+| Question | Answer |
+| --- | --- |
+| What it reads | Thesis, measurement, packet and criteria JSON files you name, resolved inside the workspace you chose. Paths outside it, links, reparse points, network paths and files over 8 MB are refused. |
+| What it stores | Nothing. The default profile writes no files. With the optional measurement command on, it writes two temporary files for the child's input and output and deletes them when the call returns. |
+| Network calls | None. The launcher denies Python socket operations. The optional measurement command you approve is a separate program and can reach any destination its own code chooses; Crucible does not contact it over the network. |
+| Telemetry | None. |
+| Retention | Results go back to your client in the tool response. Crucible keeps nothing after the call returns. |
+
 ## Optional measurement process
 
-In a compatible MCPB client's setup, leave **Allow this measurement command** off
-and **Fixed measurement command (JSON argv)** empty for the read-only default.
+In Claude Code's plugin settings or a compatible MCPB client's setup, leave
+**Allow this measurement command** off and **Fixed measurement command (JSON argv)**
+empty for the read-only default.
 To enable a reviewed oracle, enter its fixed JSON argv and turn on consent.
 The launcher rejects a command without consent, consent without a command, or
 malformed values. These fields become explicit launch arguments; they do not

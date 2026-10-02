@@ -8,7 +8,9 @@
         "-B",
         "${CLAUDE_PLUGIN_ROOT}/server/serve.py",
         "--workspace",
-        "REPLACE_WITH_ABSOLUTE_WORKSPACE"
+        "${user_config.workspace}",
+        "--process-consent=${user_config.process_consent}",
+        "--measure-command=${user_config.measure_command}"
       ],
       "env": {}
     }

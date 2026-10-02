@@ -1,10 +1,47 @@
 {
   "name": "crucible-local",
+  "displayName": "Crucible",
   "version": "1.4.0",
   "description": "Check claims against local evidence files and get a verdict for each claim.",
   "author": {
     "name": "Zain Dana Harper"
   },
   "license": "FSL-1.1-MIT",
-  "repository": "https://github.com/HarperZ9/crucible"
+  "keywords": [
+    "verification",
+    "claims",
+    "evidence",
+    "fact-checking",
+    "measurement",
+    "local-first"
+  ],
+  "homepage": "https://harperz9.github.io/crucible.html",
+  "repository": "https://github.com/HarperZ9/crucible",
+  "documentationUrl": "https://github.com/HarperZ9/crucible/blob/main/client-plugin/README.md",
+  "supportUrl": "https://harperz9.github.io/plugins/crucible/support.html",
+  "privacyPolicyUrl": "https://harperz9.github.io/plugins/crucible/privacy.html",
+  "termsOfServiceUrl": "https://harperz9.github.io/plugins/crucible/terms.html",
+  "icon": "./.claude-plugin/icon.png",
+  "userConfig": {
+    "workspace": {
+      "type": "directory",
+      "title": "Readable workspace",
+      "description": "Local directory this plugin may read. Choose a folder that holds only the files you want checked.",
+      "required": true
+    },
+    "process_consent": {
+      "type": "boolean",
+      "title": "Allow this measurement command",
+      "description": "Optional. The approved command runs with your OS permissions, including file writes and network access. It is not sandboxed.",
+      "default": false,
+      "required": false
+    },
+    "measure_command": {
+      "type": "string",
+      "title": "Fixed measurement command (JSON argv)",
+      "description": "Optional. JSON argv array with an absolute executable. Leave empty unless measurement command consent is on.",
+      "default": "",
+      "required": false
+    }
+  }
 }
