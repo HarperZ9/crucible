@@ -12,6 +12,8 @@ behind a feature branch and reviewed before merge.
   portable and Codex manifests are unchanged.
 - The client README gains a data and network table, and the client privacy note names the two
   temporary files the optional measurement command uses.
+- The client README and privacy note gain a "What this plugin runs and handles" section: hooks,
+  the exact Claude launch command, network use, files written and the environment variables read.
 
 ## 1.4.0 (2026-10-01)
 
