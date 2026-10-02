@@ -19,8 +19,7 @@ behind a feature branch and reviewed before merge.
 - The server code now ships inside the plugin folder at `client-plugin/server/src/`, so a plugin
   installed from that folder alone starts. `python scripts/build_client_package.py --sync-vendored`
   rewrites it from `src/`, and a test fails when the copy drifts. The launcher no longer falls back
-  to the repository's `src/`; a missing copy exits with a one-line message. The Claude icon is now the
-  512 px version so every plugin file stays under 256 KiB.
+  to the repository's `src/`; a missing copy exits with a one-line message.
 - `crucible.measurement_gate` describes itself in plain terms, and the client privacy note says the
   measurement command gets two temporary files per run.
 
