@@ -42,16 +42,19 @@ With the measurement command on, each run of the program uses two temporary file
 
 ### Environment variables and credentials
 
-Crucible reads no credentials, API keys or tokens.
+Crucible reads no credentials, API keys or tokens from files or settings.
 
-Crucible's own code reads these environment variables, and only when the measurement command runs:
+This list comes from running the server and recording every environment variable it looked up. The run covered startup, the tool list and each tool, once with the defaults and once with a measurement command.
 
-- `SYSTEMROOT` and `WINDIR`: the Windows system folder. They are passed to the measurement program so it can start on Windows.
-- `TEMP` and `TMP`: your temp folder. They are passed to the measurement program.
+Crucible's own code:
 
-The program receives only those four variables, when they are set. Crucible passes on none of your other variables, such as API keys or endpoint settings.
+- With the defaults, Crucible's own code reads no environment variables.
+- When the measurement command runs, Crucible goes through every environment variable you have, name and value, and keeps only `SYSTEMROOT`, `WINDIR`, `TEMP` and `TMP`. It passes those four to the measurement program so it can start and find your temp folder. It drops all the others in memory. It does not store them, log them, return them to Claude or pass them on. This means API keys or tokens in your environment are not passed on.
 
-Python's standard `tempfile` module also reads `TMPDIR`, `TEMP` and `TMP` to choose where the two temporary files go.
+Python's standard library, which Crucible runs on:
+
+- At startup, Python's argument parser reads `LANG`, `LANGUAGE`, `LC_ALL` and `LC_MESSAGES` to pick the language for its error messages. It also reads `COLUMNS` and `LINES` to size its help text.
+- When the measurement command runs, Python's `tempfile` module reads `TMPDIR`, `TEMP` and `TMP` to choose the temp folder for the two temporary files. On Windows it also reads `USERPROFILE` and `SYSTEMROOT` to find fallback temp folders.
 
 ## What it stores and sends
 
