@@ -61,8 +61,8 @@ Python's standard library, which Crucible runs on:
 This profile stores nothing on disk and opens no network connection; the launcher
 denies Python socket and process operations. The optional measurement oracle runs
 only when the person who installs the plugin approves its exact command at launch.
-While it runs, Crucible passes the claims to it through two temporary files and
-deletes them when the call returns. That oracle program may do whatever its own
+While it runs, Crucible passes each claim to it through two temporary files in
+your system temp folder and deletes them after each run. That oracle program may do whatever its own
 code does, including network access.
 
 ## Retention and support

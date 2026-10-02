@@ -72,6 +72,37 @@ def entries(root):
                 result[path.relative_to(root).as_posix()] = path.read_bytes()
     return result
 
+VENDORED = "server/src/"
+
+def normalized(data):
+    """Compare and vendor text with CRLF folded to LF, as git stores it."""
+    return data.replace(b"\r\n", b"\n")
+
+def vendored_payload():
+    """The files the source ZIP places under server/src/, keyed by plugin path."""
+    return {VENDORED + k: normalized(v) for k, v in entries(ROOT / "src").items()}
+
+def plugin_entries():
+    """client-plugin/ without its vendored copy; server/src/ always comes from src/."""
+    return {k: v for k, v in entries(ROOT / "client-plugin").items() if not k.startswith(VENDORED)}
+
+def sync_vendored():
+    """Rewrite client-plugin/server/src/ from src/, deleting stale files."""
+    target = ROOT / "client-plugin" / VENDORED
+    expected = vendored_payload()
+    if target.exists():
+        for path in sorted(target.rglob("*"), reverse=True):
+            if path.is_file() and path.relative_to(ROOT / "client-plugin").as_posix() not in expected:
+                path.unlink()
+            elif path.is_dir() and not any(path.iterdir()):
+                path.rmdir()
+    for name, data in sorted(expected.items()):
+        path = ROOT / "client-plugin" / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        if not path.is_file() or path.read_bytes() != data:
+            path.write_bytes(data)
+    return sorted(expected)
+
 def write_zip(path, payload):
     with zipfile.ZipFile(path, "x", compression=zipfile.ZIP_STORED) as archive:
         for name, data in sorted(payload.items()):
@@ -111,7 +142,7 @@ def build(output, mode="release", native=False):
         raise ValueError("output must be a new directory outside source")
     source = entries(ROOT / "src")
     scripts = entries(ROOT / "scripts")
-    plugin = entries(ROOT / "client-plugin")
+    plugin = plugin_entries()
     tracked = set(git("ls-files").splitlines())
     if mode == "release":
         candidates = {**{"src/"+k:v for k,v in source.items()},
@@ -176,7 +207,7 @@ def build(output, mode="release", native=False):
                             "pyinstaller":importlib.metadata.version("pyinstaller"), "command":command}
     current = {**{"src/"+k:digest(v) for k,v in entries(ROOT/"src").items()},
                **{"scripts/"+k:digest(v) for k,v in entries(ROOT/"scripts").items()},
-               **{"client-plugin/"+k:digest(v) for k,v in entries(ROOT/"client-plugin").items()}}
+               **{"client-plugin/"+k:digest(v) for k,v in plugin_entries().items()}}
     if current != source_hashes:
         raise ValueError("source changed during build")
     receipt["artifacts"] = {p.name:digest(p.read_bytes()) for p in paths}
@@ -186,9 +217,16 @@ def build(output, mode="release", native=False):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("output")
+    parser.add_argument("output", nargs="?")
     parser.add_argument("--mode", choices=("dev","release"), default="release")
     parser.add_argument("--native", action="store_true")
+    parser.add_argument("--sync-vendored", action="store_true",
+                        help="rewrite client-plugin/server/src/ from src/ and exit")
     args = parser.parse_args()
+    if args.sync_vendored:
+        print(len(sync_vendored()), "files in client-plugin/server/src/")
+        raise SystemExit(0)
+    if args.output is None:
+        parser.error("output is required unless --sync-vendored is given")
     for path in build(args.output, args.mode, args.native):
         print(path)

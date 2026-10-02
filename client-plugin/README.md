@@ -22,14 +22,15 @@ Claude Code asks for the readable workspace when you enable the plugin, along
 with the two optional measurement-command settings described below. Other
 clients that read the portable `mcp.json` or `.codex-mcp.json` still need
 REPLACE_WITH_ABSOLUTE_WORKSPACE replaced with the directory you want the client
-to read. Keep the complete extracted bundle. The Windows x64 binary MCPB and ZIP include Python;
+to read. The server code ships inside this folder under `server/src/`, so the
+plugin folder runs on its own; keep it complete. The Windows x64 binary MCPB and ZIP include Python;
 open the MCPB in a compatible desktop client and choose a workspace directory,
 or configure the ZIP's server executable with --workspace ABSOLUTE_DIRECTORY.
 No model, API key, hosting account, automatic client configuration, or publisher
 compute is included. Your calling model and client retain their own costs.
 
 Network retrieval and persistent-state operations remain on
-the full CLI/MCP surfaces documented in USAGE.md. Do not infer a grant from a
+the full CLI/MCP surfaces documented in [USAGE.md](https://github.com/HarperZ9/crucible/blob/main/USAGE.md). Do not infer a grant from a
 request, document or plugin installation. Public marketplace acceptance, macOS,
 Linux native bundles and installed-client compatibility remain unverified.
 
@@ -91,7 +92,7 @@ Python's standard library, which Crucible runs on:
 | Question | Answer |
 | --- | --- |
 | What it reads | Thesis, measurement, packet and criteria JSON files you name, resolved inside the workspace you chose. Paths outside it, links, reparse points, network paths and files over 8 MB are refused. |
-| What it stores | Nothing. The default profile writes no files. With the optional measurement command on, it writes two temporary files for the child's input and output and deletes them when the call returns. |
+| What it stores | Nothing. The default profile writes no files. With the optional measurement command on, it writes two temporary files in your system temp folder for each run of the command, one for its input and one for its output, and deletes them after each run. |
 | Network calls | None. The launcher denies Python socket operations. The optional measurement command you approve is a separate program and can reach any destination its own code chooses; Crucible does not contact it over the network. |
 | Telemetry | None. |
 | Retention | Results go back to your client in the tool response. Crucible keeps nothing after the call returns. |
@@ -115,7 +116,7 @@ is a thesis JSON path inside the selected workspace. Calls cannot select a diffe
 command, environment, network permission, or output destination.
 
 The fixed oracle reads `crucible.measure/v1` JSON on stdin and returns measurement
-JSON on stdout, using the existing `SubprocessMeasure` contract in `USAGE.md`.
+JSON on stdout, using the existing `SubprocessMeasure` contract in [USAGE.md](https://github.com/HarperZ9/crucible/blob/main/USAGE.md).
 The response contains measurements, verdicts and a witnessed assessment. Each
 request accepts at most 16 claims, with 10 seconds and 65,536 output bytes per
 claim. The child receives only operating-system and temporary-directory variables;
