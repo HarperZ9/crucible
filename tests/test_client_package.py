@@ -79,7 +79,8 @@ def test_disclosure_section_names_the_exact_launch_and_environment():
         section = text.split("## What this plugin runs and handles", 1)[1]
         assert launch in section, name
         assert "This plugin has no hooks." in section
-        for variable in ("SYSTEMROOT", "WINDIR", "TEMP", "TMP", "TMPDIR"):
+        for variable in ("SYSTEMROOT", "WINDIR", "TEMP", "TMP", "TMPDIR", "USERPROFILE",
+                         "LANG", "LANGUAGE", "LC_ALL", "LC_MESSAGES", "COLUMNS", "LINES"):
             assert "`" + variable + "`" in section, (name, variable)
     assert not (PLUGIN / "hooks").exists()
 

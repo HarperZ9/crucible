@@ -14,6 +14,8 @@ behind a feature branch and reviewed before merge.
   temporary files the optional measurement command uses.
 - The client README and privacy note gain a "What this plugin runs and handles" section: hooks,
   the exact Claude launch command, network use, files written and the environment variables read.
+- The environment section now lists what a traced run of the server read, split into Crucible's
+  own reads and Python's standard library reads (argument parser and `tempfile`).
 
 ## 1.4.0 (2026-10-01)
 
