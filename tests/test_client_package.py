@@ -71,6 +71,19 @@ def test_claude_launch_values_parse_as_the_substituted_defaults(tmp_path):
     assert names == {"crucible.assess", "crucible.measurement_gate"}
 
 
+def test_disclosure_section_names_the_exact_launch_and_environment():
+    server = json.loads((PLUGIN / ".mcp.json").read_text(encoding="utf-8"))["mcpServers"]["crucible"]
+    launch = " ".join([server["command"], *server["args"]])
+    for name in ("README.md", "PRIVACY.md"):
+        text = (PLUGIN / name).read_text(encoding="utf-8")
+        section = text.split("## What this plugin runs and handles", 1)[1]
+        assert launch in section, name
+        assert "This plugin has no hooks." in section
+        for variable in ("SYSTEMROOT", "WINDIR", "TEMP", "TMP", "TMPDIR"):
+            assert "`" + variable + "`" in section, (name, variable)
+    assert not (PLUGIN / "hooks").exists()
+
+
 def test_committed_icon_is_a_square_png_the_directory_accepts():
     data = (PLUGIN / ".claude-plugin/icon.png").read_bytes()
     assert data[:8] == bytes([137, 80, 78, 71, 13, 10, 26, 10]) and data[12:16] == b"IHDR"
