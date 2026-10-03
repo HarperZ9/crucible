@@ -39,6 +39,21 @@ The same package can be exercised from source with:
 python -m crucible --help
 ```
 
+## Judge with a model or a panel
+
+```bash
+crucible pairwise pairs.json --json      # both-order judgments to verdicts and an order-consistency report
+crucible decompose claim.json --json     # typed sub-questions, the combined verdict and the weakest one
+crucible views views.json                # majority and every minority position, with sources
+crucible report REGISTRY --views views-by-claim.json
+```
+
+`pairwise` reads `{"pairs": [{"id", "ab", "ba"}]}`, where `ab` is the slot a judge picked
+with A first and `ba` the slot it picked with B first (`first`, `second` or `tie`). A pair
+wins only when both orders name the same answer. The MCP tools `crucible.pairwise`,
+`crucible.decompose` and `crucible.views` take the same files. Formats, the Python API
+and measured results are in [`docs/JUDGING.md`](docs/JUDGING.md).
+
 ## MCP
 
 Use `crucible mcp` when a host needs the measurement and verdict tools over

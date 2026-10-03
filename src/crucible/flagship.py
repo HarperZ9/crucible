@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 
 from crucible import __version__
+from crucible.mcp_schema import tool_defs
 
 SCHEMA = "project-telos.flagship-action/v1"
 TOOL = "crucible"
@@ -74,25 +75,7 @@ def status_payload() -> dict:
                 "measurement_wellposedness_warnings",
             ],
             "operator_commands": ["status", "doctor", "demo", "mcp"],
-            "mcp_tools": [
-                "crucible.status",
-                "crucible.doctor",
-                "crucible.assess",
-                "crucible.recheck",
-                "crucible.recheck_template",
-                "crucible.run",
-                "crucible.measurement_gate",
-                "crucible.review",
-                "crucible.report",
-                "crucible.batch",
-                "crucible.registry",
-                "crucible.drift",
-                "crucible.refine",
-                "crucible.verdicts",
-                "crucible.pairwise",
-                "crucible.decompose",
-                "crucible.views",
-            ],
+            "mcp_tools": [tool["name"] for tool in tool_defs()],
             "integration_surfaces": [
                 "CLI",
                 "MCP stdio",
