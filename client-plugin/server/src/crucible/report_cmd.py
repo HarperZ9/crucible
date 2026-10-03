@@ -1,6 +1,7 @@
 """CLI command for rendering a witnessed assessment report."""
 from __future__ import annotations
 
+import json
 import sys
 
 from crucible.assess import Assessment, recheck_assessment
@@ -8,6 +9,16 @@ from crucible.registry import Registry
 from crucible.report import render_assessment_report
 
 _INPUT_ERRORS = (OSError, ValueError, KeyError, TypeError, IndexError)
+
+
+def _views(path: str | None) -> dict | None:
+    if not path:
+        return None
+    with open(path, encoding="utf-8") as f:
+        data = json.load(f)
+    if not isinstance(data, dict):
+        raise ValueError("views file must map claim ids to lists of views")
+    return data
 
 
 def cmd_report(args) -> int:
@@ -26,6 +37,7 @@ def cmd_report(args) -> int:
             thesis,
             assessment,
             checks=recheck_assessment(thesis, assessment),
+            views=_views(getattr(args, "views", None)),
         )
         if args.out:
             with open(args.out, "x", encoding="utf-8") as f:

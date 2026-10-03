@@ -55,6 +55,9 @@ ANNOTATIONS = {
     "crucible.drift": _hints("Compare the latest assessments", read_only=True, idempotent=True),
     "crucible.refine": _hints("Run the refine loop", read_only=False),
     "crucible.verdicts": _hints("List or re-check verdicts", read_only=True, idempotent=True),
+    "crucible.pairwise": _hints("Pairwise verdicts in both orders", read_only=True, idempotent=True),
+    "crucible.decompose": _hints("Measure typed sub-questions", read_only=True, idempotent=True),
+    "crucible.views": _hints("Summarize views, minorities kept", read_only=True, idempotent=True),
 }
 
 
@@ -188,6 +191,25 @@ def _tool_defs() -> list[dict]:
                 "dir": _path("registry directory"),
                 "verify": {"type": "boolean", "description": "re-derive verdicts from stored thesis and measurements"},
             }, ["dir"]),
+        },
+        {
+            "name": "crucible.pairwise",
+            "description": "Combine pairwise judgments recorded in both orders into A, B, TIE or "
+                           "ORDER_DISAGREE per pair, with order-swap consistency and first-slot "
+                           "preference rates and their Wilson intervals.",
+            "inputSchema": _obj({"file": _path('JSON {"pairs": [{"id", "ab", "ba"}]}')}, ["file"]),
+        },
+        {
+            "name": "crucible.decompose",
+            "description": "Measure a claim's typed sub-questions (yesno, number, choice), combine "
+                           "them demote-only, and name the single weakest sub-question.",
+            "inputSchema": _obj({"file": _path("decomposed claim spec JSON with answers")}, ["file"]),
+        },
+        {
+            "name": "crucible.views",
+            "description": "Summarize views by position: the majority and every minority position "
+                           "with its sources; optional planted positions are scored for survival.",
+            "inputSchema": _obj({"file": _path('JSON {"views": [...], "planted"?: [...]}')}, ["file"]),
         },
     ]
 
@@ -358,4 +380,6 @@ def call_tool(name: str, args: dict) -> str:
         if args.get("verify") is True:
             argv.append("--verify")
         return _invoke_cli(argv)
+    if name in {"crucible.pairwise", "crucible.decompose", "crucible.views"}:
+        return _invoke_cli([name.split(".", 1)[1], _require_str(args, "file"), "--json"])
     raise ValueError(f"unknown tool: {name}")

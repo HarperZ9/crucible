@@ -89,6 +89,9 @@ def status_payload() -> dict:
                 "crucible.drift",
                 "crucible.refine",
                 "crucible.verdicts",
+                "crucible.pairwise",
+                "crucible.decompose",
+                "crucible.views",
             ],
             "integration_surfaces": [
                 "CLI",
