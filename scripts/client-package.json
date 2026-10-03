@@ -1,6 +1,6 @@
 {
   "pkg": "crucible",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "desc": "Check claims against local evidence files and get a verdict for each claim.",
   "tool": "crucible.assess",
   "args": {
