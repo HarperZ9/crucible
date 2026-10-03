@@ -3,7 +3,11 @@
 All notable changes to crucible. Versions follow semantic versioning; each minor release is built
 behind a feature branch and reviewed before merge.
 
-## Unreleased
+## 1.5.0, 2026-10-03
+
+Adds judging modes for when a model or a panel does the judging, measured once with a 2B local
+judge. Both-order pairwise lost to pointwise scoring for that judge; decomposition made the named
+weakest claim more stable across reruns.
 
 - Pairwise judging in both orders: `crucible.pairwise` asks a comparator with each answer first and
   returns a winner only when both orders agree; a split is `ORDER_DISAGREE`, never a preference.

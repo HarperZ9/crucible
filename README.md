@@ -8,7 +8,7 @@
 [![downloads](https://img.shields.io/pypi/dm/crucible-bench?label=downloads&style=flat-square&labelColor=14041b)](https://pypi.org/project/crucible-bench/)
 ![python: 3.11+](https://img.shields.io/badge/python-3.11%2B-blue?style=flat-square&labelColor=14041b)
 ![deps: none (core)](https://img.shields.io/badge/core%20deps-none-success?style=flat-square&labelColor=14041b)
-![version: 1.4.0](https://img.shields.io/badge/version-1.4.0-26dfe8?style=flat-square&labelColor=14041b)
+![version: 1.5.0](https://img.shields.io/badge/version-1.5.0-26dfe8?style=flat-square&labelColor=14041b)
 
 crucible turns a thesis into a set of claims, each paired with the observation that would refute it. Independent adversaries steelman every claim by proposing the strongest test, the engine measures each one against a substrate oracle, and the weakest axis gets refined across rounds: strengthen the substrate, sharpen the measurement, or amend the thesis. The result is a verdict per claim, MATCH, DRIFT, or UNVERIFIABLE, grounded in the measurement rather than a judge's opinion. Every run writes a record you can re-check.
 
@@ -16,7 +16,7 @@ crucible turns a thesis into a set of claims, each paired with the observation t
 
 ## Current status
 
-`crucible-bench 1.4.0` is the current source version. The judgment loop,
+`crucible-bench 1.5.0` is the current source version. The judgment loop,
 cleanroom review packets, sealed registry, drift and CI gates, measurement
 adapters, CLI, Python API, and MCP surface are present; verdicts remain
 UNVERIFIABLE when the required evidence is absent.
@@ -203,7 +203,7 @@ All edges map into the same `Measurement` to `verdict_for` spine. The verdict st
 
 ## Status
 
-`crucible-bench 1.4.0` covers the full loop, one-command runs, cleanroom review packets, oracle replay, registry operations, creative measurement gates, and the MCP bridge, plus MCP replay-template parity, the CI regression gate, LLM-as-judge, missing-evidence explanations, ill-posed measurement warnings, and the MATCH-provenance gate. 1.3.0 seals the tolerance that decides each verdict and fixes the verdict-integrity defects listed in the changelog; upgrade from 1.2.0 or earlier. Within Project Telos, crucible is the measured-judgment layer: it consumes gather evidence and index context and emits verdict packets that telos can surface and replay.
+`crucible-bench 1.5.0` covers the full loop, one-command runs, cleanroom review packets, oracle replay, registry operations, creative measurement gates, and the MCP bridge, plus MCP replay-template parity, the CI regression gate, LLM-as-judge, missing-evidence explanations, ill-posed measurement warnings, and the MATCH-provenance gate. 1.5.0 adds both-order pairwise judging, decomposed claims and minority-preserving summaries, with measured results in `docs/benchmarks/judging-v1`. 1.3.0 seals the tolerance that decides each verdict and fixes the verdict-integrity defects listed in the changelog; upgrade from 1.2.0 or earlier. Within Project Telos, crucible is the measured-judgment layer: it consumes gather evidence and index context and emits verdict packets that telos can surface and replay.
 
 ## Why it matters
 
