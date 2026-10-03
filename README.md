@@ -39,7 +39,7 @@ entrypoint for a sealed baseline.
 - **Oracle recheck packs.** `crucible recheck` lists descriptor-bearing measurements, writes `crucible.replay-template/1` templates, and validates `crucible.replay-pack/1` inputs against the sealed rows without opening a second verdict path. A privacy-bounded `crucible.replay-set/1` binding covers the descriptor-bearing replay contracts without exporting descriptorless rows or their evidence. CLI replay packs must preserve the template's assessment binding; a missing or mismatched thesis ID, assessment seal, or measurement seal fails closed before replay.
 - **A content-addressed registry with tamper detection.** Every claim carries a sha256 receipt; the registry re-verifies stored claims (MATCH / MISSING / CORRUPT), checks thesis seals, rejects duplicate ids with different seals, and refuses tampered theses.
 - **Typed missing-evidence explanations.** Every UNVERIFIABLE verdict names the exact evidence class it lacks and the concrete next action, derived from the same pure ladder as the verdict, so the explanation can never disagree with it. New in 1.2.0.
-- **Batch manifests, Markdown reports, creative measurement gates, native MCP.** `crucible batch` runs a manifest of theses into one registry, `crucible report` renders deterministic Markdown, `crucible measurement-gate` verifies Telos creative measurement packets, and `crucible mcp` serves 14 tools over stdio, including replay-template generation.
+- **Batch manifests, Markdown reports, creative measurement gates, native MCP.** `crucible batch` runs a manifest of theses into one registry, `crucible report` renders deterministic Markdown, `crucible measurement-gate` verifies Telos creative measurement packets, and `crucible mcp` serves 17 tools over stdio, including replay-template generation.
 - **Zero third-party runtime dependencies.** The core is pure standard library, Python 3.11+.
 
 ## How a thesis run works
@@ -173,7 +173,8 @@ A regression is a claim moving MATCH to DRIFT, becoming UNVERIFIABLE, or droppin
 | `crucible export THESIS` | publication-gated export; fenced material is refused at the edge |
 | `crucible measurement-gate PACKET` | verify a Telos creative measurement packet |
 | `crucible status / doctor / demo` | operator envelope, readiness checks, demo pointer (`--json`) |
-| `crucible mcp` | serve the 14 crucible tools over MCP stdio, including `crucible.recheck_template` |
+| `crucible pairwise FILE` / `decompose FILE` / `views FILE` | both-order pairwise verdicts, typed sub-questions, minority-preserving summaries |
+| `crucible mcp` | serve the 17 crucible tools over MCP stdio, including `crucible.recheck_template` |
 
 Every command works identically from a source checkout via `python -m crucible`.
 

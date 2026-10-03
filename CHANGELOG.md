@@ -5,6 +5,22 @@ behind a feature branch and reviewed before merge.
 
 ## Unreleased
 
+- Pairwise judging in both orders: `crucible.pairwise` asks a comparator with each answer first and
+  returns a winner only when both orders agree; a split is `ORDER_DISAGREE`, never a preference.
+  `pairwise_report` gives order-swap consistency and the first-slot rate with Wilson intervals, and
+  `PairwiseMeasure` puts the check on the measure seam.
+- Decomposed claims: `crucible.decompose` splits a claim into typed sub-questions (yes or no, number,
+  choice), decides each with the same pure verdict function, combines them demote-only and names the
+  single weakest sub-question. The parent claim's hash is unchanged.
+- Minority views kept: `crucible.views` and `report --views` list the majority beside every minority
+  position with its sources, and `dissent_survival` scores any summary on the minorities it kept.
+- New CLI commands `pairwise`, `decompose` and `views`, and MCP tools `crucible.pairwise`,
+  `crucible.decompose` and `crucible.views` (17 tools in all).
+- Measured with a 2B local judge in `docs/benchmarks/judging-v1`: order-swap consistency 0.07, so
+  both-order pairwise (0.07 accuracy) lost to pointwise scoring (0.87) for that judge; decomposition
+  raised rerun agreement on the weakest claim from 0.20 to 0.70. Human-preference agreement is untested.
+- MCP tool schemas move to `crucible.mcp_schema`; `mcp_tools` re-exports them. The status envelope
+  now lists MCP tools from the schema instead of a second hand-kept list.
 - Claude plugin listing: the Claude manifest in `client-plugin/` gains a display name, keywords,
   homepage, documentation, support, privacy and terms links, and a 1024 px icon. The workspace,
   measurement-command consent and measurement command now come from `userConfig`, so Claude Code

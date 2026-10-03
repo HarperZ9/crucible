@@ -1,0 +1,1938 @@
+{
+ "pairs": [
+  {
+   "a": "3 x 23 = 49. 100 - 49 = 51. The change is 51 dollars.",
+   "b": "3 x 23 = 69. 100 - 69 = 31. The change is 31 dollars.",
+   "correct": "B",
+   "id": 0,
+   "question": "A shop sells lamps at 23 dollars each. A customer buys 3 and pays with 100 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "50 x 3 = 148. 148 + 44 = 192. It travels 192 km.",
+   "b": "50 x 3 = 150. 150 + 44 = 194. It travels 194 km.",
+   "correct": "B",
+   "id": 1,
+   "question": "A train travels at 50 km per hour for 3 hours, then 44 km more. How far does it travel in total?"
+  },
+  {
+   "a": "4 x 4 = 36. 150 - 36 = 114. The change is 114 dollars.",
+   "b": "4 x 4 = 16. 150 - 16 = 134. The change is 134 dollars.",
+   "correct": "B",
+   "id": 2,
+   "question": "A shop sells plants at 4 dollars each. A customer buys 4 and pays with 150 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "39 x 4 = 146. 146 + 57 = 203. It travels 203 km.",
+   "b": "39 x 4 = 156. 156 + 57 = 213. It travels 213 km.",
+   "correct": "B",
+   "id": 3,
+   "question": "A train travels at 39 km per hour for 4 hours, then 57 km more. How far does it travel in total?"
+  },
+  {
+   "a": "18 x 8 = 124. 150 - 124 = 26. The change is 26 dollars.",
+   "b": "18 x 8 = 144. 150 - 144 = 6. The change is 6 dollars.",
+   "correct": "B",
+   "id": 4,
+   "question": "A shop sells cables at 8 dollars each. A customer buys 18 and pays with 150 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "34 x 6 = 204. 204 + 16 = 220. It travels 220 km.",
+   "b": "34 x 6 = 194. 194 + 16 = 210. It travels 210 km.",
+   "correct": "A",
+   "id": 5,
+   "question": "A train travels at 34 km per hour for 6 hours, then 16 km more. How far does it travel in total?"
+  },
+  {
+   "a": "14 x 5 = 60. 100 - 60 = 40. The change is 40 dollars.",
+   "b": "14 x 5 = 70. 100 - 70 = 30. The change is 30 dollars.",
+   "correct": "B",
+   "id": 6,
+   "question": "A shop sells cables at 5 dollars each. A customer buys 14 and pays with 100 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "80 x 6 = 480. 480 + 24 = 504. It travels 504 km.",
+   "b": "80 x 6 = 478. 478 + 24 = 502. It travels 502 km.",
+   "correct": "A",
+   "id": 7,
+   "question": "A train travels at 80 km per hour for 6 hours, then 24 km more. How far does it travel in total?"
+  },
+  {
+   "a": "7 x 20 = 160. 200 - 160 = 40. The change is 40 dollars.",
+   "b": "7 x 20 = 140. 200 - 140 = 60. The change is 60 dollars.",
+   "correct": "B",
+   "id": 8,
+   "question": "A shop sells lamps at 20 dollars each. A customer buys 7 and pays with 200 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "65 x 5 = 325. 325 + 24 = 349. It travels 349 km.",
+   "b": "65 x 5 = 335. 335 + 24 = 359. It travels 359 km.",
+   "correct": "A",
+   "id": 9,
+   "question": "A train travels at 65 km per hour for 5 hours, then 24 km more. How far does it travel in total?"
+  },
+  {
+   "a": "6 x 20 = 110. 250 - 110 = 140. The change is 140 dollars.",
+   "b": "6 x 20 = 120. 250 - 120 = 130. The change is 130 dollars.",
+   "correct": "B",
+   "id": 10,
+   "question": "A shop sells pens at 20 dollars each. A customer buys 6 and pays with 250 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "43 x 8 = 346. 346 + 5 = 351. It travels 351 km.",
+   "b": "43 x 8 = 344. 344 + 5 = 349. It travels 349 km.",
+   "correct": "B",
+   "id": 11,
+   "question": "A train travels at 43 km per hour for 8 hours, then 5 km more. How far does it travel in total?"
+  },
+  {
+   "a": "3 x 26 = 88. 100 - 88 = 12. The change is 12 dollars.",
+   "b": "3 x 26 = 78. 100 - 78 = 22. The change is 22 dollars.",
+   "correct": "B",
+   "id": 12,
+   "question": "A shop sells pens at 26 dollars each. A customer buys 3 and pays with 100 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "81 x 2 = 160. 160 + 52 = 212. It travels 212 km.",
+   "b": "81 x 2 = 162. 162 + 52 = 214. It travels 214 km.",
+   "correct": "B",
+   "id": 13,
+   "question": "A train travels at 81 km per hour for 2 hours, then 52 km more. How far does it travel in total?"
+  },
+  {
+   "a": "19 x 20 = 390. 500 - 390 = 110. The change is 110 dollars.",
+   "b": "19 x 20 = 380. 500 - 380 = 120. The change is 120 dollars.",
+   "correct": "B",
+   "id": 14,
+   "question": "A shop sells cables at 20 dollars each. A customer buys 19 and pays with 500 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "48 x 3 = 134. 134 + 15 = 149. It travels 149 km.",
+   "b": "48 x 3 = 144. 144 + 15 = 159. It travels 159 km.",
+   "correct": "B",
+   "id": 15,
+   "question": "A train travels at 48 km per hour for 3 hours, then 15 km more. How far does it travel in total?"
+  },
+  {
+   "a": "4 x 24 = 96. 100 - 96 = 4. The change is 4 dollars.",
+   "b": "4 x 24 = 116. 100 - 116 = -16. The change is -16 dollars.",
+   "correct": "A",
+   "id": 16,
+   "question": "A shop sells chairs at 24 dollars each. A customer buys 4 and pays with 100 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "43 x 9 = 387. 387 + 60 = 447. It travels 447 km.",
+   "b": "43 x 9 = 385. 385 + 60 = 445. It travels 445 km.",
+   "correct": "A",
+   "id": 17,
+   "question": "A train travels at 43 km per hour for 9 hours, then 60 km more. How far does it travel in total?"
+  },
+  {
+   "a": "3 x 17 = 52. 200 - 52 = 148. The change is 148 dollars.",
+   "b": "3 x 17 = 51. 200 - 51 = 149. The change is 149 dollars.",
+   "correct": "B",
+   "id": 18,
+   "question": "A shop sells pens at 17 dollars each. A customer buys 3 and pays with 200 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "76 x 4 = 294. 294 + 49 = 343. It travels 343 km.",
+   "b": "76 x 4 = 304. 304 + 49 = 353. It travels 353 km.",
+   "correct": "B",
+   "id": 19,
+   "question": "A train travels at 76 km per hour for 4 hours, then 49 km more. How far does it travel in total?"
+  },
+  {
+   "a": "15 x 19 = 275. 300 - 275 = 25. The change is 25 dollars.",
+   "b": "15 x 19 = 285. 300 - 285 = 15. The change is 15 dollars.",
+   "correct": "B",
+   "id": 20,
+   "question": "A shop sells chairs at 19 dollars each. A customer buys 15 and pays with 300 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "73 x 7 = 513. 513 + 47 = 560. It travels 560 km.",
+   "b": "73 x 7 = 511. 511 + 47 = 558. It travels 558 km.",
+   "correct": "B",
+   "id": 21,
+   "question": "A train travels at 73 km per hour for 7 hours, then 47 km more. How far does it travel in total?"
+  },
+  {
+   "a": "9 x 9 = 61. 150 - 61 = 89. The change is 89 dollars.",
+   "b": "9 x 9 = 81. 150 - 81 = 69. The change is 69 dollars.",
+   "correct": "B",
+   "id": 22,
+   "question": "A shop sells lamps at 9 dollars each. A customer buys 9 and pays with 150 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "41 x 3 = 123. 123 + 51 = 174. It travels 174 km.",
+   "b": "41 x 3 = 121. 121 + 51 = 172. It travels 172 km.",
+   "correct": "A",
+   "id": 23,
+   "question": "A train travels at 41 km per hour for 3 hours, then 51 km more. How far does it travel in total?"
+  },
+  {
+   "a": "9 x 4 = 36. 150 - 36 = 114. The change is 114 dollars.",
+   "b": "9 x 4 = 16. 150 - 16 = 134. The change is 134 dollars.",
+   "correct": "A",
+   "id": 24,
+   "question": "A shop sells notebooks at 4 dollars each. A customer buys 9 and pays with 150 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "78 x 9 = 692. 692 + 19 = 711. It travels 711 km.",
+   "b": "78 x 9 = 702. 702 + 19 = 721. It travels 721 km.",
+   "correct": "B",
+   "id": 25,
+   "question": "A train travels at 78 km per hour for 9 hours, then 19 km more. How far does it travel in total?"
+  },
+  {
+   "a": "5 x 24 = 130. 200 - 130 = 70. The change is 70 dollars.",
+   "b": "5 x 24 = 120. 200 - 120 = 80. The change is 80 dollars.",
+   "correct": "B",
+   "id": 26,
+   "question": "A shop sells lamps at 24 dollars each. A customer buys 5 and pays with 200 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "38 x 2 = 76. 76 + 49 = 125. It travels 125 km.",
+   "b": "38 x 2 = 74. 74 + 49 = 123. It travels 123 km.",
+   "correct": "A",
+   "id": 27,
+   "question": "A train travels at 38 km per hour for 2 hours, then 49 km more. How far does it travel in total?"
+  },
+  {
+   "a": "10 x 16 = 160. 250 - 160 = 90. The change is 90 dollars.",
+   "b": "10 x 16 = 159. 250 - 159 = 91. The change is 91 dollars.",
+   "correct": "A",
+   "id": 28,
+   "question": "A shop sells tickets at 16 dollars each. A customer buys 10 and pays with 250 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "86 x 7 = 592. 592 + 51 = 643. It travels 643 km.",
+   "b": "86 x 7 = 602. 602 + 51 = 653. It travels 653 km.",
+   "correct": "B",
+   "id": 29,
+   "question": "A train travels at 86 km per hour for 7 hours, then 51 km more. How far does it travel in total?"
+  },
+  {
+   "a": "15 x 24 = 359. 450 - 359 = 91. The change is 91 dollars.",
+   "b": "15 x 24 = 360. 450 - 360 = 90. The change is 90 dollars.",
+   "correct": "B",
+   "id": 30,
+   "question": "A shop sells tickets at 24 dollars each. A customer buys 15 and pays with 450 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "62 x 7 = 444. 444 + 57 = 501. It travels 501 km.",
+   "b": "62 x 7 = 434. 434 + 57 = 491. It travels 491 km.",
+   "correct": "B",
+   "id": 31,
+   "question": "A train travels at 62 km per hour for 7 hours, then 57 km more. How far does it travel in total?"
+  },
+  {
+   "a": "16 x 15 = 230. 300 - 230 = 70. The change is 70 dollars.",
+   "b": "16 x 15 = 240. 300 - 240 = 60. The change is 60 dollars.",
+   "correct": "B",
+   "id": 32,
+   "question": "A shop sells tickets at 15 dollars each. A customer buys 16 and pays with 300 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "56 x 6 = 336. 336 + 56 = 392. It travels 392 km.",
+   "b": "56 x 6 = 334. 334 + 56 = 390. It travels 390 km.",
+   "correct": "A",
+   "id": 33,
+   "question": "A train travels at 56 km per hour for 6 hours, then 56 km more. How far does it travel in total?"
+  },
+  {
+   "a": "11 x 18 = 198. 250 - 198 = 52. The change is 52 dollars.",
+   "b": "11 x 18 = 197. 250 - 197 = 53. The change is 53 dollars.",
+   "correct": "A",
+   "id": 34,
+   "question": "A shop sells notebooks at 18 dollars each. A customer buys 11 and pays with 250 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "57 x 5 = 275. 275 + 26 = 301. It travels 301 km.",
+   "b": "57 x 5 = 285. 285 + 26 = 311. It travels 311 km.",
+   "correct": "B",
+   "id": 35,
+   "question": "A train travels at 57 km per hour for 5 hours, then 26 km more. How far does it travel in total?"
+  },
+  {
+   "a": "10 x 20 = 200. 250 - 200 = 50. The change is 50 dollars.",
+   "b": "10 x 20 = 190. 250 - 190 = 60. The change is 60 dollars.",
+   "correct": "A",
+   "id": 36,
+   "question": "A shop sells pens at 20 dollars each. A customer buys 10 and pays with 250 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "66 x 9 = 594. 594 + 12 = 606. It travels 606 km.",
+   "b": "66 x 9 = 596. 596 + 12 = 608. It travels 608 km.",
+   "correct": "A",
+   "id": 37,
+   "question": "A train travels at 66 km per hour for 9 hours, then 12 km more. How far does it travel in total?"
+  },
+  {
+   "a": "9 x 27 = 243. 250 - 243 = 7. The change is 7 dollars.",
+   "b": "9 x 27 = 253. 250 - 253 = -3. The change is -3 dollars.",
+   "correct": "A",
+   "id": 38,
+   "question": "A shop sells mugs at 27 dollars each. A customer buys 9 and pays with 250 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "35 x 7 = 235. 235 + 53 = 288. It travels 288 km.",
+   "b": "35 x 7 = 245. 245 + 53 = 298. It travels 298 km.",
+   "correct": "B",
+   "id": 39,
+   "question": "A train travels at 35 km per hour for 7 hours, then 53 km more. How far does it travel in total?"
+  },
+  {
+   "a": "10 x 23 = 230. 350 - 230 = 120. The change is 120 dollars.",
+   "b": "10 x 23 = 210. 350 - 210 = 140. The change is 140 dollars.",
+   "correct": "A",
+   "id": 40,
+   "question": "A shop sells lamps at 23 dollars each. A customer buys 10 and pays with 350 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "79 x 4 = 316. 316 + 22 = 338. It travels 338 km.",
+   "b": "79 x 4 = 314. 314 + 22 = 336. It travels 336 km.",
+   "correct": "A",
+   "id": 41,
+   "question": "A train travels at 79 km per hour for 4 hours, then 22 km more. How far does it travel in total?"
+  },
+  {
+   "a": "7 x 19 = 132. 200 - 132 = 68. The change is 68 dollars.",
+   "b": "7 x 19 = 133. 200 - 133 = 67. The change is 67 dollars.",
+   "correct": "B",
+   "id": 42,
+   "question": "A shop sells chairs at 19 dollars each. A customer buys 7 and pays with 200 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "32 x 4 = 128. 128 + 25 = 153. It travels 153 km.",
+   "b": "32 x 4 = 138. 138 + 25 = 163. It travels 163 km.",
+   "correct": "A",
+   "id": 43,
+   "question": "A train travels at 32 km per hour for 4 hours, then 25 km more. How far does it travel in total?"
+  },
+  {
+   "a": "8 x 9 = 72. 200 - 72 = 128. The change is 128 dollars.",
+   "b": "8 x 9 = 62. 200 - 62 = 138. The change is 138 dollars.",
+   "correct": "A",
+   "id": 44,
+   "question": "A shop sells chairs at 9 dollars each. A customer buys 8 and pays with 200 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "72 x 2 = 146. 146 + 47 = 193. It travels 193 km.",
+   "b": "72 x 2 = 144. 144 + 47 = 191. It travels 191 km.",
+   "correct": "B",
+   "id": 45,
+   "question": "A train travels at 72 km per hour for 2 hours, then 47 km more. How far does it travel in total?"
+  },
+  {
+   "a": "11 x 12 = 131. 250 - 131 = 119. The change is 119 dollars.",
+   "b": "11 x 12 = 132. 250 - 132 = 118. The change is 118 dollars.",
+   "correct": "B",
+   "id": 46,
+   "question": "A shop sells cables at 12 dollars each. A customer buys 11 and pays with 250 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "39 x 2 = 78. 78 + 41 = 119. It travels 119 km.",
+   "b": "39 x 2 = 80. 80 + 41 = 121. It travels 121 km.",
+   "correct": "A",
+   "id": 47,
+   "question": "A train travels at 39 km per hour for 2 hours, then 41 km more. How far does it travel in total?"
+  },
+  {
+   "a": "4 x 24 = 86. 100 - 86 = 14. The change is 14 dollars.",
+   "b": "4 x 24 = 96. 100 - 96 = 4. The change is 4 dollars.",
+   "correct": "B",
+   "id": 48,
+   "question": "A shop sells plants at 24 dollars each. A customer buys 4 and pays with 100 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "38 x 4 = 152. 152 + 54 = 206. It travels 206 km.",
+   "b": "38 x 4 = 150. 150 + 54 = 204. It travels 204 km.",
+   "correct": "A",
+   "id": 49,
+   "question": "A train travels at 38 km per hour for 4 hours, then 54 km more. How far does it travel in total?"
+  },
+  {
+   "a": "10 x 27 = 270. 350 - 270 = 80. The change is 80 dollars.",
+   "b": "10 x 27 = 260. 350 - 260 = 90. The change is 90 dollars.",
+   "correct": "A",
+   "id": 50,
+   "question": "A shop sells lamps at 27 dollars each. A customer buys 10 and pays with 350 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "83 x 2 = 166. 166 + 7 = 173. It travels 173 km.",
+   "b": "83 x 2 = 156. 156 + 7 = 163. It travels 163 km.",
+   "correct": "A",
+   "id": 51,
+   "question": "A train travels at 83 km per hour for 2 hours, then 7 km more. How far does it travel in total?"
+  },
+  {
+   "a": "7 x 9 = 64. 100 - 64 = 36. The change is 36 dollars.",
+   "b": "7 x 9 = 63. 100 - 63 = 37. The change is 37 dollars.",
+   "correct": "B",
+   "id": 52,
+   "question": "A shop sells cables at 9 dollars each. A customer buys 7 and pays with 100 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "86 x 3 = 258. 258 + 41 = 299. It travels 299 km.",
+   "b": "86 x 3 = 268. 268 + 41 = 309. It travels 309 km.",
+   "correct": "A",
+   "id": 53,
+   "question": "A train travels at 86 km per hour for 3 hours, then 41 km more. How far does it travel in total?"
+  },
+  {
+   "a": "10 x 19 = 170. 250 - 170 = 80. The change is 80 dollars.",
+   "b": "10 x 19 = 190. 250 - 190 = 60. The change is 60 dollars.",
+   "correct": "B",
+   "id": 54,
+   "question": "A shop sells tickets at 19 dollars each. A customer buys 10 and pays with 250 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "55 x 5 = 285. 285 + 25 = 310. It travels 310 km.",
+   "b": "55 x 5 = 275. 275 + 25 = 300. It travels 300 km.",
+   "correct": "B",
+   "id": 55,
+   "question": "A train travels at 55 km per hour for 5 hours, then 25 km more. How far does it travel in total?"
+  },
+  {
+   "a": "13 x 24 = 312. 450 - 312 = 138. The change is 138 dollars.",
+   "b": "13 x 24 = 313. 450 - 313 = 137. The change is 137 dollars.",
+   "correct": "A",
+   "id": 56,
+   "question": "A shop sells mugs at 24 dollars each. A customer buys 13 and pays with 450 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "74 x 3 = 222. 222 + 41 = 263. It travels 263 km.",
+   "b": "74 x 3 = 224. 224 + 41 = 265. It travels 265 km.",
+   "correct": "A",
+   "id": 57,
+   "question": "A train travels at 74 km per hour for 3 hours, then 41 km more. How far does it travel in total?"
+  },
+  {
+   "a": "5 x 12 = 60. 200 - 60 = 140. The change is 140 dollars.",
+   "b": "5 x 12 = 40. 200 - 40 = 160. The change is 160 dollars.",
+   "correct": "A",
+   "id": 58,
+   "question": "A shop sells pens at 12 dollars each. A customer buys 5 and pays with 200 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "73 x 2 = 146. 146 + 14 = 160. It travels 160 km.",
+   "b": "73 x 2 = 136. 136 + 14 = 150. It travels 150 km.",
+   "correct": "A",
+   "id": 59,
+   "question": "A train travels at 73 km per hour for 2 hours, then 14 km more. How far does it travel in total?"
+  },
+  {
+   "a": "19 x 29 = 571. 700 - 571 = 129. The change is 129 dollars.",
+   "b": "19 x 29 = 551. 700 - 551 = 149. The change is 149 dollars.",
+   "correct": "B",
+   "id": 60,
+   "question": "A shop sells cables at 29 dollars each. A customer buys 19 and pays with 700 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "43 x 4 = 172. 172 + 34 = 206. It travels 206 km.",
+   "b": "43 x 4 = 174. 174 + 34 = 208. It travels 208 km.",
+   "correct": "A",
+   "id": 61,
+   "question": "A train travels at 43 km per hour for 4 hours, then 34 km more. How far does it travel in total?"
+  },
+  {
+   "a": "16 x 22 = 362. 500 - 362 = 138. The change is 138 dollars.",
+   "b": "16 x 22 = 352. 500 - 352 = 148. The change is 148 dollars.",
+   "correct": "B",
+   "id": 62,
+   "question": "A shop sells cables at 22 dollars each. A customer buys 16 and pays with 500 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "57 x 5 = 285. 285 + 37 = 322. It travels 322 km.",
+   "b": "57 x 5 = 295. 295 + 37 = 332. It travels 332 km.",
+   "correct": "A",
+   "id": 63,
+   "question": "A train travels at 57 km per hour for 5 hours, then 37 km more. How far does it travel in total?"
+  },
+  {
+   "a": "3 x 7 = 21. 100 - 21 = 79. The change is 79 dollars.",
+   "b": "3 x 7 = 1. 100 - 1 = 99. The change is 99 dollars.",
+   "correct": "A",
+   "id": 64,
+   "question": "A shop sells mugs at 7 dollars each. A customer buys 3 and pays with 100 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "37 x 7 = 259. 259 + 33 = 292. It travels 292 km.",
+   "b": "37 x 7 = 257. 257 + 33 = 290. It travels 290 km.",
+   "correct": "A",
+   "id": 65,
+   "question": "A train travels at 37 km per hour for 7 hours, then 33 km more. How far does it travel in total?"
+  },
+  {
+   "a": "12 x 28 = 316. 400 - 316 = 84. The change is 84 dollars.",
+   "b": "12 x 28 = 336. 400 - 336 = 64. The change is 64 dollars.",
+   "correct": "B",
+   "id": 66,
+   "question": "A shop sells lamps at 28 dollars each. A customer buys 12 and pays with 400 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "76 x 5 = 380. 380 + 12 = 392. It travels 392 km.",
+   "b": "76 x 5 = 382. 382 + 12 = 394. It travels 394 km.",
+   "correct": "A",
+   "id": 67,
+   "question": "A train travels at 76 km per hour for 5 hours, then 12 km more. How far does it travel in total?"
+  },
+  {
+   "a": "19 x 28 = 552. 550 - 552 = -2. The change is -2 dollars.",
+   "b": "19 x 28 = 532. 550 - 532 = 18. The change is 18 dollars.",
+   "correct": "B",
+   "id": 68,
+   "question": "A shop sells lamps at 28 dollars each. A customer buys 19 and pays with 550 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "57 x 7 = 399. 399 + 53 = 452. It travels 452 km.",
+   "b": "57 x 7 = 401. 401 + 53 = 454. It travels 454 km.",
+   "correct": "A",
+   "id": 69,
+   "question": "A train travels at 57 km per hour for 7 hours, then 53 km more. How far does it travel in total?"
+  },
+  {
+   "a": "9 x 23 = 187. 300 - 187 = 113. The change is 113 dollars.",
+   "b": "9 x 23 = 207. 300 - 207 = 93. The change is 93 dollars.",
+   "correct": "B",
+   "id": 70,
+   "question": "A shop sells cables at 23 dollars each. A customer buys 9 and pays with 300 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "49 x 9 = 439. 439 + 54 = 493. It travels 493 km.",
+   "b": "49 x 9 = 441. 441 + 54 = 495. It travels 495 km.",
+   "correct": "B",
+   "id": 71,
+   "question": "A train travels at 49 km per hour for 9 hours, then 54 km more. How far does it travel in total?"
+  },
+  {
+   "a": "6 x 19 = 114. 250 - 114 = 136. The change is 136 dollars.",
+   "b": "6 x 19 = 124. 250 - 124 = 126. The change is 126 dollars.",
+   "correct": "A",
+   "id": 72,
+   "question": "A shop sells plants at 19 dollars each. A customer buys 6 and pays with 250 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "78 x 7 = 546. 546 + 19 = 565. It travels 565 km.",
+   "b": "78 x 7 = 536. 536 + 19 = 555. It travels 555 km.",
+   "correct": "A",
+   "id": 73,
+   "question": "A train travels at 78 km per hour for 7 hours, then 19 km more. How far does it travel in total?"
+  },
+  {
+   "a": "15 x 23 = 345. 350 - 345 = 5. The change is 5 dollars.",
+   "b": "15 x 23 = 325. 350 - 325 = 25. The change is 25 dollars.",
+   "correct": "A",
+   "id": 74,
+   "question": "A shop sells mugs at 23 dollars each. A customer buys 15 and pays with 350 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "39 x 3 = 117. 117 + 21 = 138. It travels 138 km.",
+   "b": "39 x 3 = 119. 119 + 21 = 140. It travels 140 km.",
+   "correct": "A",
+   "id": 75,
+   "question": "A train travels at 39 km per hour for 3 hours, then 21 km more. How far does it travel in total?"
+  },
+  {
+   "a": "5 x 22 = 110. 150 - 110 = 40. The change is 40 dollars.",
+   "b": "5 x 22 = 109. 150 - 109 = 41. The change is 41 dollars.",
+   "correct": "A",
+   "id": 76,
+   "question": "A shop sells plants at 22 dollars each. A customer buys 5 and pays with 150 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "32 x 4 = 128. 128 + 19 = 147. It travels 147 km.",
+   "b": "32 x 4 = 118. 118 + 19 = 137. It travels 137 km.",
+   "correct": "A",
+   "id": 77,
+   "question": "A train travels at 32 km per hour for 4 hours, then 19 km more. How far does it travel in total?"
+  },
+  {
+   "a": "8 x 17 = 136. 250 - 136 = 114. The change is 114 dollars.",
+   "b": "8 x 17 = 135. 250 - 135 = 115. The change is 115 dollars.",
+   "correct": "A",
+   "id": 78,
+   "question": "A shop sells mugs at 17 dollars each. A customer buys 8 and pays with 250 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "85 x 5 = 423. 423 + 23 = 446. It travels 446 km.",
+   "b": "85 x 5 = 425. 425 + 23 = 448. It travels 448 km.",
+   "correct": "B",
+   "id": 79,
+   "question": "A train travels at 85 km per hour for 5 hours, then 23 km more. How far does it travel in total?"
+  },
+  {
+   "a": "12 x 8 = 97. 150 - 97 = 53. The change is 53 dollars.",
+   "b": "12 x 8 = 96. 150 - 96 = 54. The change is 54 dollars.",
+   "correct": "B",
+   "id": 80,
+   "question": "A shop sells notebooks at 8 dollars each. A customer buys 12 and pays with 150 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "67 x 4 = 268. 268 + 51 = 319. It travels 319 km.",
+   "b": "67 x 4 = 258. 258 + 51 = 309. It travels 309 km.",
+   "correct": "A",
+   "id": 81,
+   "question": "A train travels at 67 km per hour for 4 hours, then 51 km more. How far does it travel in total?"
+  },
+  {
+   "a": "17 x 10 = 170. 200 - 170 = 30. The change is 30 dollars.",
+   "b": "17 x 10 = 169. 200 - 169 = 31. The change is 31 dollars.",
+   "correct": "A",
+   "id": 82,
+   "question": "A shop sells chairs at 10 dollars each. A customer buys 17 and pays with 200 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "72 x 9 = 646. 646 + 42 = 688. It travels 688 km.",
+   "b": "72 x 9 = 648. 648 + 42 = 690. It travels 690 km.",
+   "correct": "B",
+   "id": 83,
+   "question": "A train travels at 72 km per hour for 9 hours, then 42 km more. How far does it travel in total?"
+  },
+  {
+   "a": "4 x 5 = 20. 150 - 20 = 130. The change is 130 dollars.",
+   "b": "4 x 5 = 30. 150 - 30 = 120. The change is 120 dollars.",
+   "correct": "A",
+   "id": 84,
+   "question": "A shop sells mugs at 5 dollars each. A customer buys 4 and pays with 150 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "77 x 9 = 693. 693 + 57 = 750. It travels 750 km.",
+   "b": "77 x 9 = 703. 703 + 57 = 760. It travels 760 km.",
+   "correct": "A",
+   "id": 85,
+   "question": "A train travels at 77 km per hour for 9 hours, then 57 km more. How far does it travel in total?"
+  },
+  {
+   "a": "11 x 19 = 229. 350 - 229 = 121. The change is 121 dollars.",
+   "b": "11 x 19 = 209. 350 - 209 = 141. The change is 141 dollars.",
+   "correct": "B",
+   "id": 86,
+   "question": "A shop sells plants at 19 dollars each. A customer buys 11 and pays with 350 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "86 x 5 = 430. 430 + 47 = 477. It travels 477 km.",
+   "b": "86 x 5 = 428. 428 + 47 = 475. It travels 475 km.",
+   "correct": "A",
+   "id": 87,
+   "question": "A train travels at 86 km per hour for 5 hours, then 47 km more. How far does it travel in total?"
+  },
+  {
+   "a": "7 x 21 = 148. 150 - 148 = 2. The change is 2 dollars.",
+   "b": "7 x 21 = 147. 150 - 147 = 3. The change is 3 dollars.",
+   "correct": "B",
+   "id": 88,
+   "question": "A shop sells cables at 21 dollars each. A customer buys 7 and pays with 150 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "52 x 4 = 206. 206 + 43 = 249. It travels 249 km.",
+   "b": "52 x 4 = 208. 208 + 43 = 251. It travels 251 km.",
+   "correct": "B",
+   "id": 89,
+   "question": "A train travels at 52 km per hour for 4 hours, then 43 km more. How far does it travel in total?"
+  },
+  {
+   "a": "19 x 14 = 267. 300 - 267 = 33. The change is 33 dollars.",
+   "b": "19 x 14 = 266. 300 - 266 = 34. The change is 34 dollars.",
+   "correct": "B",
+   "id": 90,
+   "question": "A shop sells pens at 14 dollars each. A customer buys 19 and pays with 300 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "61 x 7 = 427. 427 + 29 = 456. It travels 456 km.",
+   "b": "61 x 7 = 429. 429 + 29 = 458. It travels 458 km.",
+   "correct": "A",
+   "id": 91,
+   "question": "A train travels at 61 km per hour for 7 hours, then 29 km more. How far does it travel in total?"
+  },
+  {
+   "a": "15 x 18 = 270. 350 - 270 = 80. The change is 80 dollars.",
+   "b": "15 x 18 = 250. 350 - 250 = 100. The change is 100 dollars.",
+   "correct": "A",
+   "id": 92,
+   "question": "A shop sells cables at 18 dollars each. A customer buys 15 and pays with 350 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "50 x 4 = 200. 200 + 41 = 241. It travels 241 km.",
+   "b": "50 x 4 = 202. 202 + 41 = 243. It travels 243 km.",
+   "correct": "A",
+   "id": 93,
+   "question": "A train travels at 50 km per hour for 4 hours, then 41 km more. How far does it travel in total?"
+  },
+  {
+   "a": "16 x 23 = 369. 450 - 369 = 81. The change is 81 dollars.",
+   "b": "16 x 23 = 368. 450 - 368 = 82. The change is 82 dollars.",
+   "correct": "B",
+   "id": 94,
+   "question": "A shop sells cables at 23 dollars each. A customer buys 16 and pays with 450 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "79 x 9 = 711. 711 + 60 = 771. It travels 771 km.",
+   "b": "79 x 9 = 709. 709 + 60 = 769. It travels 769 km.",
+   "correct": "A",
+   "id": 95,
+   "question": "A train travels at 79 km per hour for 9 hours, then 60 km more. How far does it travel in total?"
+  },
+  {
+   "a": "9 x 21 = 189. 200 - 189 = 11. The change is 11 dollars.",
+   "b": "9 x 21 = 169. 200 - 169 = 31. The change is 31 dollars.",
+   "correct": "A",
+   "id": 96,
+   "question": "A shop sells chairs at 21 dollars each. A customer buys 9 and pays with 200 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "87 x 5 = 435. 435 + 51 = 486. It travels 486 km.",
+   "b": "87 x 5 = 437. 437 + 51 = 488. It travels 488 km.",
+   "correct": "A",
+   "id": 97,
+   "question": "A train travels at 87 km per hour for 5 hours, then 51 km more. How far does it travel in total?"
+  },
+  {
+   "a": "8 x 15 = 140. 200 - 140 = 60. The change is 60 dollars.",
+   "b": "8 x 15 = 120. 200 - 120 = 80. The change is 80 dollars.",
+   "correct": "B",
+   "id": 98,
+   "question": "A shop sells cables at 15 dollars each. A customer buys 8 and pays with 200 dollars. How much change does the customer get?"
+  },
+  {
+   "a": "40 x 2 = 80. 80 + 15 = 95. It travels 95 km.",
+   "b": "40 x 2 = 82. 82 + 15 = 97. It travels 97 km.",
+   "correct": "A",
+   "id": 99,
+   "question": "A train travels at 40 km per hour for 2 hours, then 15 km more. How far does it travel in total?"
+  }
+ ],
+ "source_sets": [
+  {
+   "id": 0,
+   "planted": "rollback",
+   "question": "Should we ship the release on Friday?",
+   "views": [
+    {
+     "position": "ship the release on Friday",
+     "source": "reviewer0",
+     "text": "I support the plan to ship the release on Friday; the benefits are clear."
+    },
+    {
+     "position": "ship the release on Friday",
+     "source": "reviewer1",
+     "text": "I support the plan to ship the release on Friday; the benefits are clear."
+    },
+    {
+     "position": "ship the release on Friday",
+     "source": "reviewer2",
+     "text": "I support the plan to ship the release on Friday; the benefits are clear."
+    },
+    {
+     "position": "wait: rollback risk",
+     "source": "reviewer4",
+     "text": "I disagree: we should wait, because the rollback risk is not addressed."
+    },
+    {
+     "position": "ship the release on Friday",
+     "source": "reviewer3",
+     "text": "I support the plan to ship the release on Friday; the benefits are clear."
+    }
+   ]
+  },
+  {
+   "id": 1,
+   "planted": "licence",
+   "question": "Should we adopt the new logging library?",
+   "views": [
+    {
+     "position": "adopt the new logging library",
+     "source": "reviewer0",
+     "text": "I support the plan to adopt the new logging library; the benefits are clear."
+    },
+    {
+     "position": "adopt the new logging library",
+     "source": "reviewer1",
+     "text": "I support the plan to adopt the new logging library; the benefits are clear."
+    },
+    {
+     "position": "adopt the new logging library",
+     "source": "reviewer2",
+     "text": "I support the plan to adopt the new logging library; the benefits are clear."
+    },
+    {
+     "position": "wait: licence risk",
+     "source": "reviewer4",
+     "text": "I disagree: we should wait, because the licence risk is not addressed."
+    },
+    {
+     "position": "adopt the new logging library",
+     "source": "reviewer3",
+     "text": "I support the plan to adopt the new logging library; the benefits are clear."
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "planted": "latency",
+   "question": "Should we move the service to the new region?",
+   "views": [
+    {
+     "position": "move the service to the new region",
+     "source": "reviewer0",
+     "text": "I support the plan to move the service to the new region; the benefits are clear."
+    },
+    {
+     "position": "move the service to the new region",
+     "source": "reviewer1",
+     "text": "I support the plan to move the service to the new region; the benefits are clear."
+    },
+    {
+     "position": "move the service to the new region",
+     "source": "reviewer2",
+     "text": "I support the plan to move the service to the new region; the benefits are clear."
+    },
+    {
+     "position": "wait: latency risk",
+     "source": "reviewer4",
+     "text": "I disagree: we should wait, because the latency risk is not addressed."
+    },
+    {
+     "position": "move the service to the new region",
+     "source": "reviewer3",
+     "text": "I support the plan to move the service to the new region; the benefits are clear."
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "planted": "accessibility",
+   "question": "Should we launch the redesigned form?",
+   "views": [
+    {
+     "position": "launch the redesigned form",
+     "source": "reviewer0",
+     "text": "I support the plan to launch the redesigned form; the benefits are clear."
+    },
+    {
+     "position": "wait: accessibility risk",
+     "source": "reviewer4",
+     "text": "I disagree: we should wait, because the accessibility risk is not addressed."
+    },
+    {
+     "position": "launch the redesigned form",
+     "source": "reviewer1",
+     "text": "I support the plan to launch the redesigned form; the benefits are clear."
+    },
+    {
+     "position": "launch the redesigned form",
+     "source": "reviewer2",
+     "text": "I support the plan to launch the redesigned form; the benefits are clear."
+    },
+    {
+     "position": "launch the redesigned form",
+     "source": "reviewer3",
+     "text": "I support the plan to launch the redesigned form; the benefits are clear."
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "planted": "privacy",
+   "question": "Should we enable session replay?",
+   "views": [
+    {
+     "position": "enable session replay",
+     "source": "reviewer0",
+     "text": "I support the plan to enable session replay; the benefits are clear."
+    },
+    {
+     "position": "wait: privacy risk",
+     "source": "reviewer4",
+     "text": "I disagree: we should wait, because the privacy risk is not addressed."
+    },
+    {
+     "position": "enable session replay",
+     "source": "reviewer1",
+     "text": "I support the plan to enable session replay; the benefits are clear."
+    },
+    {
+     "position": "enable session replay",
+     "source": "reviewer2",
+     "text": "I support the plan to enable session replay; the benefits are clear."
+    },
+    {
+     "position": "enable session replay",
+     "source": "reviewer3",
+     "text": "I support the plan to enable session replay; the benefits are clear."
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "planted": "downtime",
+   "question": "Should we upgrade the database cluster?",
+   "views": [
+    {
+     "position": "upgrade the database cluster",
+     "source": "reviewer0",
+     "text": "I support the plan to upgrade the database cluster; the benefits are clear."
+    },
+    {
+     "position": "wait: downtime risk",
+     "source": "reviewer4",
+     "text": "I disagree: we should wait, because the downtime risk is not addressed."
+    },
+    {
+     "position": "upgrade the database cluster",
+     "source": "reviewer1",
+     "text": "I support the plan to upgrade the database cluster; the benefits are clear."
+    },
+    {
+     "position": "upgrade the database cluster",
+     "source": "reviewer2",
+     "text": "I support the plan to upgrade the database cluster; the benefits are clear."
+    },
+    {
+     "position": "upgrade the database cluster",
+     "source": "reviewer3",
+     "text": "I support the plan to upgrade the database cluster; the benefits are clear."
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "planted": "durability",
+   "question": "Should we switch to the cheaper storage tier?",
+   "views": [
+    {
+     "position": "switch to the cheaper storage tier",
+     "source": "reviewer0",
+     "text": "I support the plan to switch to the cheaper storage tier; the benefits are clear."
+    },
+    {
+     "position": "wait: durability risk",
+     "source": "reviewer4",
+     "text": "I disagree: we should wait, because the durability risk is not addressed."
+    },
+    {
+     "position": "switch to the cheaper storage tier",
+     "source": "reviewer1",
+     "text": "I support the plan to switch to the cheaper storage tier; the benefits are clear."
+    },
+    {
+     "position": "switch to the cheaper storage tier",
+     "source": "reviewer2",
+     "text": "I support the plan to switch to the cheaper storage tier; the benefits are clear."
+    },
+    {
+     "position": "switch to the cheaper storage tier",
+     "source": "reviewer3",
+     "text": "I support the plan to switch to the cheaper storage tier; the benefits are clear."
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "planted": "coverage",
+   "question": "Should we merge the refactor today?",
+   "views": [
+    {
+     "position": "merge the refactor today",
+     "source": "reviewer0",
+     "text": "I support the plan to merge the refactor today; the benefits are clear."
+    },
+    {
+     "position": "merge the refactor today",
+     "source": "reviewer1",
+     "text": "I support the plan to merge the refactor today; the benefits are clear."
+    },
+    {
+     "position": "merge the refactor today",
+     "source": "reviewer2",
+     "text": "I support the plan to merge the refactor today; the benefits are clear."
+    },
+    {
+     "position": "merge the refactor today",
+     "source": "reviewer3",
+     "text": "I support the plan to merge the refactor today; the benefits are clear."
+    },
+    {
+     "position": "wait: coverage risk",
+     "source": "reviewer4",
+     "text": "I disagree: we should wait, because the coverage risk is not addressed."
+    }
+   ]
+  },
+  {
+   "id": 8,
+   "planted": "cost",
+   "question": "Should we turn on autoscaling?",
+   "views": [
+    {
+     "position": "turn on autoscaling",
+     "source": "reviewer0",
+     "text": "I support the plan to turn on autoscaling; the benefits are clear."
+    },
+    {
+     "position": "wait: cost risk",
+     "source": "reviewer4",
+     "text": "I disagree: we should wait, because the cost risk is not addressed."
+    },
+    {
+     "position": "turn on autoscaling",
+     "source": "reviewer1",
+     "text": "I support the plan to turn on autoscaling; the benefits are clear."
+    },
+    {
+     "position": "turn on autoscaling",
+     "source": "reviewer2",
+     "text": "I support the plan to turn on autoscaling; the benefits are clear."
+    },
+    {
+     "position": "turn on autoscaling",
+     "source": "reviewer3",
+     "text": "I support the plan to turn on autoscaling; the benefits are clear."
+    }
+   ]
+  },
+  {
+   "id": 9,
+   "planted": "contamination",
+   "question": "Should we publish the benchmark?",
+   "views": [
+    {
+     "position": "publish the benchmark",
+     "source": "reviewer0",
+     "text": "I support the plan to publish the benchmark; the benefits are clear."
+    },
+    {
+     "position": "wait: contamination risk",
+     "source": "reviewer4",
+     "text": "I disagree: we should wait, because the contamination risk is not addressed."
+    },
+    {
+     "position": "publish the benchmark",
+     "source": "reviewer1",
+     "text": "I support the plan to publish the benchmark; the benefits are clear."
+    },
+    {
+     "position": "publish the benchmark",
+     "source": "reviewer2",
+     "text": "I support the plan to publish the benchmark; the benefits are clear."
+    },
+    {
+     "position": "publish the benchmark",
+     "source": "reviewer3",
+     "text": "I support the plan to publish the benchmark; the benefits are clear."
+    }
+   ]
+  },
+  {
+   "id": 10,
+   "planted": "migration",
+   "question": "Should we retire the old API?",
+   "views": [
+    {
+     "position": "wait: migration risk",
+     "source": "reviewer4",
+     "text": "I disagree: we should wait, because the migration risk is not addressed."
+    },
+    {
+     "position": "retire the old API",
+     "source": "reviewer0",
+     "text": "I support the plan to retire the old API; the benefits are clear."
+    },
+    {
+     "position": "retire the old API",
+     "source": "reviewer1",
+     "text": "I support the plan to retire the old API; the benefits are clear."
+    },
+    {
+     "position": "retire the old API",
+     "source": "reviewer2",
+     "text": "I support the plan to retire the old API; the benefits are clear."
+    },
+    {
+     "position": "retire the old API",
+     "source": "reviewer3",
+     "text": "I support the plan to retire the old API; the benefits are clear."
+    }
+   ]
+  },
+  {
+   "id": 11,
+   "planted": "consent",
+   "question": "Should we add the analytics script?",
+   "views": [
+    {
+     "position": "add the analytics script",
+     "source": "reviewer0",
+     "text": "I support the plan to add the analytics script; the benefits are clear."
+    },
+    {
+     "position": "wait: consent risk",
+     "source": "reviewer4",
+     "text": "I disagree: we should wait, because the consent risk is not addressed."
+    },
+    {
+     "position": "add the analytics script",
+     "source": "reviewer1",
+     "text": "I support the plan to add the analytics script; the benefits are clear."
+    },
+    {
+     "position": "add the analytics script",
+     "source": "reviewer2",
+     "text": "I support the plan to add the analytics script; the benefits are clear."
+    },
+    {
+     "position": "add the analytics script",
+     "source": "reviewer3",
+     "text": "I support the plan to add the analytics script; the benefits are clear."
+    }
+   ]
+  },
+  {
+   "id": 12,
+   "planted": "abuse",
+   "question": "Should we raise the rate limit?",
+   "views": [
+    {
+     "position": "wait: abuse risk",
+     "source": "reviewer4",
+     "text": "I disagree: we should wait, because the abuse risk is not addressed."
+    },
+    {
+     "position": "raise the rate limit",
+     "source": "reviewer0",
+     "text": "I support the plan to raise the rate limit; the benefits are clear."
+    },
+    {
+     "position": "raise the rate limit",
+     "source": "reviewer1",
+     "text": "I support the plan to raise the rate limit; the benefits are clear."
+    },
+    {
+     "position": "raise the rate limit",
+     "source": "reviewer2",
+     "text": "I support the plan to raise the rate limit; the benefits are clear."
+    },
+    {
+     "position": "raise the rate limit",
+     "source": "reviewer3",
+     "text": "I support the plan to raise the rate limit; the benefits are clear."
+    }
+   ]
+  },
+  {
+   "id": 13,
+   "planted": "staleness",
+   "question": "Should we cache user profiles?",
+   "views": [
+    {
+     "position": "cache user profiles",
+     "source": "reviewer0",
+     "text": "I support the plan to cache user profiles; the benefits are clear."
+    },
+    {
+     "position": "cache user profiles",
+     "source": "reviewer1",
+     "text": "I support the plan to cache user profiles; the benefits are clear."
+    },
+    {
+     "position": "cache user profiles",
+     "source": "reviewer2",
+     "text": "I support the plan to cache user profiles; the benefits are clear."
+    },
+    {
+     "position": "cache user profiles",
+     "source": "reviewer3",
+     "text": "I support the plan to cache user profiles; the benefits are clear."
+    },
+    {
+     "position": "wait: staleness risk",
+     "source": "reviewer4",
+     "text": "I disagree: we should wait, because the staleness risk is not addressed."
+    }
+   ]
+  },
+  {
+   "id": 14,
+   "planted": "support",
+   "question": "Should we open the beta to everyone?",
+   "views": [
+    {
+     "position": "open the beta to everyone",
+     "source": "reviewer0",
+     "text": "I support the plan to open the beta to everyone; the benefits are clear."
+    },
+    {
+     "position": "open the beta to everyone",
+     "source": "reviewer1",
+     "text": "I support the plan to open the beta to everyone; the benefits are clear."
+    },
+    {
+     "position": "open the beta to everyone",
+     "source": "reviewer2",
+     "text": "I support the plan to open the beta to everyone; the benefits are clear."
+    },
+    {
+     "position": "wait: support risk",
+     "source": "reviewer4",
+     "text": "I disagree: we should wait, because the support risk is not addressed."
+    },
+    {
+     "position": "open the beta to everyone",
+     "source": "reviewer3",
+     "text": "I support the plan to open the beta to everyone; the benefits are clear."
+    }
+   ]
+  },
+  {
+   "id": 15,
+   "planted": "lockin",
+   "question": "Should we use the vendor SDK?",
+   "views": [
+    {
+     "position": "wait: lockin risk",
+     "source": "reviewer4",
+     "text": "I disagree: we should wait, because the lockin risk is not addressed."
+    },
+    {
+     "position": "use the vendor SDK",
+     "source": "reviewer0",
+     "text": "I support the plan to use the vendor SDK; the benefits are clear."
+    },
+    {
+     "position": "use the vendor SDK",
+     "source": "reviewer1",
+     "text": "I support the plan to use the vendor SDK; the benefits are clear."
+    },
+    {
+     "position": "use the vendor SDK",
+     "source": "reviewer2",
+     "text": "I support the plan to use the vendor SDK; the benefits are clear."
+    },
+    {
+     "position": "use the vendor SDK",
+     "source": "reviewer3",
+     "text": "I support the plan to use the vendor SDK; the benefits are clear."
+    }
+   ]
+  },
+  {
+   "id": 16,
+   "planted": "artifacts",
+   "question": "Should we compress the images harder?",
+   "views": [
+    {
+     "position": "compress the images harder",
+     "source": "reviewer0",
+     "text": "I support the plan to compress the images harder; the benefits are clear."
+    },
+    {
+     "position": "wait: artifacts risk",
+     "source": "reviewer4",
+     "text": "I disagree: we should wait, because the artifacts risk is not addressed."
+    },
+    {
+     "position": "compress the images harder",
+     "source": "reviewer1",
+     "text": "I support the plan to compress the images harder; the benefits are clear."
+    },
+    {
+     "position": "compress the images harder",
+     "source": "reviewer2",
+     "text": "I support the plan to compress the images harder; the benefits are clear."
+    },
+    {
+     "position": "compress the images harder",
+     "source": "reviewer3",
+     "text": "I support the plan to compress the images harder; the benefits are clear."
+    }
+   ]
+  },
+  {
+   "id": 17,
+   "planted": "enterprise",
+   "question": "Should we drop the legacy browser?",
+   "views": [
+    {
+     "position": "drop the legacy browser",
+     "source": "reviewer0",
+     "text": "I support the plan to drop the legacy browser; the benefits are clear."
+    },
+    {
+     "position": "drop the legacy browser",
+     "source": "reviewer1",
+     "text": "I support the plan to drop the legacy browser; the benefits are clear."
+    },
+    {
+     "position": "drop the legacy browser",
+     "source": "reviewer2",
+     "text": "I support the plan to drop the legacy browser; the benefits are clear."
+    },
+    {
+     "position": "wait: enterprise risk",
+     "source": "reviewer4",
+     "text": "I disagree: we should wait, because the enterprise risk is not addressed."
+    },
+    {
+     "position": "drop the legacy browser",
+     "source": "reviewer3",
+     "text": "I support the plan to drop the legacy browser; the benefits are clear."
+    }
+   ]
+  },
+  {
+   "id": 18,
+   "planted": "deadlines",
+   "question": "Should we batch the nightly jobs?",
+   "views": [
+    {
+     "position": "batch the nightly jobs",
+     "source": "reviewer0",
+     "text": "I support the plan to batch the nightly jobs; the benefits are clear."
+    },
+    {
+     "position": "batch the nightly jobs",
+     "source": "reviewer1",
+     "text": "I support the plan to batch the nightly jobs; the benefits are clear."
+    },
+    {
+     "position": "batch the nightly jobs",
+     "source": "reviewer2",
+     "text": "I support the plan to batch the nightly jobs; the benefits are clear."
+    },
+    {
+     "position": "batch the nightly jobs",
+     "source": "reviewer3",
+     "text": "I support the plan to batch the nightly jobs; the benefits are clear."
+    },
+    {
+     "position": "wait: deadlines risk",
+     "source": "reviewer4",
+     "text": "I disagree: we should wait, because the deadlines risk is not addressed."
+    }
+   ]
+  },
+  {
+   "id": 19,
+   "planted": "retention",
+   "question": "Should we store logs for a year?",
+   "views": [
+    {
+     "position": "wait: retention risk",
+     "source": "reviewer4",
+     "text": "I disagree: we should wait, because the retention risk is not addressed."
+    },
+    {
+     "position": "store logs for a year",
+     "source": "reviewer0",
+     "text": "I support the plan to store logs for a year; the benefits are clear."
+    },
+    {
+     "position": "store logs for a year",
+     "source": "reviewer1",
+     "text": "I support the plan to store logs for a year; the benefits are clear."
+    },
+    {
+     "position": "store logs for a year",
+     "source": "reviewer2",
+     "text": "I support the plan to store logs for a year; the benefits are clear."
+    },
+    {
+     "position": "store logs for a year",
+     "source": "reviewer3",
+     "text": "I support the plan to store logs for a year; the benefits are clear."
+    }
+   ]
+  },
+  {
+   "id": 20,
+   "planted": "supplychain",
+   "question": "Should we auto-merge dependency bumps?",
+   "views": [
+    {
+     "position": "auto-merge dependency bumps",
+     "source": "reviewer0",
+     "text": "I support the plan to auto-merge dependency bumps; the benefits are clear."
+    },
+    {
+     "position": "wait: supplychain risk",
+     "source": "reviewer4",
+     "text": "I disagree: we should wait, because the supplychain risk is not addressed."
+    },
+    {
+     "position": "auto-merge dependency bumps",
+     "source": "reviewer1",
+     "text": "I support the plan to auto-merge dependency bumps; the benefits are clear."
+    },
+    {
+     "position": "auto-merge dependency bumps",
+     "source": "reviewer2",
+     "text": "I support the plan to auto-merge dependency bumps; the benefits are clear."
+    },
+    {
+     "position": "auto-merge dependency bumps",
+     "source": "reviewer3",
+     "text": "I support the plan to auto-merge dependency bumps; the benefits are clear."
+    }
+   ]
+  },
+  {
+   "id": 21,
+   "planted": "terminology",
+   "question": "Should we translate with the model?",
+   "views": [
+    {
+     "position": "wait: terminology risk",
+     "source": "reviewer4",
+     "text": "I disagree: we should wait, because the terminology risk is not addressed."
+    },
+    {
+     "position": "translate with the model",
+     "source": "reviewer0",
+     "text": "I support the plan to translate with the model; the benefits are clear."
+    },
+    {
+     "position": "translate with the model",
+     "source": "reviewer1",
+     "text": "I support the plan to translate with the model; the benefits are clear."
+    },
+    {
+     "position": "translate with the model",
+     "source": "reviewer2",
+     "text": "I support the plan to translate with the model; the benefits are clear."
+    },
+    {
+     "position": "translate with the model",
+     "source": "reviewer3",
+     "text": "I support the plan to translate with the model; the benefits are clear."
+    }
+   ]
+  },
+  {
+   "id": 22,
+   "planted": "sandboxing",
+   "question": "Should we let agents run shell commands?",
+   "views": [
+    {
+     "position": "let agents run shell commands",
+     "source": "reviewer0",
+     "text": "I support the plan to let agents run shell commands; the benefits are clear."
+    },
+    {
+     "position": "wait: sandboxing risk",
+     "source": "reviewer4",
+     "text": "I disagree: we should wait, because the sandboxing risk is not addressed."
+    },
+    {
+     "position": "let agents run shell commands",
+     "source": "reviewer1",
+     "text": "I support the plan to let agents run shell commands; the benefits are clear."
+    },
+    {
+     "position": "let agents run shell commands",
+     "source": "reviewer2",
+     "text": "I support the plan to let agents run shell commands; the benefits are clear."
+    },
+    {
+     "position": "let agents run shell commands",
+     "source": "reviewer3",
+     "text": "I support the plan to let agents run shell commands; the benefits are clear."
+    }
+   ]
+  },
+  {
+   "id": 23,
+   "planted": "permissions",
+   "question": "Should we index the shared drive?",
+   "views": [
+    {
+     "position": "index the shared drive",
+     "source": "reviewer0",
+     "text": "I support the plan to index the shared drive; the benefits are clear."
+    },
+    {
+     "position": "index the shared drive",
+     "source": "reviewer1",
+     "text": "I support the plan to index the shared drive; the benefits are clear."
+    },
+    {
+     "position": "index the shared drive",
+     "source": "reviewer2",
+     "text": "I support the plan to index the shared drive; the benefits are clear."
+    },
+    {
+     "position": "wait: permissions risk",
+     "source": "reviewer4",
+     "text": "I disagree: we should wait, because the permissions risk is not addressed."
+    },
+    {
+     "position": "index the shared drive",
+     "source": "reviewer3",
+     "text": "I support the plan to index the shared drive; the benefits are clear."
+    }
+   ]
+  },
+  {
+   "id": 24,
+   "planted": "contrast",
+   "question": "Should we ship the dark theme?",
+   "views": [
+    {
+     "position": "wait: contrast risk",
+     "source": "reviewer4",
+     "text": "I disagree: we should wait, because the contrast risk is not addressed."
+    },
+    {
+     "position": "ship the dark theme",
+     "source": "reviewer0",
+     "text": "I support the plan to ship the dark theme; the benefits are clear."
+    },
+    {
+     "position": "ship the dark theme",
+     "source": "reviewer1",
+     "text": "I support the plan to ship the dark theme; the benefits are clear."
+    },
+    {
+     "position": "ship the dark theme",
+     "source": "reviewer2",
+     "text": "I support the plan to ship the dark theme; the benefits are clear."
+    },
+    {
+     "position": "ship the dark theme",
+     "source": "reviewer3",
+     "text": "I support the plan to ship the dark theme; the benefits are clear."
+    }
+   ]
+  },
+  {
+   "id": 25,
+   "planted": "regressions",
+   "question": "Should we cut the test suite in half?",
+   "views": [
+    {
+     "position": "wait: regressions risk",
+     "source": "reviewer4",
+     "text": "I disagree: we should wait, because the regressions risk is not addressed."
+    },
+    {
+     "position": "cut the test suite in half",
+     "source": "reviewer0",
+     "text": "I support the plan to cut the test suite in half; the benefits are clear."
+    },
+    {
+     "position": "cut the test suite in half",
+     "source": "reviewer1",
+     "text": "I support the plan to cut the test suite in half; the benefits are clear."
+    },
+    {
+     "position": "cut the test suite in half",
+     "source": "reviewer2",
+     "text": "I support the plan to cut the test suite in half; the benefits are clear."
+    },
+    {
+     "position": "cut the test suite in half",
+     "source": "reviewer3",
+     "text": "I support the plan to cut the test suite in half; the benefits are clear."
+    }
+   ]
+  },
+  {
+   "id": 26,
+   "planted": "versioning",
+   "question": "Should we move docs to the wiki?",
+   "views": [
+    {
+     "position": "move docs to the wiki",
+     "source": "reviewer0",
+     "text": "I support the plan to move docs to the wiki; the benefits are clear."
+    },
+    {
+     "position": "move docs to the wiki",
+     "source": "reviewer1",
+     "text": "I support the plan to move docs to the wiki; the benefits are clear."
+    },
+    {
+     "position": "move docs to the wiki",
+     "source": "reviewer2",
+     "text": "I support the plan to move docs to the wiki; the benefits are clear."
+    },
+    {
+     "position": "wait: versioning risk",
+     "source": "reviewer4",
+     "text": "I disagree: we should wait, because the versioning risk is not addressed."
+    },
+    {
+     "position": "move docs to the wiki",
+     "source": "reviewer3",
+     "text": "I support the plan to move docs to the wiki; the benefits are clear."
+    }
+   ]
+  },
+  {
+   "id": 27,
+   "planted": "churn",
+   "question": "Should we offer an annual discount?",
+   "views": [
+    {
+     "position": "offer an annual discount",
+     "source": "reviewer0",
+     "text": "I support the plan to offer an annual discount; the benefits are clear."
+    },
+    {
+     "position": "offer an annual discount",
+     "source": "reviewer1",
+     "text": "I support the plan to offer an annual discount; the benefits are clear."
+    },
+    {
+     "position": "offer an annual discount",
+     "source": "reviewer2",
+     "text": "I support the plan to offer an annual discount; the benefits are clear."
+    },
+    {
+     "position": "offer an annual discount",
+     "source": "reviewer3",
+     "text": "I support the plan to offer an annual discount; the benefits are clear."
+    },
+    {
+     "position": "wait: churn risk",
+     "source": "reviewer4",
+     "text": "I disagree: we should wait, because the churn risk is not addressed."
+    }
+   ]
+  },
+  {
+   "id": 28,
+   "planted": "unsubscribe",
+   "question": "Should we send weekly digest emails?",
+   "views": [
+    {
+     "position": "send weekly digest emails",
+     "source": "reviewer0",
+     "text": "I support the plan to send weekly digest emails; the benefits are clear."
+    },
+    {
+     "position": "send weekly digest emails",
+     "source": "reviewer1",
+     "text": "I support the plan to send weekly digest emails; the benefits are clear."
+    },
+    {
+     "position": "send weekly digest emails",
+     "source": "reviewer2",
+     "text": "I support the plan to send weekly digest emails; the benefits are clear."
+    },
+    {
+     "position": "send weekly digest emails",
+     "source": "reviewer3",
+     "text": "I support the plan to send weekly digest emails; the benefits are clear."
+    },
+    {
+     "position": "wait: unsubscribe risk",
+     "source": "reviewer4",
+     "text": "I disagree: we should wait, because the unsubscribe risk is not addressed."
+    }
+   ]
+  },
+  {
+   "id": 29,
+   "planted": "deprecation",
+   "question": "Should we pin the model version?",
+   "views": [
+    {
+     "position": "wait: deprecation risk",
+     "source": "reviewer4",
+     "text": "I disagree: we should wait, because the deprecation risk is not addressed."
+    },
+    {
+     "position": "pin the model version",
+     "source": "reviewer0",
+     "text": "I support the plan to pin the model version; the benefits are clear."
+    },
+    {
+     "position": "pin the model version",
+     "source": "reviewer1",
+     "text": "I support the plan to pin the model version; the benefits are clear."
+    },
+    {
+     "position": "pin the model version",
+     "source": "reviewer2",
+     "text": "I support the plan to pin the model version; the benefits are clear."
+    },
+    {
+     "position": "pin the model version",
+     "source": "reviewer3",
+     "text": "I support the plan to pin the model version; the benefits are clear."
+    }
+   ]
+  }
+ ],
+ "theses": [
+  {
+   "claims": [
+    "25 + 34 = 59",
+    "31 x 11 = 341",
+    "27 x 34 = 928"
+   ],
+   "id": 0,
+   "wrong": 2
+  },
+  {
+   "claims": [
+    "26 x 23 = 608",
+    "16 + 19 = 35",
+    "16 + 26 = 42"
+   ],
+   "id": 1,
+   "wrong": 0
+  },
+  {
+   "claims": [
+    "39 + 20 = 59",
+    "14 + 18 = 32",
+    "26 + 39 = 55"
+   ],
+   "id": 2,
+   "wrong": 2
+  },
+  {
+   "claims": [
+    "15 + 24 = 39",
+    "35 x 12 = 430",
+    "33 + 13 = 46"
+   ],
+   "id": 3,
+   "wrong": 1
+  },
+  {
+   "claims": [
+    "36 x 29 = 1044",
+    "26 + 17 = 53",
+    "21 + 28 = 49"
+   ],
+   "id": 4,
+   "wrong": 1
+  },
+  {
+   "claims": [
+    "40 x 23 = 940",
+    "38 x 28 = 1064",
+    "24 x 20 = 480"
+   ],
+   "id": 5,
+   "wrong": 0
+  },
+  {
+   "claims": [
+    "31 x 26 = 806",
+    "30 + 25 = 55",
+    "42 + 27 = 68"
+   ],
+   "id": 6,
+   "wrong": 2
+  },
+  {
+   "claims": [
+    "26 + 24 = 50",
+    "16 x 24 = 374",
+    "36 x 39 = 1404"
+   ],
+   "id": 7,
+   "wrong": 1
+  },
+  {
+   "claims": [
+    "48 + 22 = 70",
+    "43 + 17 = 70",
+    "20 x 37 = 740"
+   ],
+   "id": 8,
+   "wrong": 1
+  },
+  {
+   "claims": [
+    "30 x 32 = 980",
+    "45 x 24 = 1080",
+    "39 x 18 = 702"
+   ],
+   "id": 9,
+   "wrong": 0
+  },
+  {
+   "claims": [
+    "43 x 27 = 1141",
+    "44 + 14 = 58",
+    "35 + 15 = 50"
+   ],
+   "id": 10,
+   "wrong": 0
+  },
+  {
+   "claims": [
+    "48 + 29 = 77",
+    "17 + 32 = 49",
+    "35 x 23 = 795"
+   ],
+   "id": 11,
+   "wrong": 2
+  },
+  {
+   "claims": [
+    "25 x 13 = 325",
+    "34 x 32 = 1088",
+    "14 x 16 = 214"
+   ],
+   "id": 12,
+   "wrong": 2
+  },
+  {
+   "claims": [
+    "23 + 19 = 42",
+    "14 x 14 = 196",
+    "45 + 39 = 83"
+   ],
+   "id": 13,
+   "wrong": 2
+  },
+  {
+   "claims": [
+    "46 + 13 = 49",
+    "23 + 12 = 35",
+    "36 x 36 = 1296"
+   ],
+   "id": 14,
+   "wrong": 0
+  },
+  {
+   "claims": [
+    "15 x 37 = 545",
+    "22 + 25 = 47",
+    "45 x 36 = 1620"
+   ],
+   "id": 15,
+   "wrong": 0
+  },
+  {
+   "claims": [
+    "31 + 23 = 44",
+    "13 x 31 = 403",
+    "16 + 38 = 54"
+   ],
+   "id": 16,
+   "wrong": 0
+  },
+  {
+   "claims": [
+    "31 x 20 = 620",
+    "24 x 35 = 830",
+    "27 + 21 = 48"
+   ],
+   "id": 17,
+   "wrong": 1
+  },
+  {
+   "claims": [
+    "20 x 15 = 300",
+    "26 x 34 = 894",
+    "19 x 38 = 722"
+   ],
+   "id": 18,
+   "wrong": 1
+  },
+  {
+   "claims": [
+    "41 x 11 = 451",
+    "14 x 19 = 246",
+    "14 x 25 = 350"
+   ],
+   "id": 19,
+   "wrong": 1
+  },
+  {
+   "claims": [
+    "34 + 37 = 70",
+    "13 x 22 = 286",
+    "28 + 36 = 64"
+   ],
+   "id": 20,
+   "wrong": 0
+  },
+  {
+   "claims": [
+    "41 x 16 = 676",
+    "40 x 27 = 1080",
+    "33 + 29 = 62"
+   ],
+   "id": 21,
+   "wrong": 0
+  },
+  {
+   "claims": [
+    "16 x 31 = 516",
+    "31 x 22 = 682",
+    "25 + 17 = 42"
+   ],
+   "id": 22,
+   "wrong": 0
+  },
+  {
+   "claims": [
+    "42 + 33 = 74",
+    "46 x 34 = 1564",
+    "26 x 30 = 780"
+   ],
+   "id": 23,
+   "wrong": 0
+  },
+  {
+   "claims": [
+    "42 x 26 = 1092",
+    "49 + 32 = 91",
+    "48 + 11 = 59"
+   ],
+   "id": 24,
+   "wrong": 1
+  },
+  {
+   "claims": [
+    "35 + 12 = 47",
+    "38 x 21 = 778",
+    "46 + 25 = 71"
+   ],
+   "id": 25,
+   "wrong": 1
+  },
+  {
+   "claims": [
+    "32 + 29 = 61",
+    "23 + 11 = 34",
+    "27 x 39 = 1043"
+   ],
+   "id": 26,
+   "wrong": 2
+  },
+  {
+   "claims": [
+    "13 + 26 = 39",
+    "36 x 39 = 1404",
+    "26 x 17 = 432"
+   ],
+   "id": 27,
+   "wrong": 2
+  },
+  {
+   "claims": [
+    "14 x 17 = 258",
+    "48 + 14 = 62",
+    "46 x 35 = 1610"
+   ],
+   "id": 28,
+   "wrong": 0
+  },
+  {
+   "claims": [
+    "39 x 21 = 799",
+    "39 x 14 = 546",
+    "21 x 23 = 483"
+   ],
+   "id": 29,
+   "wrong": 0
+  }
+ ]
+}

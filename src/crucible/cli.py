@@ -23,6 +23,7 @@ from crucible.commands import (
 from crucible.drift_cmd import cmd_drift
 from crucible.examples_cmd import cmd_examples
 from crucible.flagship import cmd_demo, cmd_doctor, cmd_status
+from crucible.judging_cmd import add_judging_commands
 from crucible.mcp import serve as serve_mcp
 from crucible.measurement_gate_cmd import cmd_measurement_gate
 from crucible.recheck_cmd import cmd_recheck
@@ -69,6 +70,7 @@ def build_parser() -> argparse.ArgumentParser:
     _add_recheck_command(sub)
     _add_review_command(sub)
     _add_artifact_commands(sub)
+    add_judging_commands(sub)
     mcp = sub.add_parser("mcp", help="serve Crucible tools over MCP stdio")
     mcp.set_defaults(func=lambda _args: serve_mcp())
     return parser
@@ -196,6 +198,9 @@ def _add_artifact_commands(sub) -> None:
                      help="assessment index to render, default -1 for the latest")
     rpt.add_argument("--out", default=None, metavar="FILE",
                      help="write the Markdown report to FILE instead of stdout")
+    rpt.add_argument("--views", default=None, metavar="FILE",
+                     help="JSON mapping claim id to views; each claim's majority and every "
+                          "minority position are rendered")
     rpt.set_defaults(func=cmd_report)
 
     bat = sub.add_parser("batch", help="assess a manifest of thesis jobs into a registry")

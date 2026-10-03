@@ -10,6 +10,7 @@ import json
 from collections.abc import Mapping
 
 from crucible.assess import Assessment
+from crucible.dissent import render_views_markdown, summarize_views
 from crucible.thesis import Thesis
 
 
@@ -18,8 +19,13 @@ def render_assessment_report(
     assessment: Assessment,
     *,
     checks: Mapping[str, object] | None = None,
+    views: Mapping[str, object] | None = None,
 ) -> str:
-    """Render a deterministic Markdown report for one assessment."""
+    """Render a deterministic Markdown report for one assessment.
+
+    ``views`` maps a claim id to the views several judges or sources gave on it;
+    each claim's majority and every minority position are listed.
+    """
     verdicts = tuple(dict(v) for v in assessment.verdicts)
     measurements = tuple(dict(m) for m in assessment.measurements)
     claim_text = {c.id: c.text for c in thesis.claims}
@@ -41,7 +47,20 @@ def render_assessment_report(
     _append_evidence(lines, measurements, claim_text)
     _append_rechecks(lines, measurements, claim_text)
     _append_missing(lines, thesis, measurement_by_id)
+    _append_views(lines, views, claim_text)
     return "\n".join(lines) + "\n"
+
+
+def _append_views(lines: list[str], views: Mapping[str, object] | None,
+                  claim_text: Mapping[str, str]) -> None:
+    if not views:
+        return
+    lines.extend(["", "## Views, minorities kept", ""])
+    for cid in sorted(views):
+        lines.append(f"### {_md(claim_text.get(cid, cid))}")
+        lines.append("")
+        lines.extend(render_views_markdown(summarize_views(views[cid])))  # type: ignore[arg-type]
+        lines.append("")
 
 
 def _append_verdicts(lines: list[str], verdicts: tuple[dict, ...], claim_text: Mapping[str, str]) -> None:

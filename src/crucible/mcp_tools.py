@@ -14,186 +14,15 @@ from crucible.commands import (
     _verdict_dict,
 )
 from crucible.flagship import doctor_payload, status_payload
+from crucible.mcp_schema import (  # noqa: F401
+    ANNOTATIONS,
+    annotate,
+    tool_defs,
+    tool_names,
+)
 from crucible.measurement_gate import verify_measurement_packet
 from crucible.measurement_gate_cmd import _criteria
 from crucible.recheck_cmd import recheck_payload, replay_template_payload
-
-
-def _obj(properties: dict, required: list[str] | None = None) -> dict:
-    schema = {"type": "object", "properties": properties}
-    if required:
-        schema["required"] = required
-    return schema
-
-
-def _path(description: str) -> dict:
-    return {"type": "string", "description": description}
-
-
-def _hints(title: str, *, read_only: bool, destructive: bool = False,
-           idempotent: bool = False, open_world: bool = False) -> dict:
-    return {"title": title, "readOnlyHint": read_only, "destructiveHint": destructive,
-            "idempotentHint": idempotent, "openWorldHint": open_world}
-
-
-# MCP tool annotations. A hint describes the tool to the client and is not a
-# permission; launch grants and path confinement do the refusing.
-ANNOTATIONS = {
-    "crucible.status": _hints("Crucible status", read_only=True, idempotent=True),
-    "crucible.doctor": _hints("Crucible readiness check", read_only=True, idempotent=True),
-    "crucible.assess": _hints("Assess claims against evidence", read_only=True, idempotent=True),
-    "crucible.recheck": _hints("Re-check recorded measurements", read_only=True, idempotent=True),
-    "crucible.recheck_template": _hints("Build a replay template", read_only=True, idempotent=True),
-    "crucible.run": _hints("Run and record an assessment", read_only=False),
-    "crucible.measurement_gate": _hints("Verify a measurement packet", read_only=True,
-                                        idempotent=True),
-    "crucible.review": _hints("Validate a review bundle", read_only=True, idempotent=True),
-    "crucible.report": _hints("Render an assessment report", read_only=False, idempotent=True),
-    "crucible.batch": _hints("Assess a batch into a registry", read_only=False),
-    "crucible.registry": _hints("List, verify or prune a registry", read_only=False,
-                                destructive=True),
-    "crucible.drift": _hints("Compare the latest assessments", read_only=True, idempotent=True),
-    "crucible.refine": _hints("Run the refine loop", read_only=False),
-    "crucible.verdicts": _hints("List or re-check verdicts", read_only=True, idempotent=True),
-}
-
-
-def annotate(tool: dict) -> dict:
-    notes = dict(ANNOTATIONS[tool["name"]])
-    return {**tool, "title": notes["title"], "annotations": notes}
-
-
-def tool_defs() -> list[dict]:
-    return [annotate(tool) for tool in _tool_defs()]
-
-
-def _tool_defs() -> list[dict]:
-    return [
-        {
-            "name": "crucible.status",
-            "description": "Emit Crucible's Project Telos operator-spine status envelope.",
-            "inputSchema": _obj({}),
-        },
-        {
-            "name": "crucible.doctor",
-            "description": "Check Crucible's operator-spine readiness envelope.",
-            "inputSchema": _obj({}),
-        },
-        {
-            "name": "crucible.assess",
-            "description": "Assess falsifiable claims against optional measurements and emit witnessed "
-                           "verdicts, ill-posed measurement warnings, and missing-evidence explanations "
-                           "for UNVERIFIABLE claims.",
-            "inputSchema": _obj({
-                "thesis": _path("path to a thesis JSON file"),
-                "measurements": _path("optional path to a measurements JSON file"),
-                "strict": {"type": "boolean",
-                           "description": "error when measurement rows are ill-posed"},
-            }, ["thesis"]),
-        },
-        {
-            "name": "crucible.recheck",
-            "description": "Inspect or replay oracle-level measurement descriptors from a Crucible registry.",
-            "inputSchema": _obj({
-                "dir": _path("path to a Crucible registry directory"),
-                "index": {"type": ["integer", "string"], "description": "assessment index, default -1"},
-                "pack": _path("optional JSON replay pack with reproduced measurements"),
-                "template": {"type": "boolean",
-                             "description": "return a crucible.replay-template/1 object instead of a plan"},
-            }, ["dir"]),
-        },
-        {
-            "name": "crucible.recheck_template",
-            "description": "Return a crucible.replay-template/1 object for descriptor-bearing rows in a registry assessment.",
-            "inputSchema": _obj({
-                "dir": _path("path to a Crucible registry directory"),
-                "index": {"type": ["integer", "string"], "description": "assessment index, default -1"},
-            }, ["dir"]),
-        },
-        {
-            "name": "crucible.run",
-            "description": "Run steelman, measurement, assessment, disk recheck, and optional packet writes.",
-            "inputSchema": _obj({
-                "thesis": _path("path to a thesis JSON file or registry thesis id"),
-                "registry": _path("registry directory to record and re-check the assessment"),
-                "measurements": _path("path to measurements JSON; exclusive with substrate"),
-                "substrate": _path("path to substrate JSON; exclusive with measurements"),
-                "report": _path("optional Markdown report output path"),
-                "out": _path("optional JSON run-record output path"),
-                "bundle": _path("optional cleanroom review packet directory"),
-            }, ["thesis", "registry"]),
-        },
-        {
-            "name": "crucible.measurement_gate",
-            "description": "Check a measurement packet JSON file against an optional criteria JSON file and "
-                           "return a verdict for each measurement layer and an overall verdict.",
-            "inputSchema": _obj({
-                "packet": _path("path to a project-telos.measurement-layers/v1 JSON packet"),
-                "criteria": _path("optional JSON criteria keyed by measurement layer id"),
-            }, ["packet"]),
-        },
-        {
-            "name": "crucible.review",
-            "description": "Validate a cleanroom review bundle before verifier handoff.",
-            "inputSchema": _obj({"bundle": _path("bundle directory created by crucible.run")}, ["bundle"]),
-        },
-        {
-            "name": "crucible.report",
-            "description": "Render a Markdown report for a witnessed assessment in a registry.",
-            "inputSchema": _obj({
-                "dir": _path("registry directory"),
-                "index": {"type": ["integer", "string"], "description": "assessment index, default -1"},
-                "out": _path("optional Markdown output path"),
-            }, ["dir"]),
-        },
-        {
-            "name": "crucible.batch",
-            "description": "Assess a manifest of thesis jobs into a registry.",
-            "inputSchema": _obj({
-                "manifest": _path("batch manifest JSON"),
-                "registry": _path("registry directory"),
-                "reports": _path("optional directory for per-job Markdown reports"),
-            }, ["manifest", "registry"]),
-        },
-        {
-            "name": "crucible.registry",
-            "description": "List, verify, summarize, search, or prune a Crucible registry.",
-            "inputSchema": _obj({
-                "action": {"type": "string", "enum": ["list", "verify", "stats", "search", "prune"]},
-                "dir": _path("registry directory"),
-                "query": {"type": "string", "description": "optional search query"},
-                "status": {"type": "string", "enum": ["publishable", "fenced"]},
-                "verdict": {"type": "string", "enum": ["MATCH", "DRIFT", "UNVERIFIABLE"]},
-                "apply": {"type": "boolean", "description": "apply registry prune deletions"},
-            }, ["action", "dir"]),
-        },
-        {
-            "name": "crucible.drift",
-            "description": "Compare the latest two verified assessments in a registry.",
-            "inputSchema": _obj({"dir": _path("registry directory")}, ["dir"]),
-        },
-        {
-            "name": "crucible.refine",
-            "description": "Run the deterministic refine loop over a substrate-round config.",
-            "inputSchema": _obj({
-                "config": _path("refine config JSON"),
-                "thesis": _path("optional thesis file or registry id override"),
-                "registry": _path("optional registry directory for thesis id resolution"),
-            }, ["config"]),
-        },
-        {
-            "name": "crucible.verdicts",
-            "description": "List or re-check witnessed assessments in a registry.",
-            "inputSchema": _obj({
-                "dir": _path("registry directory"),
-                "verify": {"type": "boolean", "description": "re-derive verdicts from stored thesis and measurements"},
-            }, ["dir"]),
-        },
-    ]
-
-
-def tool_names() -> set[str]:
-    return {tool["name"] for tool in tool_defs()}
 
 
 def _require_str(args: dict, name: str) -> str:
@@ -298,6 +127,28 @@ def _registry_tool(args: dict) -> str:
     return _invoke_cli(argv)
 
 
+def _recheck_tool(name: str, args: dict) -> str:
+    index_value = args.get("index", -1)
+    try:
+        index = int(index_value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("index must be an integer") from exc
+    template = _optional_bool(args, "template")
+    if name == "crucible.recheck_template" or template is True:
+        if _optional_str(args, "pack") is not None:
+            raise ValueError("template cannot be combined with pack")
+        payload = replay_template_payload(
+            recheck_payload(_require_str(args, "dir"), index=index)
+        )
+    else:
+        payload = recheck_payload(
+            _require_str(args, "dir"),
+            index=index,
+            pack=_optional_str(args, "pack"),
+        )
+    return json.dumps(payload, indent=2, ensure_ascii=False)
+
+
 def call_tool(name: str, args: dict) -> str:
     if name == "crucible.status":
         return json.dumps(status_payload(), indent=2, sort_keys=True)
@@ -309,25 +160,7 @@ def call_tool(name: str, args: dict) -> str:
         payload = _assess_from_files(thesis, measurements, strict=args.get("strict") is True)
         return json.dumps(payload, indent=2, ensure_ascii=False)
     if name in {"crucible.recheck", "crucible.recheck_template"}:
-        index_value = args.get("index", -1)
-        try:
-            index = int(index_value)
-        except (TypeError, ValueError) as exc:
-            raise ValueError("index must be an integer") from exc
-        template = _optional_bool(args, "template")
-        if name == "crucible.recheck_template" or template is True:
-            if _optional_str(args, "pack") is not None:
-                raise ValueError("template cannot be combined with pack")
-            payload = replay_template_payload(
-                recheck_payload(_require_str(args, "dir"), index=index)
-            )
-        else:
-            payload = recheck_payload(
-                _require_str(args, "dir"),
-                index=index,
-                pack=_optional_str(args, "pack"),
-            )
-        return json.dumps(payload, indent=2, ensure_ascii=False)
+        return _recheck_tool(name, args)
     if name == "crucible.run":
         return _run_tool(args)
     if name == "crucible.measurement_gate":
@@ -358,4 +191,6 @@ def call_tool(name: str, args: dict) -> str:
         if args.get("verify") is True:
             argv.append("--verify")
         return _invoke_cli(argv)
+    if name in {"crucible.pairwise", "crucible.decompose", "crucible.views"}:
+        return _invoke_cli([name.split(".", 1)[1], _require_str(args, "file"), "--json"])
     raise ValueError(f"unknown tool: {name}")

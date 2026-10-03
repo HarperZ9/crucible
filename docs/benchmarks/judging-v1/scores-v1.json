@@ -1,0 +1,64 @@
+{
+ "c1": {
+  "report": {
+   "schema": "crucible.pairwise-report/1",
+   "pairs": 100,
+   "usable_pairs": 100,
+   "verdicts": {
+    "A": 3,
+    "B": 4,
+    "ORDER_DISAGREE": 93
+   },
+   "order_consistency": 0.07,
+   "order_consistency_wilson95": [
+    0.034318824364064096,
+    0.13749671006529757
+   ],
+   "first_slot_rate": 0.964824120603015,
+   "first_slot_wilson95": [
+    0.9291832594988669,
+    0.9828584518660601
+   ]
+  },
+  "pairwise_acc": 0.07,
+  "pairwise_acc_wilson": [
+   0.034318824364064096,
+   0.13749671006529757
+  ],
+  "pointwise_acc": 0.87,
+  "pointwise_acc_wilson": [
+   0.7901947810519012,
+   0.9224290614158575
+  ],
+  "single_order_acc": 0.56,
+  "pairwise_minus_pointwise": {
+   "mean": -0.8,
+   "low": -0.88,
+   "high": -0.72
+  }
+ },
+ "c2": {
+  "holistic_agreement": 0.2,
+  "decomposed_agreement": 0.7,
+  "decomposed_minus_holistic": {
+   "mean": 0.5,
+   "low": 0.26666666666666666,
+   "high": 0.7
+  },
+  "holistic_names_false_claim": 0.3888888888888889,
+  "decomposed_names_false_claim": 0.5666666666666667
+ },
+ "c3": {
+  "crucible_path": 1.0,
+  "plain_summary": 0.9,
+  "plain_wilson": [
+   0.7437855868473339,
+   0.9654007400402839
+  ],
+  "keep_minority_summary": 0.9,
+  "keep_wilson": [
+   0.7437855868473339,
+   0.9654007400402839
+  ]
+ }
+}
