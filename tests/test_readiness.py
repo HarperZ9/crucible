@@ -17,8 +17,8 @@ def test_flagship_brand_assets_exist_and_are_referenced():
     root = Path(__file__).resolve().parents[1]
     readme = (root / "README.md").read_text(encoding="utf-8")
     for rel in [
-        "docs/brand/crucible-mark.svg",
-        "docs/brand/crucible-hero.png",
+        "docs/brand/mark-tile.svg",
+        "docs/art/social.png",
         ".github/assets/banner.png",
         "examples/crucible-demo.html",
     ]:
@@ -27,7 +27,7 @@ def test_flagship_brand_assets_exist_and_are_referenced():
     # repository settings rather than linked from prose. What the README shows
     # a reader is the generated header and the thesis-lifecycle diagram.
     for rel in [
-        "docs/art/crucible-header.svg",
+        "docs/art/hero-dark.svg",
         "docs/art/thesis-lifecycle.svg",
         "examples/crucible-demo.html",
     ]:

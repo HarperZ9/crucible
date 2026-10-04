@@ -1,14 +1,20 @@
-<p align="center"><img src="docs/art/crucible-header.svg" alt="crucible: register a thesis, measure each claim, name the weakest axis." width="100%"></p>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/art/hero-dark.svg">
+  <img src="docs/art/hero-light.svg" alt="crucible: Register a thesis, measure each claim, name the weakest axis. Seven measured axes fan out from a bright core inside fine rings. One axis falls short of the dashed tolerance ring and is marked DRIFT; one has no measurement and is marked UNVERIFIABLE." width="100%">
+</picture>
 
-**A judgment engine: register a thesis, steelman each claim, measure against a substrate, refine the weakest axis.**
+# crucible
 
-[![PyPI](https://img.shields.io/pypi/v/crucible-bench?style=flat-square&labelColor=14041b&color=9683ff)](https://pypi.org/project/crucible-bench/)
-![license: FSL-1.1-MIT](https://img.shields.io/badge/license-FSL--1.1--MIT-8f8095?style=flat-square&labelColor=14041b)
+Register a thesis, measure each claim, name the weakest axis.
+
+```bash
+pip install crucible-bench
+```
+
+[![version: 1.5.0](https://img.shields.io/badge/version-1.5.0-e6e1d6?style=flat-square&labelColor=1a1712)](https://pypi.org/project/crucible-bench/)
 [![CI](https://github.com/HarperZ9/crucible/actions/workflows/ci.yml/badge.svg)](https://github.com/HarperZ9/crucible/actions/workflows/ci.yml)
-[![downloads](https://img.shields.io/pypi/dm/crucible-bench?label=downloads&style=flat-square&labelColor=14041b)](https://pypi.org/project/crucible-bench/)
-![python: 3.11+](https://img.shields.io/badge/python-3.11%2B-blue?style=flat-square&labelColor=14041b)
-![deps: none (core)](https://img.shields.io/badge/core%20deps-none-success?style=flat-square&labelColor=14041b)
-![version: 1.5.0](https://img.shields.io/badge/version-1.5.0-26dfe8?style=flat-square&labelColor=14041b)
+[![license](https://img.shields.io/badge/license-FSL--1.1--MIT-e6e1d6?style=flat-square&labelColor=1a1712)](LICENSE)
+![python 3.11+](https://img.shields.io/badge/python-3.11%2B-e6e1d6?style=flat-square&labelColor=1a1712)
 
 crucible turns a thesis into a set of claims, each paired with the observation that would refute it. Independent adversaries steelman every claim by proposing the strongest test, the engine measures each one against a substrate oracle, and the weakest axis gets refined across rounds: strengthen the substrate, sharpen the measurement, or amend the thesis. The result is a verdict per claim, MATCH, DRIFT, or UNVERIFIABLE, grounded in the measurement rather than a judge's opinion. Every run writes a record you can re-check.
 
