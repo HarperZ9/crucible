@@ -36,3 +36,9 @@ jobs:
           python -m twine check dist/*
       - name: Smoke-test the built wheel in a fresh environment
         run: python scripts/smoke_wheel.py dist/*.whl
+  art-receipts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Verify art receipt digests
+        run: python3 scripts/check_art_receipts.py
