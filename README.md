@@ -69,6 +69,48 @@ The [animated explainer](https://harperz9.github.io/repo-explainers/crucible.htm
 walks through the bundled binary-search thesis through steelman, measurement, the pure verdict function for each claim, the sealed registry and the recheck that catches a flipped verdict. Every value on it is output from this repository. Its
 source is [docs/explainer/index.html](docs/explainer/index.html).
 
+## Watch
+
+[![A passing check can still be wrong: a narrated film, 2 min 24 s](https://harperz9.github.io/media/explainers/passing-check/poster.jpg)](https://harperz9.github.io/explainers.html#passing-check-h)
+
+**[A passing check can still be wrong](https://harperz9.github.io/explainers.html#passing-check-h)** (2 min 24 s, narrated, captioned). Crucible steelmans each claim before it measures, because a pass alone can hide a weak check. The film page carries the transcript, the sources and recall questions.
+
+Video walkthrough: coming with the next release.
+
+## Walkthrough
+
+Install it, run it once, then use the main feature. Each command below is real, and so is its output.
+
+1. **Install.** Install from PyPI. Python 3.11 or newer.
+
+   ```text
+   $ pip install crucible-bench
+   ```
+
+2. **First run: write the example inputs.** The package ships a thesis and its measurements. This writes them into a folder you can read.
+
+   ```text
+   $ crucible examples --out crucible-examples
+   ```
+
+3. **Test a thesis.** Run the thesis against its measurements. Each claim is steelmanned first, then measured against its tolerance, and the verdicts are sealed into a registry.
+
+   ```text
+   $ crucible run crucible-examples/thesis-binary-search.json --measurements crucible-examples/measurements-binary-search.json --registry .crucible-registry
+   ran thesis bd7404c02eb2036e: 3 claim(s)
+     steelman refutations: 3
+     MATCH 1  DRIFT 1  UNVERIFIABLE 1
+   ```
+
+4. **Catch a flipped verdict.** From a checkout, the demo flips one sealed verdict and rechecks it. The recheck fails.
+
+   ```text
+   $ python examples/demo.py
+   counts: MATCH 1  DRIFT 1  UNVERIFIABLE 1
+   assessment seal 07dafef03f5c..., verified True
+   after flipping a DRIFT to a MATCH, verified False  <- caught
+   ```
+
 ## Install
 
 ```bash
