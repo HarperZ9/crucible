@@ -63,6 +63,12 @@ loop is `verdict_for`, which is a pure function of a deviation and a tolerance.
 No model sits in it, so a fluent assertion has no route into a rechecked result,
 and an axis that could not be measured reads UNVERIFIABLE instead of holding.
 
+## See it work, step by step
+
+The [animated explainer](https://harperz9.github.io/repo-explainers/crucible.html)
+walks through the bundled binary-search thesis through steelman, measurement, the pure verdict function for each claim, the sealed registry and the recheck that catches a flipped verdict. Every value on it is output from this repository. Its
+source is [docs/explainer/index.html](docs/explainer/index.html).
+
 ## Install
 
 ```bash
