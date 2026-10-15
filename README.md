@@ -75,8 +75,6 @@ source is [docs/explainer/index.html](docs/explainer/index.html).
 
 **[A passing check can still be wrong](https://harperz9.github.io/explainers.html#passing-check-h)** (2 min 24 s, narrated, captioned). Crucible steelmans each claim before it measures, because a pass alone can hide a weak check. The film page carries the transcript, the sources and recall questions.
 
-Video walkthrough: coming with the next release.
-
 ## Walkthrough
 
 Install it, run it once, then use the main feature. Each command below is real, and so is its output.
