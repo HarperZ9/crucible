@@ -23,8 +23,9 @@ falsification condition (what observation would refute it), and a sha256 content
 with an empty falsification condition can never verify: it is UNVERIFIABLE by construction.
 
 **Steelman.** Before measuring, independent adversaries propose the strongest refutation of each
-claim and the test that would settle it. They propose; they never decide. The default Null
-steelman restates the claim's own falsification condition and invents nothing.
+claim and the test that would settle it. They propose, and the verdict step decides. The default Null
+steelman restates the claim's own falsification condition as the standing test, and flags a
+claim whose condition is empty.
 
 **Measurement.** A measurement binds to a claim by content hash and records a deviation from what
 the claim predicts, a tolerance, a method, and evidence. Measurements come from a manual JSON
@@ -33,7 +34,7 @@ commands, Telos witnessed artifacts, gather digests, index verification records,
 
 **Verdict.** `verdict_for(claim, measurement)` is pure: deviation within tolerance is MATCH,
 outside is DRIFT, missing or unmeasurable is UNVERIFIABLE. UNVERIFIABLE is fail-closed: an axis
-that cannot be measured is never read as holding. No model participates in this step.
+holds when a measurement shows MATCH. This step is plain code.
 
 **Witnessed assessment.** An assessment folds its verdicts and measurements into one sealed
 record. Verification recomputes the seals from the stored data and re-derives every verdict from
@@ -81,8 +82,7 @@ crucible run examples/thesis-binary-search.json \
 ```
 
 The output reports the verdict counts, the assessment seal, and `re-derived from disk: True`,
-meaning the verdicts were recomputed from what was just written, not echoed from memory. Inspect
-the stored state:
+meaning the verdicts were recomputed from the files just written. Inspect the stored state:
 
 ```bash
 crucible verdicts .crucible-registry --verify
@@ -105,8 +105,8 @@ crucible review reports/first-run
 
 The bundle directory contains `spec.json`, `run.json`, `report.md`, and `review.md`, with
 packet-relative artifact paths. This is the handoff shape: a verifier gets the original spec and
-the artifact, nothing else. `review` fails closed if the packet carries extra context, drifted
-metadata, or a report that no longer renders from the run record.
+the artifact, and works from those two. `review` fails closed if the packet carries extra context,
+drifted metadata, or a report that has drifted from the run record.
 
 ## Where to go next
 
@@ -123,4 +123,4 @@ metadata, or a report that no longer renders from the run record.
   and `crucible doctor --json` give hosts a machine-readable envelope.
 - **Read the contracts.** [USAGE.md](../USAGE.md) for the interop boundary,
   [ENTERPRISE-READINESS.md](ENTERPRISE-READINESS.md) for unattended-agent integration,
-  [CHANGELOG.md](../CHANGELOG.md) for what is merged but not yet released.
+  [CHANGELOG.md](../CHANGELOG.md) for what is merged and waiting for the next release.

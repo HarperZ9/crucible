@@ -174,8 +174,8 @@ ol.walkthrough p{margin:0 0 .3rem;max-width:44rem}
     <p>crucible turns a thesis into claims, each paired with the observation that would refute it. It measures each claim, gives each one a verdict from a pure function of the measurement, and writes a sealed record that anyone can recheck. A claim with nothing to measure is reported as unverifiable, never as a pass.</p>
   </div>
   <ul class="uses">
-    <li><b>Claims with their refutation</b>Each claim states what measured result would prove it wrong. A claim that states none cannot pass.</li>
-    <li><b>A verdict with no model in it</b><code>verdict_for</code> compares a deviation with a tolerance. The same record always gives the same verdict.</li>
+    <li><b>Claims with their refutation</b>Each claim states what measured result would prove it wrong. That condition is required for a claim to pass.</li>
+    <li><b>A deterministic verdict</b><code>verdict_for</code> compares a deviation with a tolerance in plain code. The same record always gives the same verdict.</li>
     <li><b>A record that resists edits</b>Theses, claims, measurements and verdicts are sealed by SHA-256. A flipped verdict fails the recheck.</li>
     <li><b>A CI gate</b><code>crucible ci</code> exits non-zero when a claim loses standing against a sealed baseline.</li>
   </ul>
@@ -233,7 +233,7 @@ ol.walkthrough p{margin:0 0 .3rem;max-width:44rem}
       </div></li>
       <li class="step" tabindex="-1" data-scene="k3" data-state="s"><div class="card">
         <span class="num">04</span><h3>The verdict is a pure function</h3>
-        <p><code>verdict_for</code> runs a fixed ladder. No falsification condition: UNVERIFIABLE. No measurement, or one bound to a different claim: UNVERIFIABLE. A tolerance that differs from the one sealed with the claim: UNVERIFIABLE, so a verdict cannot be rescued by widening it later.</p>
+        <p><code>verdict_for</code> runs a fixed ladder, and each rung asks for one thing: a falsification condition, a measurement bound to this claim, and the tolerance sealed with the claim. A record that fails a rung reads UNVERIFIABLE. Widening the tolerance after the run fails the third rung, so the record reads UNVERIFIABLE in place of a pass.</p>
         <p>Otherwise the margin is (tolerance minus deviation) divided by tolerance. A margin of 0 or more is MATCH; below 0 is DRIFT. Pick each claim in the panel.</p>
         <p class="src">Source: <a href="https://github.com/HarperZ9/crucible/blob/14fca4fe80576e172c3cd1bed2c0fca57be3139c/src/crucible/verdict.py">src/crucible/verdict.py</a>, <code>verdict_for</code></p>
       </div></li>
@@ -245,7 +245,7 @@ ol.walkthrough p{margin:0 0 .3rem;max-width:44rem}
       </div></li>
       <li class="step" tabindex="-1" data-scene="k5" data-state="s"><div class="card">
         <span class="num">06</span><h3>Flip one verdict, and the recheck catches it</h3>
-        <p>The bundled demo changes the DRIFT verdict to MATCH inside the sealed assessment, then verifies it again. Verification fails: the edited record no longer agrees with what its seal and measurements re-derive.</p>
+        <p>The bundled demo changes the DRIFT verdict to MATCH inside the sealed assessment, then verifies it again. Verification fails, because the seal and the measurements re-derive DRIFT and the edited record says MATCH.</p>
         <p class="src">Source: <a href="https://github.com/HarperZ9/crucible/blob/14fca4fe80576e172c3cd1bed2c0fca57be3139c/examples/demo.py">examples/demo.py</a></p>
       </div></li>
     </ol>
@@ -275,12 +275,12 @@ after flipping a DRIFT to a MATCH, verified False  &lt;- caught</span></code></p
 </section>
 
 <section class="block wrap" aria-labelledby="limits">
-  <h2 id="limits">What it does not do</h2>
+  <h2 id="limits">Limits</h2>
   <ul class="limits">
-    <li>A verdict is only as good as the measurement fed to it. crucible checks that a measurement binds to its claim; it cannot check that the measuring was done well.</li>
-    <li>A claim with no falsification condition is never passed. Opinions like "more elegant" stay UNVERIFIABLE by design.</li>
-    <li>The LLM-as-judge measure puts a model at the measurement step. The verdict still comes from <code>verdict_for</code>, but the deviation is the judge's.</li>
-    <li>A sealed record shows the verdicts were not edited after the run. It does not show the thesis was worth testing.</li>
+    <li>crucible checks that a measurement binds to its claim. The quality of the measuring itself is on whoever ran it.</li>
+    <li>Opinions like "more elegant" read UNVERIFIABLE. To test one, restate it as a measurable claim with a falsification condition.</li>
+    <li>The LLM-as-judge measure puts a model at the measurement step. The verdict still comes from <code>verdict_for</code>, and the deviation is the judge's.</li>
+    <li>A sealed record shows the verdicts are the ones the run produced. Choosing a thesis worth testing is your part.</li>
   </ul>
   <p class="src">Source: README.md at 14fca4f, "Highlights" and "How a thesis run works"; src/crucible/verdict.py</p>
 </section>
@@ -288,10 +288,10 @@ after flipping a DRIFT to a MATCH, verified False  &lt;- caught</span></code></p
 <section class="block wrap recall" aria-labelledby="recall">
   <h2 id="recall">Check what stuck</h2>
   <p class="measure">Answer each one in your head before you open it.</p>
-  <details><summary>Why does the elegance claim read UNVERIFIABLE and not DRIFT?</summary><p>It states no falsification condition, so verdict_for stops at the first rung. Nothing could refute it, so nothing can confirm it.</p></details>
+  <details><summary>The elegance claim reads UNVERIFIABLE. Why that verdict, of the three?</summary><p>verdict_for stops at the first rung, which asks for a falsification condition. A claim needs a result that could refute it before any result can confirm it.</p></details>
   <details><summary>What is the margin for the "at most 3" claim, and what verdict does it give?</summary><p>(0.5 minus 8) divided by 0.5, which is -15. Below zero, so DRIFT.</p></details>
-  <details><summary>A measurement arrives with a wider tolerance than the one sealed with the claim. What happens?</summary><p>UNVERIFIABLE. The sealed tolerance decides, so a verdict cannot be rescued by widening the bound after the seal.</p></details>
-  <details><summary>Why does the assessment seal change between runs when the verdicts do not?</summary><p>The assessment record includes the run's start time. The thesis seal and the claim hashes stay fixed.</p></details>
+  <details><summary>A measurement arrives with a wider tolerance than the one sealed with the claim. What happens?</summary><p>UNVERIFIABLE. The tolerance sealed with the claim decides, and a widened bound fails that rung.</p></details>
+  <details><summary>The verdicts repeat across runs, yet the assessment seal changes. Why?</summary><p>The assessment record includes the run's start time. The thesis seal and the claim hashes stay fixed.</p></details>
 </section>
 </main>
 <footer class="foot wrap">
