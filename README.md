@@ -13,9 +13,9 @@ It is for people who publish or review claims about software, models or research
 
 ## Install and first run
 
-[![version: 1.5.0](https://img.shields.io/badge/version-1.5.0-e6e1d6?style=flat-square&labelColor=1a1712)](https://pypi.org/project/crucible-bench/)
+[![version: 1.6.0](https://img.shields.io/badge/version-1.6.0-e6e1d6?style=flat-square&labelColor=1a1712)](https://pypi.org/project/crucible-bench/)
 
-`crucible-bench 1.5.0` is the current release on PyPI. It needs Python 3.11 or newer and installs the `crucible` command and the `crucible` Python package.
+`crucible-bench 1.6.0` is the current release on PyPI. It needs Python 3.11 or newer and installs the `crucible` command and the `crucible` Python package.
 
 ```bash
 pip install crucible-bench
@@ -216,7 +216,7 @@ All edges map into the same `Measurement` to `verdict_for` spine. The verdict st
 
 ## Status
 
-`crucible-bench 1.5.0` covers the full loop, one-command runs, cleanroom review packets, oracle replay, registry operations, creative measurement gates, and the MCP bridge, plus MCP replay-template parity, the CI regression gate, LLM-as-judge, missing-evidence explanations, ill-posed measurement warnings, and the MATCH-provenance gate. 1.5.0 adds both-order pairwise judging, decomposed claims and minority-preserving summaries, with measured results in `docs/benchmarks/judging-v1`. 1.3.0 seals the tolerance that decides each verdict and fixes the verdict-integrity defects listed in the changelog; upgrade from 1.2.0 or earlier. Crucible can take [gather](https://github.com/HarperZ9/gather) digests as evidence, and its verdict packets can be replayed by any tool that reads the registry format.
+`crucible-bench 1.6.0` covers the full loop, one-command runs, cleanroom review packets, oracle replay, registry operations, creative measurement gates, and the MCP bridge, plus MCP replay-template parity, the CI regression gate, LLM-as-judge, missing-evidence explanations, ill-posed measurement warnings, and the MATCH-provenance gate. 1.6.0 changes the README and package metadata only. 1.5.0 adds both-order pairwise judging, decomposed claims and minority-preserving summaries, with measured results in `docs/benchmarks/judging-v1`. 1.3.0 seals the tolerance that decides each verdict and fixes the verdict-integrity defects listed in the changelog; upgrade from 1.2.0 or earlier. Crucible can take [gather](https://github.com/HarperZ9/gather) digests as evidence, and its verdict packets can be replayed by any tool that reads the registry format.
 
 ## Why it matters
 

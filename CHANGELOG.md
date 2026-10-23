@@ -3,6 +3,18 @@
 All notable changes to crucible. Versions follow semantic versioning; each minor release is built
 behind a feature branch and reviewed before merge.
 
+## 1.6.0, 2026-10-22
+
+Documentation and package metadata only. The code is the same as 1.5.0.
+
+- The README opens with what Crucible decides, who uses it, a first run checked in a clean
+  environment, a comparison with promptfoo, DeepEval, Inspect, OpenAI Evals and Ragas, and its limits.
+- The licence section states the FSL-1.1-MIT terms, and README images use absolute URLs so the
+  PyPI page shows them.
+- The PyPI summary is rewritten, and the author entry gains zaindharper@gmail.com.
+- The release build accepts only versions that end in `.0`, so this documentation release is a
+  minor version.
+
 ## 1.5.0, 2026-10-03
 
 Adds judging modes for when a model or a panel does the judging, measured once with a 2B local
