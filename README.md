@@ -1,38 +1,67 @@
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/art/hero-dark.svg">
-  <img src="docs/art/hero-light.svg" alt="crucible: Register a thesis, measure each claim, name the weakest axis. Seven measured axes fan out from a bright core inside fine rings. One axis falls short of the dashed tolerance ring and is marked DRIFT; one has no measurement and is marked UNVERIFIABLE." width="100%">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/HarperZ9/crucible/main/docs/art/hero-dark.svg">
+  <img src="https://raw.githubusercontent.com/HarperZ9/crucible/main/docs/art/hero-light.svg" alt="crucible: Register a thesis, measure each claim, name the weakest axis. Seven measured axes fan out from a bright core inside fine rings. One axis falls short of the dashed tolerance ring and is marked DRIFT; one has no measurement and is marked UNVERIFIABLE." width="100%">
 </picture>
 
-# crucible
+# Crucible
 
-Register a thesis, measure each claim, name the weakest axis.
+Test each claim in a thesis against a measurement and get MATCH, DRIFT or UNVERIFIABLE, with a record anyone can recheck.
+
+You write a thesis as a list of claims, and each claim names the observation that would prove it wrong. You supply measurements: a deviation and a tolerance per claim, from a benchmark, a script, a proof checker or a model judge. Crucible decides each verdict with a pure function. A deviation within tolerance is MATCH, a deviation outside it is DRIFT, and a claim with no falsification condition or no measurement is UNVERIFIABLE. It seals the thesis, the measurements and the verdicts into a local registry, so a later reader can recompute every verdict and see any edit.
+
+It is for people who publish or review claims about software, models or research results and want each claim tied to the evidence that settles it: evaluation engineers, reviewers of AI agent output and researchers. The core is Python standard library only, runs offline and needs no account or API key.
+
+## Install and first run
+
+[![version: 1.5.0](https://img.shields.io/badge/version-1.5.0-e6e1d6?style=flat-square&labelColor=1a1712)](https://pypi.org/project/crucible-bench/)
+
+`crucible-bench 1.5.0` is the current release on PyPI. It needs Python 3.11 or newer and installs the `crucible` command and the `crucible` Python package.
 
 ```bash
 pip install crucible-bench
+crucible examples --out crucible-examples
+crucible run crucible-examples/thesis-binary-search.json \
+  --measurements crucible-examples/measurements-binary-search.json \
+  --registry .crucible-registry
 ```
 
-[![version: 1.5.0](https://img.shields.io/badge/version-1.5.0-e6e1d6?style=flat-square&labelColor=1a1712)](https://pypi.org/project/crucible-bench/)
-[![CI](https://github.com/HarperZ9/crucible/actions/workflows/ci.yml/badge.svg)](https://github.com/HarperZ9/crucible/actions/workflows/ci.yml)
-[![license](https://img.shields.io/badge/license-FSL--1.1--MIT-e6e1d6?style=flat-square&labelColor=1a1712)](LICENSE)
-![python 3.11+](https://img.shields.io/badge/python-3.11%2B-e6e1d6?style=flat-square&labelColor=1a1712)
+```text
+wrote 5 example inputs to crucible-examples
+ran thesis bd7404c02eb2036e: 3 claim(s)
+  steelman refutations: 3
+  MATCH 1  DRIFT 1  UNVERIFIABLE 1
+  re-derived from disk: True  {'seals_ok': True, 'thesis_ok': True, 'verdicts_rederive': True}
+```
 
-crucible turns a thesis into a set of claims, each paired with the observation that would refute it. Independent adversaries steelman every claim by proposing the strongest test, the engine measures each one against a substrate oracle, and the weakest axis gets refined across rounds: strengthen the substrate, sharpen the measurement, or amend the thesis. The result is a verdict per claim, MATCH, DRIFT, or UNVERIFIABLE, grounded in the measurement rather than a judge's opinion. Every run writes a record you can re-check.
+The example thesis makes three claims about binary search on 1,024 elements. "At most 11 comparisons" measures a deviation of 0 and holds. "At most 3 comparisons" measures a deviation of 8 and drifts. "More elegant than linear search" names no way to be wrong, so it stays UNVERIFIABLE.
 
-[Project Telos](https://harperz9.github.io) | [gather](https://github.com/HarperZ9/gather) | [crucible](https://github.com/HarperZ9/crucible) | [index](https://github.com/HarperZ9/index) | [forum](https://github.com/HarperZ9/forum) | [telos](https://github.com/HarperZ9/telos) | [learn](https://github.com/HarperZ9/learn) | [emet](https://github.com/HarperZ9/emet) | [buildlang](https://github.com/HarperZ9/buildlang)
+Recheck the registry, then change one stored verdict and recheck again:
 
-## Current status
+```bash
+crucible verdicts .crucible-registry --verify
+python -c "p='.crucible-registry/assessments.jsonl'; s=open(p).read(); open(p,'w').write(s.replace('\"status\": \"DRIFT\"','\"status\": \"MATCH\"',1))"
+crucible verdicts .crucible-registry --verify
+```
 
-`crucible-bench 1.5.0` is the current source version. The judgment loop,
-cleanroom review packets, sealed registry, drift and CI gates, measurement
-adapters, CLI, Python API, and MCP surface are present; verdicts remain
-UNVERIFIABLE when the required evidence is absent.
+```text
+re-checked 1 assessment(s): 1 ok, 0 not
+  bd7404c02eb2036e ok=True  seals=True thesis=True rederive=True
+re-checked 1 assessment(s): 0 ok, 1 not
+  bd7404c02eb2036e ok=False  seals=False thesis=True rederive=False
+```
 
-## Operator surface
+The second check exits with status 1. Add `--bundle DIR` to `crucible run` to write a review packet, and `crucible review DIR` checks the packet before you hand it to a reviewer. `crucible mcp` serves the same operations to an MCP client.
 
-Use `crucible status --json` and `crucible doctor --json` to inspect the local
-installation, then `crucible mcp` to expose assessment, review, registry, and
-measurement-gate operations to an MCP host. `crucible ci` is the regression
-entrypoint for a sealed baseline.
+## How it compares
+
+promptfoo, DeepEval, Inspect, OpenAI Evals and Ragas run test cases against a model and score its outputs. They generate the measurements. Crucible starts where a measurement exists and decides what it means for a stated claim. It does not call a model by default and ships no datasets. It adds three things those tools leave to you: every claim must name its falsification condition, a missing measurement is reported as UNVERIFIABLE with the evidence it lacks, and the sealed registry lets a third party recompute each verdict. A score from any of those tools can enter Crucible as a measurement row. `crucible ci` then fails a pull request when a claim moves from MATCH to DRIFT or loses its measurement.
+
+## Limits
+
+- A verdict is only as good as the measurement fed to it. Crucible checks that a measurement binds to its claim and that the tolerance did not change after sealing. It cannot tell whether the measurement itself is correct.
+- The steelman stage proposes the test that would settle each claim. The default restates the claim's own falsification condition. A model or command steelman plugs in through the API.
+- A sealed registry proves the record is unchanged since sealing. It does not prove who made it or that the claim is true.
+- The model-judge, pairwise and decomposition modes were measured once with one 2B local judge (`docs/benchmarks/judging-v1`). Agreement with human preferences is untested.
 
 ## Highlights
 
@@ -53,7 +82,7 @@ entrypoint for a sealed baseline.
 `crucible run` takes one thesis and produces a packet a reviewer can check
 without rerunning anything, and without trusting the run that made it.
 
-<p align="center"><img src="docs/art/thesis-lifecycle.svg" alt="Eight stages from a registered thesis to a self-contained review packet: thesis, steelman, measure, cohesion, verdict, registry, recheck, packet. A round that is not cohesive reflects on the weakest axis and re-measures it. The verdict is a pure function of the measurement and ends as match, drift or unverifiable." width="100%"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/HarperZ9/crucible/main/docs/art/thesis-lifecycle.svg" alt="Eight stages from a registered thesis to a self-contained review packet: thesis, steelman, measure, cohesion, verdict, registry, recheck, packet. A round that is not cohesive reflects on the weakest axis and re-measures it. The verdict is a pure function of the measurement and ends as match, drift or unverifiable." width="100%"></p>
 
 Two edges carry the design. The one that loops back is the refine step: grading
 every claim yields a margin, the harmonic mean of those margins is the cohesion,
@@ -75,66 +104,14 @@ source is [docs/explainer/index.html](docs/explainer/index.html).
 
 **[A passing check can still be wrong](https://harperz9.github.io/explainers.html#passing-check-h)** (2 min 24 s, narrated, captioned). Crucible steelmans each claim before it measures, because a pass alone can hide a weak check. The film page carries the transcript, the sources and recall questions.
 
-## Walkthrough
+## Scripted demo from a clone
 
-Install it, run it once, then use the main feature. Each command below is real, and so is its output.
-
-1. **Install.** Install from PyPI. Python 3.11 or newer.
-
-   ```text
-   $ pip install crucible-bench
-   ```
-
-2. **First run: write the example inputs.** The package ships a thesis and its measurements. This writes them into a folder you can read.
-
-   ```text
-   $ crucible examples --out crucible-examples
-   ```
-
-3. **Test a thesis.** Run the thesis against its measurements. Each claim is steelmanned first, then measured against its tolerance, and the verdicts are sealed into a registry.
-
-   ```text
-   $ crucible run crucible-examples/thesis-binary-search.json --measurements crucible-examples/measurements-binary-search.json --registry .crucible-registry
-   ran thesis bd7404c02eb2036e: 3 claim(s)
-     steelman refutations: 3
-     MATCH 1  DRIFT 1  UNVERIFIABLE 1
-   ```
-
-4. **Catch a flipped verdict.** From a checkout, the demo flips one sealed verdict and rechecks it. The recheck fails.
-
-   ```text
-   $ python examples/demo.py
-   counts: MATCH 1  DRIFT 1  UNVERIFIABLE 1
-   assessment seal 07dafef03f5c..., verified True
-   after flipping a DRIFT to a MATCH, verified False  <- caught
-   ```
-
-## Install
-
-```bash
-pip install crucible-bench
-```
-
-The distribution is `crucible-bench`; it installs the `crucible` command and the `crucible` package (`import crucible`). The quickstart inputs ship with the package. Write them to a new folder and run the first check:
-
-```bash
-crucible examples --out crucible-examples
-crucible run crucible-examples/thesis-binary-search.json   --measurements crucible-examples/measurements-binary-search.json   --registry .crucible-registry
-```
-
-For the scripted demo and the development tools, work from a clone:
+The demo script lives in the repository. The package does not include it:
 
 ```bash
 git clone https://github.com/HarperZ9/crucible
 cd crucible
 pip install -e ".[dev]"
-```
-
-## Quickstart
-
-Run the bundled demo from a clone. It registers a three-claim thesis, steelmans it, assesses it, and then shows tampering being caught:
-
-```bash
 python examples/demo.py
 ```
 
@@ -148,23 +125,7 @@ assessment seal 07dafef03f5c..., verified True
 after flipping a DRIFT to a MATCH, verified False  <- caught
 ```
 
-Then run the same thesis through the full loop into a registry. From an installed package, use the `crucible-examples/` folder that `crucible examples` wrote in place of `examples/`:
-
-```bash
-crucible run examples/thesis-binary-search.json \
-  --measurements examples/measurements-binary-search.json \
-  --registry .crucible-registry
-```
-
-```text
-ran thesis bd7404c02eb2036e: 3 claim(s)
-  steelman refutations: 3
-  MATCH 1  DRIFT 1  UNVERIFIABLE 1
-  assessment seal: 62f928fe21052041...
-  re-derived from disk: True  {'seals_ok': True, 'thesis_ok': True, 'verdicts_rederive': True}
-```
-
-Add `--json` for the machine-readable run record, `--substrate examples/substrate-binary-search.json` instead of `--measurements` to go through the table oracle, and `--bundle DIR` to write a cleanroom review packet. A visual verdict surface lives at [`examples/crucible-demo.html`](examples/crucible-demo.html).
+Add `--json` for the machine-readable run record, `--substrate crucible-examples/substrate-binary-search.json` in place of `--measurements` to measure through the table oracle, and `--bundle DIR` to write a cleanroom review packet. A visual verdict surface lives at [`examples/crucible-demo.html`](examples/crucible-demo.html).
 
 ## A worked example
 
@@ -187,7 +148,7 @@ A thesis is claims plus falsification conditions:
 }
 ```
 
-<p align="center"><img src="docs/art/verdict-ladder.svg" alt="The seven rungs of crucible's verdict function, in the order it checks them. A claim with no falsification condition, no measurement, a measurement bound to a different claim, a deviation that is not a number, or a tolerance that was widened after the claim sealed one all return UNVERIFIABLE. A deviation within tolerance returns MATCH, and that row carries the mark because it is the only rung on which a claim stands. A deviation over tolerance returns DRIFT." width="100%"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/HarperZ9/crucible/main/docs/art/verdict-ladder.svg" alt="The seven rungs of crucible's verdict function, in the order it checks them. A claim with no falsification condition, no measurement, a measurement bound to a different claim, a deviation that is not a number, or a tolerance that was widened after the claim sealed one all return UNVERIFIABLE. A deviation within tolerance returns MATCH, and that row carries the mark because it is the only rung on which a claim stands. A deviation over tolerance returns DRIFT." width="100%"></p>
 
 The first claim is measurable: a measurement row binds to it by content hash, records a deviation and a tolerance, and the verdict follows. The second claim states no falsification condition, so it is UNVERIFIABLE by construction, and the assessment says exactly which evidence class is missing. Run it, bundle it, and validate the packet:
 
@@ -224,7 +185,7 @@ A regression is a claim moving MATCH to DRIFT, becoming UNVERIFIABLE, or droppin
 | `crucible report DIR` / `crucible batch MANIFEST` | Markdown reports; manifest runs into one registry |
 | `crucible export THESIS` | publication-gated export; fenced material is refused at the edge |
 | `crucible measurement-gate PACKET` | verify a Telos creative measurement packet |
-| `crucible status / doctor / demo` | operator envelope, readiness checks, demo pointer (`--json`) |
+| `crucible status / doctor / demo` | status envelope, readiness checks, demo pointer (`--json`) |
 | `crucible pairwise FILE` / `decompose FILE` / `views FILE` | both-order pairwise verdicts, typed sub-questions, minority-preserving summaries |
 | `crucible mcp` | serve the 17 crucible tools over MCP stdio, including `crucible.recheck_template` |
 
@@ -247,7 +208,7 @@ All edges map into the same `Measurement` to `verdict_for` spine. The verdict st
 
 - [docs/INTRODUCTION.md](docs/INTRODUCTION.md): what crucible is, core concepts, and a first-ten-minutes walkthrough.
 - [ARCHITECTURE.md](ARCHITECTURE.md): module layout and the pure/impure boundary.
-- [USAGE.md](USAGE.md): operator commands and the interop boundary.
+- [USAGE.md](USAGE.md): commands and the interop boundary.
 - [docs/ENTERPRISE-READINESS.md](docs/ENTERPRISE-READINESS.md): the host-integration contract for unattended agent workflows.
 - [docs/RELEASE-READINESS.md](docs/RELEASE-READINESS.md): the 1.0 gate checklist.
 - [CHANGELOG.md](CHANGELOG.md): per-release detail, including what is merged but not yet on PyPI.
@@ -255,19 +216,15 @@ All edges map into the same `Measurement` to `verdict_for` spine. The verdict st
 
 ## Status
 
-`crucible-bench 1.5.0` covers the full loop, one-command runs, cleanroom review packets, oracle replay, registry operations, creative measurement gates, and the MCP bridge, plus MCP replay-template parity, the CI regression gate, LLM-as-judge, missing-evidence explanations, ill-posed measurement warnings, and the MATCH-provenance gate. 1.5.0 adds both-order pairwise judging, decomposed claims and minority-preserving summaries, with measured results in `docs/benchmarks/judging-v1`. 1.3.0 seals the tolerance that decides each verdict and fixes the verdict-integrity defects listed in the changelog; upgrade from 1.2.0 or earlier. Within Project Telos, crucible is the measured-judgment layer: it consumes gather evidence and index context and emits verdict packets that telos can surface and replay.
+`crucible-bench 1.5.0` covers the full loop, one-command runs, cleanroom review packets, oracle replay, registry operations, creative measurement gates, and the MCP bridge, plus MCP replay-template parity, the CI regression gate, LLM-as-judge, missing-evidence explanations, ill-posed measurement warnings, and the MATCH-provenance gate. 1.5.0 adds both-order pairwise judging, decomposed claims and minority-preserving summaries, with measured results in `docs/benchmarks/judging-v1`. 1.3.0 seals the tolerance that decides each verdict and fixes the verdict-integrity defects listed in the changelog; upgrade from 1.2.0 or earlier. Crucible can take [gather](https://github.com/HarperZ9/gather) digests as evidence, and its verdict packets can be replayed by any tool that reads the registry format.
 
 ## Why it matters
 
-Everything above reduces to one property: a verdict is a pure function of a sealed record, so anyone holding the record can recompute it, and a tampered claim, measurement, or baseline is caught by re-hashing rather than by trust.
+Everything above reduces to one property: a verdict is a pure function of a sealed record, so anyone holding the record can recompute it, and a tampered claim, measurement, or baseline is caught by re-hashing the record. Nobody has to take the author's word for it.
 
 ## License
 
-crucible is fair-source: open to read, run, and build on, with commercial use reserved so the project can fund its own development. See [LICENSE](LICENSE) for the exact terms.
-
-## Development
-
-The local developer workflow is intentionally small.
+Crucible is under the Functional Source License, Version 1.1, MIT Future License (FSL-1.1-MIT). You may use, copy, change and redistribute it for any purpose except a product or service that competes with Crucible. Each release converts to the MIT license two years after it is published. See [LICENSE](LICENSE) for the exact terms.
 
 ## Work with it
 
@@ -285,16 +242,16 @@ every surface: knowledge open to anyone who can attain the means; acceptance
 decided by external checks, never reputation; every result re-runnable;
 honest nulls first-class; ownership earned by comprehension; learning woven
 into the work. The full text lives in [CREDO.md](CREDO.md).
-The long form of this belief: [The Unbundling](https://github.com/HarperZ9/flywheel/blob/fix/release-model-identity/docs/essays/2026-07-13-the-unbundling.md).
+The long form of this belief: [The Unbundling](https://github.com/HarperZ9/flywheel/blob/main/docs/essays/2026-07-13-the-unbundling.md).
 
 ---
 
-Built by **[Zain Dana Harper](https://harperz9.github.io)** in Seattle: evidence-first tools that leave a re-checkable artifact behind. The full workbench is at [Project Telos](https://harperz9.github.io).
+Built by **[Zain Dana Harper](https://harperz9.github.io)** in Seattle: evidence-first tools that leave a re-checkable artifact behind. More tools are listed at [harperz9.github.io](https://harperz9.github.io).
 
 ## Local client packages
 
 The optional client bundle defaults to a read-only MCP profile with an explicit
-workspace selected at launch. An operator can grant one fixed measurement command
+workspace selected at launch. You can grant one fixed measurement command
 at launch for witnessed benchmarks. That child runs with OS user permissions;
 it is not sandboxed. See [client package setup](client-plugin/README.md).
 Windows x64 MCPB and ZIP bundles include their runtime; source plugins require

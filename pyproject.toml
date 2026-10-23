@@ -5,12 +5,12 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "crucible-bench"
 version = "1.5.0"
-description = "Measurement-backed thesis evaluation with clean verifier packets and re-checkable verdicts."
+description = "Test each claim in a thesis against a measurement and get MATCH, DRIFT or UNVERIFIABLE, with a sealed record anyone can recheck."
 readme = "README.md"
 requires-python = ">=3.11"
 license = "LicenseRef-FSL-1.1-MIT"
 license-files = ["LICENSE"]
-authors = [{ name = "Zain Dana Harper" }]
+authors = [{ name = "Zain Dana Harper", email = "zaindharper@gmail.com" }]
 keywords = [
     "reasoning", "judgment", "verification", "accountability", "theses", "steelman",
     "refine", "verdict", "epistemics", "falsification", "research", "evidence",
