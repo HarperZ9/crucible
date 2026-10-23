@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "crucible-bench"
-version = "1.5.0"
+version = "1.6.0"
 description = "Test each claim in a thesis against a measurement and get MATCH, DRIFT or UNVERIFIABLE, with a sealed record anyone can recheck."
 readme = "README.md"
 requires-python = ">=3.11"
