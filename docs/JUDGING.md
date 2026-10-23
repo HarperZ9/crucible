@@ -4,7 +4,7 @@ Three tools for when a model or a panel does the judging. Each one keeps the ver
 
 ## Pairwise judging in both orders
 
-A judge that compares two answers side by side often prefers whichever it reads first. Crucible asks the comparator twice, once with each answer in the first slot, and returns a winner only when both orders agree. A split comes back as `ORDER_DISAGREE`, never as a preference.
+A judge that compares two answers side by side often prefers whichever it reads first. Crucible asks the comparator twice, once with each answer in the first slot, and returns a winner when both orders agree. A split comes back as `ORDER_DISAGREE`.
 
 ```python
 from crucible.pairwise import judge_pair, pairwise_report
@@ -46,7 +46,7 @@ The decomposition carries its own seal beside the parent claim, so the parent cl
 
 ## Minority views kept
 
-When several judges or sources weigh in, a summary that keeps only the consensus hides the view most likely to matter. `crucible views` groups views by position and lists the majority beside every minority position, with its sources and count. Nothing is dropped.
+When several judges or sources weigh in, a summary that keeps only the consensus hides the view most likely to matter. `crucible views` groups views by position and lists the majority beside every minority position, with its sources and count. Every view appears in the output.
 
 ```bash
 crucible views views.json             # {"views": [{"source", "position", "text"}], "planted"?: [...]}
@@ -66,4 +66,4 @@ One run with a 2B local judge (Qwen3.5-2B) on items with exact labels, bars set 
 | Same weakest claim in 3 reruns, 30 theses | decomposed 0.70, holistic 0.20, difference +0.50 [+0.27, +0.70] | pass |
 | `summarize_views` keeps the minority, 30 sets | 30 of 30 | at least 0.9: pass |
 
-The small judge picked the first slot 96% of the time. The both-order check caught that and returned `ORDER_DISAGREE` for 93 of 100 pairs instead of a false preference, but it does not make a judge this biased more accurate: for a 2B judge, score each answer alone. Agreement with human preference labels was not tested, because no labelled set was available. Splitting a thesis into sub-questions made the named weakest claim far more stable across reruns.
+The small judge picked the first slot 96% of the time. The both-order check caught that and returned `ORDER_DISAGREE` for 93 of 100 pairs. The check flags a biased judge and leaves its accuracy where it was, so for a 2B judge, score each answer alone. Agreement with human preference labels is still to be measured, once a labelled set is available. Splitting a thesis into sub-questions made the named weakest claim far more stable across reruns.
