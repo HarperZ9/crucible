@@ -3,6 +3,22 @@
 All notable changes to crucible. Versions follow semantic versioning; each minor release is built
 behind a feature branch and reviewed before merge.
 
+## Unreleased
+
+- `crucible import CONFIG` converts a promptfoo config into a thesis JSON that `register` and
+  `assess` read. Each assertion becomes a claim with a falsification condition, identical
+  assertions collapse to one claim, and an unknown assertion type is imported as a generic claim.
+  JSON is read in full. YAML is read as a block-style subset (mappings, sequences, plain and
+  quoted scalars, comments); flow collections, anchors, block scalars, tabs and backslash escapes
+  are refused with a message that says to convert the config to JSON. An import produces no
+  verdict: every imported claim is UNVERIFIABLE until a measurement is supplied.
+- `crucible view DIR` renders a registry as one offline HTML page. A bundled JavaScript SHA-256
+  recomputes each claim body's hash in the browser and compares it with the stored hash, after a
+  self-test on two known vectors. The page checks a body against the hash beside it and shows the
+  seal status computed when the page was built; it does not recompute seals in the browser, and
+  `crucible registry verify` remains the check that gates on integrity. `--json` emits the pack
+  (`crucible.view/1`).
+
 ## 1.6.0, 2026-10-22
 
 Documentation and package metadata only. The code is the same as 1.5.0.

@@ -2,7 +2,8 @@
 
 ``register``, ``assess``, and ``steelman`` work on a thesis (a JSON file, or an id with
 ``--registry``); ``registry list|verify|stats|search|prune`` and ``verdicts [--verify]`` inspect a
-stored registry. Each subcommand binds a handler from ``crucible.commands`` via
+stored registry; ``import`` converts a promptfoo config into a thesis and ``view`` renders a
+registry as one offline HTML page. Each subcommand binds a handler from ``crucible.commands`` via
 ``set_defaults(func=...)``; ``main`` dispatches to it. Output is human text by default, JSON with
 ``--json``.
 """
@@ -23,6 +24,7 @@ from crucible.commands import (
 from crucible.drift_cmd import cmd_drift
 from crucible.examples_cmd import cmd_examples
 from crucible.flagship import cmd_demo, cmd_doctor, cmd_status
+from crucible.import_cmd import cmd_import
 from crucible.judging_cmd import add_judging_commands
 from crucible.mcp import serve as serve_mcp
 from crucible.measurement_gate_cmd import cmd_measurement_gate
@@ -32,6 +34,7 @@ from crucible.registry_cmd import cmd_registry, cmd_verdicts
 from crucible.report_cmd import cmd_report
 from crucible.review_cmd import cmd_review
 from crucible.run_cmd import cmd_run
+from crucible.view_cmd import cmd_view
 
 
 def _add_common(p: argparse.ArgumentParser) -> None:
@@ -70,6 +73,7 @@ def build_parser() -> argparse.ArgumentParser:
     _add_recheck_command(sub)
     _add_review_command(sub)
     _add_artifact_commands(sub)
+    _add_migration_commands(sub)
     add_judging_commands(sub)
     mcp = sub.add_parser("mcp", help="serve Crucible tools over MCP stdio")
     mcp.set_defaults(func=lambda _args: serve_mcp())
@@ -229,6 +233,27 @@ def _add_artifact_commands(sub) -> None:
                     help="write the Markdown gate summary to FILE (the exit code still signals regressions)")
     ci.add_argument("--json", action="store_true", help="emit the gate report as JSON instead of Markdown")
     ci.set_defaults(func=cmd_ci)
+
+
+def _add_migration_commands(sub) -> None:
+    imp = sub.add_parser("import",
+                         help="convert a promptfoo config (YAML subset or JSON) into a thesis: "
+                              "each assertion becomes a claim with its falsification")
+    imp.add_argument("config", help="path to a promptfooconfig .yaml or .json, or - for stdin")
+    imp.add_argument("--format", choices=["auto", "yaml", "json"], default="auto",
+                     help="input format; auto reads a leading { or [ as JSON")
+    imp.add_argument("--out", default=None, metavar="FILE",
+                     help="write the thesis JSON to FILE instead of stdout")
+    imp.set_defaults(func=cmd_import)
+
+    view = sub.add_parser("view",
+                          help="render a registry as one offline HTML page that re-hashes each "
+                               "claim body in the browser")
+    view.add_argument("dir", help="the registry directory")
+    view.add_argument("--out", default=None, metavar="FILE",
+                      help="write the HTML page to FILE instead of stdout")
+    view.add_argument("--json", action="store_true", help="emit the view pack as JSON instead of HTML")
+    view.set_defaults(func=cmd_view)
 
 
 def main(argv: list[str] | None = None) -> int:

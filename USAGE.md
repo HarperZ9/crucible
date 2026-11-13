@@ -39,6 +39,33 @@ The same package can be exercised from source with:
 python -m crucible --help
 ```
 
+## Migrate a promptfoo suite
+
+```bash
+crucible import promptfooconfig.yaml --out thesis.json
+crucible register thesis.json --registry .crucible-registry
+crucible assess thesis.json --registry .crucible-registry --measurements results.json
+```
+
+`crucible import` turns each assertion into a claim with a falsification condition and writes the
+thesis JSON that `register` and `assess` read. It runs no model and produces no verdict; the
+measurements still come from your eval run. JSON configs are read in full. YAML is read as a
+block-style subset, and a construct outside it (flow collections, anchors, block scalars, tabs,
+backslash escapes) stops the import with exit status 1 so an assertion is never imported wrong.
+Convert such a config to JSON first. A `tests:` entry that points at another file is refused for
+the same reason: pass the resolved config.
+
+## View a registry offline
+
+```bash
+crucible view .crucible-registry --out registry.html
+```
+
+The page is one HTML file with no network requests. It recomputes the SHA-256 of each claim body
+in the browser and compares it with the stored hash, so an edited body shows CORRUPT. Each thesis
+also shows the seal status computed when the page was built. The page does not recompute seals in
+the browser; run `crucible registry verify` for the check that sets an exit status.
+
 ## Judge with a model or a panel
 
 ```bash
