@@ -183,6 +183,8 @@ A regression is a claim moving MATCH to DRIFT, becoming UNVERIFIABLE, or droppin
 | `crucible registry list\|verify\|stats\|search\|prune` | registry operations, including `--require-witnessed-match` |
 | `crucible verdicts DIR [--verify]` | list or re-derive witnessed assessments |
 | `crucible report DIR` / `crucible batch MANIFEST` | Markdown reports; manifest runs into one registry |
+| `crucible import CONFIG [--out FILE]` | convert a promptfoo config (JSON, or a block-style YAML subset) into a thesis JSON that `register` and `assess` read |
+| `crucible view DIR [--out FILE]` | one offline HTML page of a registry that re-hashes each claim body in the browser |
 | `crucible export THESIS` | publication-gated export; fenced material is refused at the edge |
 | `crucible measurement-gate PACKET` | verify a Telos creative measurement packet |
 | `crucible status / doctor / demo` | status envelope, readiness checks, demo pointer (`--json`) |
