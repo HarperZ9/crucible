@@ -5,6 +5,14 @@ behind a feature branch and reviewed before merge.
 
 ## Unreleased
 
+- `crucible numaudit FILE...` recomputes stated figures from the inputs stated beside them, with
+  ten fixed rules (unit restatements, speed multiples, screw resolution, thermal expansion, rim
+  speed, distances to named bodies, data rate, ground sample distance, fuel endurance, trend
+  direction). On a 90-transcript corpus of 264,012 words it raised 11 flags, all real errors, and 2
+  ambiguous findings that are caption defects; it found 9 of 12 hand-flagged errors. The rules were
+  written with those 12 cases in view, so that recall is in-sample. `--json` emits
+  `crucible.numaudit/1`; `--fail-on-flag` exits 1 when anything is flagged.
+
 - `crucible import CONFIG` converts a promptfoo config into a thesis JSON that `register` and
   `assess` read. Each assertion becomes a claim with a falsification condition, identical
   assertions collapse to one claim, and an unknown assertion type is imported as a generic claim.

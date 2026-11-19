@@ -28,6 +28,7 @@ from crucible.import_cmd import cmd_import
 from crucible.judging_cmd import add_judging_commands
 from crucible.mcp import serve as serve_mcp
 from crucible.measurement_gate_cmd import cmd_measurement_gate
+from crucible.numaudit_cmd import cmd_numaudit
 from crucible.recheck_cmd import cmd_recheck
 from crucible.refine_cmd import cmd_refine
 from crucible.registry_cmd import cmd_registry, cmd_verdicts
@@ -196,6 +197,12 @@ def _add_review_command(sub) -> None:
     rev.set_defaults(func=cmd_review)
 
 def _add_artifact_commands(sub) -> None:
+    nau = sub.add_parser("numaudit", help="recompute stated figures in text files from the inputs stated beside them")
+    nau.add_argument("paths", nargs="+", help="UTF-8 text files: transcripts, papers, pages")
+    nau.add_argument("--fail-on-flag", action="store_true", help="exit 1 when any figure is flagged")
+    nau.add_argument("--json", action="store_true", help="emit JSON (crucible.numaudit/1)")
+    nau.set_defaults(func=cmd_numaudit)
+
     rpt = sub.add_parser("report", help="render a Markdown report for a witnessed assessment")
     rpt.add_argument("dir", help="the registry directory")
     rpt.add_argument("--index", default="-1",
