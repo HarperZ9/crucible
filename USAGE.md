@@ -55,6 +55,22 @@ backslash escapes) stops the import with exit status 1 so an assertion is never 
 Convert such a config to JSON first. A `tests:` entry that points at another file is refused for
 the same reason: pass the resolved config.
 
+## Audit the numbers in a text
+
+```bash
+crucible numaudit transcript.txt paper.txt
+crucible numaudit transcript.txt --json --fail-on-flag
+```
+
+`numaudit` finds figures stated beside the numbers they should follow from and recomputes them:
+unit restatements ("140 C or about 220 F"), speed multiples of light or sound, screw and gear
+resolution, thermal expansion, rotor rim speed (solved from stored energy and mass when the text
+gives them), distances to named bodies, data rate from pixels and frame rate, ground sample
+distance, fuel endurance, and the direction of a dated trend. Each finding gives the rule, the
+stated and recomputed values, the tolerance and the excerpt. A finding marked `ambiguous` fails as
+written but passes under a caption repair the tool names, such as dropped minus signs or a split
+number. It checks internal arithmetic only: a wrong figure with no stated inputs is never flagged.
+
 ## View a registry offline
 
 ```bash
