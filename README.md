@@ -17,6 +17,8 @@ It is for people who publish or review claims about software, models or research
 
 `crucible-bench 1.6.0` is the current release on PyPI. It needs Python 3.11 or newer and installs the `crucible` command and the `crucible` Python package.
 
+mcp-name: io.github.harperz9/crucible
+
 ```bash
 pip install crucible-bench
 crucible examples --out crucible-examples
