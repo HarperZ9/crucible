@@ -70,7 +70,7 @@ promptfoo, DeepEval, Inspect, OpenAI Evals and Ragas run test cases against a mo
 - **Verdicts that recompute from the record.** `verdict_for(claim, measurement)` is a pure function: within tolerance is MATCH, outside is DRIFT, absent or unmeasurable is UNVERIFIABLE, fail-closed. No model sits in the verdict step, so a fluent assertion cannot move a rechecked result.
 - **One-command runs with cleanroom review packets.** `crucible run --bundle DIR` executes steelman, measurement, witnessed assessment, and disk recheck in one session, then writes a self-contained verifier packet (`spec.json`, `run.json`, `report.md`, `review.md`). `crucible review DIR` validates the packet boundary before handoff.
 - **A CI regression check.** `crucible ci` compares a registry's verified-latest verdicts against a sealed baseline, exits nonzero when any claim loses standing, and emits a deterministic PR-comment Markdown matrix. New in 1.2.0.
-- **A refine loop that names the weakest claim.** Grade each claim's measured margin, compute harmonic-mean cohesion, and re-measure across substrate rounds until the thesis is cohesively verified or the budget is spent. The loop reports the weakest axis instead of pretending a short thesis held.
+- **A refine loop that names the weakest claim.** Grade each claim's measured margin, compute harmonic-mean cohesion, and re-measure across substrate rounds until the thesis is cohesively verified or the budget is spent. The loop reports the weakest axis without claiming a short thesis held.
 - **Drift tracking across rounds.** `crucible drift` compares the latest two witnessed assessments and classifies each claim as held, moved, improved, or regressed.
 - **LLM-as-judge with the model outside the verdict.** `JudgeMeasure` scores freeform outputs against a rubric; the judge produces a deviation once at the seam, the verdict still derives from `verdict_for`, and a judge that raises or returns garbage fails closed. New in 1.2.0.
 - **Oracle recheck packs.** `crucible recheck` lists descriptor-bearing measurements, writes `crucible.replay-template/1` templates, and validates `crucible.replay-pack/1` inputs against the sealed rows without opening a second verdict path. A privacy-bounded `crucible.replay-set/1` binding covers the descriptor-bearing replay contracts without exporting descriptorless rows or their evidence. CLI replay packs must preserve the template's assessment binding; a missing or mismatched thesis ID, assessment seal, or measurement seal fails closed before replay.
@@ -89,10 +89,10 @@ without rerunning anything, and without trusting the run that made it.
 Two edges carry the design. The one that loops back is the refine step: grading
 every claim yields a margin, the harmonic mean of those margins is the cohesion,
 and a round that is not cohesive names its weakest axis and measures that axis
-again rather than reporting a thesis that only half held. The one that does not
+again without reporting a half-held thesis. The one that does not
 loop is `verdict_for`, which is a pure function of a deviation and a tolerance.
 No model sits in it, so a fluent assertion has no route into a rechecked result,
-and an axis that could not be measured reads UNVERIFIABLE instead of holding.
+and an axis that could not be measured reads UNVERIFIABLE and never passes.
 
 ## See it work, step by step
 
@@ -175,7 +175,7 @@ A regression is a claim moving MATCH to DRIFT, becoming UNVERIFIABLE, or droppin
 
 | Command | What it does |
 | --- | --- |
-| `crucible run THESIS --measurements F \| --substrate F` | full loop in one session; `--bundle DIR` writes a review packet |
+| `crucible run THESIS --measurements F \| --substrate F` | complete cycle in one session; `--bundle DIR` writes a review packet |
 | `crucible register / assess / steelman / measure` | the individual loop stages |
 | `crucible review BUNDLE` | validate a cleanroom packet before verifier handoff |
 | `crucible refine CONFIG` | rounds of substrate refinement toward cohesive verification |
@@ -201,10 +201,10 @@ The steelman and measure stages are seams with a stable API shape. Defaults are 
 
 - `TableMeasure`: offline deviation against a provided substrate table, no model.
 - `SubprocessSteelman` / `SubprocessMeasure`: configured commands over bounded JSON stdin/stdout, with timeouts, no shell strings, minimal environment, and output caps.
-- `TelosMeasure`: consumes `telos.witnessed-artifact/v1` envelopes and re-runs the named verifier rather than trusting the carried certificate.
+- `TelosMeasure`: consumes `telos.witnessed-artifact/v1` envelopes and re-runs the named verifier without trusting the carried certificate.
 - `GatherDigestMeasure` / `IndexMeasure`: sealed [gather](https://github.com/HarperZ9/gather) digests as evidence, and `index.verification/1` records replayed against graph packs.
 - `JudgeMeasure`: rubric-scored LLM judging behind an injectable backend, deterministic stub in tests, null by default.
-- `ProofMeasure`: a proof or type checker (Lean, Coq, a type checker, any command) as the oracle for formal claims. It runs the checker over the claim's artifact: an accepted proof is MATCH, a rejected one DRIFTs, and a checker that is absent or errors is UNVERIFIABLE, fail-closed, so an unrun checker never reports a proof as holding. The measurement binds the exact command and the artifact hash, so a stranger replays the identical check. This is the oracle for the north star, verified discovery in math.
+- `ProofMeasure`: a proof or type checker (Lean, Coq, a type checker, any command) as the oracle for formal claims. It runs the checker over the claim's artifact: an accepted proof is MATCH, a rejected one DRIFTs, and a checker that is absent or errors is UNVERIFIABLE, fail-closed, so an unrun checker never reports a proof as holding. The measurement binds the exact command and the artifact hash, so a stranger replays the identical check. This is the primary oracle for verified discovery in math.
 
 All edges map into the same `Measurement` to `verdict_for` spine. The verdict step never changes.
 
@@ -244,11 +244,11 @@ Keep the README, package metadata, and examples aligned with current behavior be
 This tool is one tool in a family that holds a single belief steady across
 every surface: knowledge open to anyone who can attain the means; acceptance
 decided by external checks, never reputation; every result re-runnable;
-honest nulls first-class; ownership earned by comprehension; learning woven
+honest nulls on equal footing; ownership earned by comprehension; learning woven
 into the work. The full text lives in [CREDO.md](CREDO.md).
 The long form of this belief: [The Unbundling](https://github.com/HarperZ9/flywheel/blob/main/docs/essays/2026-07-13-the-unbundling.md).
 
----
+
 
 Built by **[Zain Dana Harper](https://harperz9.github.io)** in Seattle: evidence-first tools that leave a re-checkable artifact behind. More tools are listed at [harperz9.github.io](https://harperz9.github.io).
 
