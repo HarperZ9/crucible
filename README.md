@@ -226,7 +226,7 @@ Everything above reduces to one property: a verdict is a pure function of a seal
 
 ## License
 
-Crucible is under the Functional Source License, Version 1.1, MIT Future License (FSL-1.1-MIT). You may use, copy, change and redistribute it for any purpose except a product or service that competes with Crucible. Each release converts to the MIT license two years after it is published. See [LICENSE](LICENSE) for the exact terms.
+Crucible is under the MIT License, Version 1.1, MIT Future License (MIT). You may use, copy, change and redistribute it for any purpose except a product or service that competes with Crucible. Each release converts to the MIT license two years after it is published. See [LICENSE](LICENSE) for the exact terms.
 
 ## Work with it
 

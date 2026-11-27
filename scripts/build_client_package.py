@@ -118,7 +118,7 @@ def native_manifest(value, executable):
     """MCPB setup forwards explicit values as argv, never ambient permissions."""
     return {"manifest_version":"0.3", "name":SPEC["name"]+"-local",
         "version":value, "display_name":SPEC["name"].title()+" Local",
-        "description":SPEC["desc"], "author":{"name":"Zain Dana Harper"}, "license":"FSL-1.1-MIT",
+        "description":SPEC["desc"], "author":{"name":"Zain Dana Harper"}, "license":"MIT",
         "server":{"type":"binary", "entry_point":"server/"+executable, "mcp_config":{
             "command":"${__dirname}/server/"+executable,
             "args":["--workspace", "${user_config.workspace}",
